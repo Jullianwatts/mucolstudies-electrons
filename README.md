@@ -1,4 +1,4 @@
-# mucolstudies
+# mucolstudies to electronstudies
 Collection of scripts for performing Muon Collider studies. These scripts assume you're inside the singularity image used in the [Fermilab Muon Collider tutorial](https://mcdwiki.docs.cern.ch/tutorials/fermilab2022/computing_setup/) which does some path mapping for you on the Snowmass cluster. In particular, you should run something along the lines of:
 
 ```
@@ -32,3 +32,5 @@ To understand what kinds of functions you can use on the particles in these coll
 
 To understand in more depth how reconstruction works, you can look at the code [here](https://github.com/MuonColliderSoft/DDMarlinPandora/tree/master/src). To understand what options were passed to this code, you'll need to look at the steering files that were used to run it. Fede's are [here](https://github.com/madbaron/SteeringMacros/tree/master/Reco), but you'd have to know which one he used. For more generic ones, have a look at the ones used in the
 [tutorial](https://github.com/MuonColliderSoft/MuC-Tutorial/tree/master/reconstruction).
+
+This repository takes the mucolstudies repository and updates it to run for electrons rather of muons. This will be a working repository and is not yet completed. 
