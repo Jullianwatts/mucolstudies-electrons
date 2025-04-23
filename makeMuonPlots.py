@@ -9,11 +9,19 @@ import ctypes
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events =10
-
+max_events = 10
+##-- shows the paths im trying as of 4/19 to get the script to run properly(with muons)
 # Gather input files
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
-fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun*/*.slcio")
+
+##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
+#the one above worked -- but i cant get the plots to print properly -- think its something to do with electrons going to try and run over electrons to see if that works.
+
+####fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun*/*.slcio")
+##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/reco/muonGun/*.slcio")
+##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/k4reco/muonGun_pT_0_50/*.root")
+##fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun_pT_250_1000*/*.slcio")
+##fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun_pT_50_250/*.slcio")
 #fnames = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/muonGun*/*.slcio")
 #fnames = glob.glob("/data/fmeloni/DataMuC_MuColl_v1/muonGun/reco/*.slcio")
 #fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/gen_muonGun/recoBIB/*.slcio")
@@ -88,7 +96,7 @@ for f in fnames:
             #print(pfo_tlv.Eta())
             #print(pfo_tlv.Phi())
             print(pfo.getType())
-
+            
             if abs(pfo.getType())==13:
                 #print(pfo.getType())
                 hists["pfo_mu_pt"].Fill(pfo_tlv.Perp())
