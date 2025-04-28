@@ -9,13 +9,17 @@ import ctypes
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 ##-- shows the paths im trying as of 4/19 to get the script to run properly(with muons)
 # Gather input files
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
 
+fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
+#the one above worked!! kinda...
+
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
-#the one above worked -- but i cant get the plots to print properly -- think its something to do with electrons going to try and run over electrons to see if that works.
+#the one above worked!
+
 
 ####fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun*/*.slcio")
 ##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/reco/muonGun/*.slcio")
