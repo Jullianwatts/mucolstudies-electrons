@@ -14,8 +14,10 @@ max_events = -1
 # Gather input files
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
 
-fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
-#the one above worked!! kinda....
+fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_1000_5000*/*.slcio")
+
+#fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
+#the one above worked!! but is only from 0-50 
 
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
 #the one above worked!
@@ -99,7 +101,7 @@ for f in fnames:
             #print(pfo_tlv.Perp())
             #print(pfo_tlv.Eta())
             #print(pfo_tlv.Phi())
-            print(pfo.getType())
+            #print(pfo.getType())
             
             if abs(pfo.getType())==13:
                 #print(pfo.getType())
