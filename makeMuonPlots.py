@@ -15,7 +15,7 @@ max_events = -1
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
 
 fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
-#the one above worked!! kinda...
+#the one above worked!! kinda....
 
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
 #the one above worked!
