@@ -16,8 +16,8 @@ max_events = -1
 
 #fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_1000_5000*/*.slcio")
 
-fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
-#the one above worked!! but is only from 0-50 
+fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*/*.slcio")
+
 
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
 #the one above worked!
@@ -40,12 +40,12 @@ print("Found %i files."%len(fnames))
 # Set up histograms
 # This is an algorithmic way of making a bunch of histograms and storing them in a dictionary
 variables = {}
-variables["pt"] =  {"nbins": 20, "xmin": 0, "xmax": 50}
+variables["pt"] =  {"nbins": 20, "xmin": 0, "xmax": 2000}
 variables["eta"] = {"nbins": 20, "xmin": -3, "xmax": 3}
 variables["phi"] = {"nbins": 20, "xmin": -3.5, "xmax": 3.5}
 variables["n"] = {"nbins": 20, "xmin": 0, "xmax": 20}
 hists = {}
-for obj in ["pfo", "pfo_mu", "mcp", "mcp_mu", "mcp_mu_match"]:
+for obj in ["pfo", "pfo_e", "mcp", "mcp_e", "mcp_e_match"]:
     for var in variables:
         hists[obj+"_"+var] = ROOT.TH1F(obj+"_"+var, obj+"_"+var, variables[var]["nbins"], variables[var]["xmin"], variables[var]["xmax"])
 
@@ -56,7 +56,7 @@ dvariables["dpt"] =     {"nbins": 100, "xmin": -500, "xmax": 500}
 dvariables["drelpt"] =  {"nbins": 100, "xmin": -0.5, "xmax": 0.5}
 dvariables["dphi"] =    {"nbins": 100, "xmin": -0.001, "xmax": 0.001}
 dvariables["deta"] =    {"nbins": 100, "xmin": -0.001, "xmax": 0.001}
-for obj in ["d_mu"]:
+for obj in ["d_e"]:
     for var in dvariables:
         hists[obj+"_"+var] = ROOT.TH1F(obj+"_"+var, obj+"_"+var, dvariables[var]["nbins"], dvariables[var]["xmin"], dvariables[var]["xmax"])
 
@@ -83,38 +83,27 @@ for f in fnames:
         pfoCollection = event.getCollection("PandoraPFOs")
 
         # Make counter variables
-        n_mcp_mu = 0
-        n_pfo_mu = 0
-        has_pfo_mu = False
-        my_pfo_mu = 0
+        n_mcp_e = 0
+        n_pfo_e = 0
+        has_pfo_e = False
+        my_pfo_e = 0
 
         # Loop ovenr the reconstructed objects and fill histograms
         for pfo in pfoCollection:
-            #print(pfoCollection)
-            #print(pfo)
             pfo_p = pfo.getMomentum()
             pfo_tlv = ROOT.TLorentzVector()
             pfo_tlv.SetPxPyPzE(pfo_p[0], pfo_p[1], pfo_p[2], pfo.getEnergy())
             hists["pfo_pt"].Fill(pfo_tlv.Perp())
             hists["pfo_eta"].Fill(pfo_tlv.Eta())
             hists["pfo_phi"].Fill(pfo_tlv.Phi())
-            #print(pfo_tlv.Perp())
-            #print(pfo_tlv.Eta())
-            #print(pfo_tlv.Phi())
-            #print(pfo.getType())
             
-            if abs(pfo.getType())==13:
-                #print(pfo.getType())
-                hists["pfo_mu_pt"].Fill(pfo_tlv.Perp())
-                hists["pfo_mu_eta"].Fill(pfo_tlv.Eta())
-                hists["pfo_mu_phi"].Fill(pfo_tlv.Phi())
-                n_pfo_mu += 1
-                has_pfo_mu = True
-                my_pfo_mu = pfo_tlv     # Storing this to use for matching in the next loop)
-                #print(len(pfo_t1v))
-                #print(len(my_pfo_mu))
-                #print(pfo_tlv)
-                #print(my_pfo_mu)
+            if abs(pfo.getType())==11:
+                hists["pfo_e_pt"].Fill(pfo_tlv.Perp())
+                hists["pfo_e_eta"].Fill(pfo_tlv.Eta())
+                hists["pfo_e_phi"].Fill(pfo_tlv.Phi())
+                n_pfo_e += 1
+                has_pfo_e = True
+                my_pfo_e = pfo_tlv     # Storing this to use for matching in the next loop
         
     
         # Loop over the truth objects and fill histograms
@@ -127,35 +116,35 @@ for f in fnames:
             hists["mcp_phi"].Fill(mcp_tlv.Phi())
         
 
-            if abs(mcp.getPDG())==13 and mcp.getGeneratorStatus()==1:
-                hists["mcp_mu_pt"].Fill(mcp_tlv.Perp())
-                hists["mcp_mu_eta"].Fill(mcp_tlv.Eta())
-                hists["mcp_mu_phi"].Fill(mcp_tlv.Phi())
-                n_mcp_mu += 1
+            if abs(mcp.getPDG())==11 and mcp.getGeneratorStatus()==1:
+                hists["mcp_e_pt"].Fill(mcp_tlv.Perp())
+                hists["mcp_e_eta"].Fill(mcp_tlv.Eta())
+                hists["mcp_e_phi"].Fill(mcp_tlv.Phi())
+                n_mcp_e += 1
     
                 # For events in which a PFO mu was reconstructed, fill histograms that will
                 # be used for efficiency. Both numerator and denominator must be filled with truth values!
                 # Also fill resolution histograms
-                if has_pfo_mu:
-                    hists["mcp_mu_match_pt"].Fill(mcp_tlv.Perp())
-                    hists["mcp_mu_match_eta"].Fill(mcp_tlv.Eta())
-                    hists["mcp_mu_match_phi"].Fill(mcp_tlv.Phi())
+                if has_pfo_e:
+                    hists["mcp_e_match_pt"].Fill(mcp_tlv.Perp())
+                    hists["mcp_e_match_eta"].Fill(mcp_tlv.Eta())
+                    hists["mcp_e_match_phi"].Fill(mcp_tlv.Phi())
 
-                    hists["d_mu_dpt"].Fill(my_pfo_mu.Perp() - mcp_tlv.Perp())
-                    hists["d_mu_drelpt"].Fill((my_pfo_mu.Perp() - mcp_tlv.Perp())/mcp_tlv.Perp())
-                    hists["d_mu_deta"].Fill(my_pfo_mu.Eta() - mcp_tlv.Eta())
-                    hists["d_mu_dphi"].Fill(my_pfo_mu.DeltaPhi(mcp_tlv))
-                    h_2d_relpt.Fill(mcp_tlv.Perp(), (my_pfo_mu.Perp() - mcp_tlv.Perp())/mcp_tlv.Perp())
+                    hists["d_e_dpt"].Fill(my_pfo_e.Perp() - mcp_tlv.Perp())
+                    hists["d_e_drelpt"].Fill((my_pfo_e.Perp() - mcp_tlv.Perp())/mcp_tlv.Perp())
+                    hists["d_e_deta"].Fill(my_pfo_e.Eta() - mcp_tlv.Eta())
+                    hists["d_e_dphi"].Fill(my_pfo_e.DeltaPhi(mcp_tlv))
+                    h_2d_relpt.Fill(mcp_tlv.Perp(), (my_pfo_e.Perp() - mcp_tlv.Perp())/mcp_tlv.Perp())
 
         # This is here to check that we never reconstruct multiple muons
         # If we did, we'd have to match the correct muon to the MCP object to do eff/res plots
         # But since we don't, we can skip that step
-        if n_pfo_mu > 1: print(n_pfo_mu)
+        if n_pfo_e > 1: print(n_pfo_e)
         hists["mcp_n"].Fill(len(mcpCollection))
         hists["pfo_n"].Fill(len(pfoCollection))
-        hists["mcp_mu_n"].Fill(n_mcp_mu)
-        hists["pfo_mu_n"].Fill(n_pfo_mu)
-        hists["mcp_mu_match_n"].Fill(n_pfo_mu)
+        hists["mcp_e_n"].Fill(n_mcp_e)
+        hists["pfo_e_n"].Fill(n_pfo_e)
+        hists["mcp_e_match_n"].Fill(n_pfo_e)
 
         i+=1
 
@@ -165,9 +154,9 @@ print("\nSummary statistics:")
 print("Ran over %i events."%i)
 print("Found:")
 print("\t%i MCPs"%hists["mcp_pt"].GetEntries())
-print("\t%i mu MCPs"%hists["mcp_mu_pt"].GetEntries())
+print("\t%i electron MCPs"%hists["mcp_e_pt"].GetEntries())
 print("\t%i PFOs"%hists["pfo_pt"].GetEntries())
-print("\t%i mu PFOs"%hists["pfo_mu_pt"].GetEntries())
+print("\t%i electron PFOs"%hists["pfo_e_pt"].GetEntries())
  
 
 # Draw all the 1D histograms you filled
@@ -178,7 +167,7 @@ for i, h in enumerate(hists):
     hists[h].GetYaxis().SetTitle("Entries")
 
     # For resolution plots, fit them and get the mean and sigma
-    if h.startswith("d_mu"):
+    if h.startswith("d_e"):
         f = ROOT.TF1("f%i"%i, "gaus")
         f.SetLineColor(ROOT.kRed)
         hists[h].Fit("f%i"%i)
@@ -191,8 +180,8 @@ for i, h in enumerate(hists):
 
 # Test out IntegralAndError
 # Make plot that's fraction of mcp mu above a given pt cut
-h = hists["mcp_mu_pt"]
-hint = h.Clone("mcp_mu_pt_thresh")
+h = hists["mcp_e_pt"]
+hint = h.Clone("mcp_e_pt_thresh")
 for ibin in range(1, h.GetNbinsX()+1):
     bin_err = ctypes.c_double(0)        # Need to store a Double type to pass by reference in next line
     bin_val = h.IntegralAndError(ibin, h.GetNbinsX()+1, bin_err)
@@ -202,17 +191,14 @@ c = ROOT.TCanvas("cint", "cint")
 hint.Draw()
 hint.GetXaxis().SetTitle("p_T threshold [GeV]")
 hint.GetYaxis().SetTitle("Number of true muons over threshold")
-c.SaveAs("plots/mcp_mu_pt_thresh.png")
+c.SaveAs("plots/mcp_e_pt_thresh.png")
 
-#print(n_pfo_mu)
 # Make efficiency plots
 # In these files, there are at most 1 PFO mu, so matching isn't needed
 for v in variables:
     if v=="n": continue
     c = ROOT.TCanvas("c%s"%v, "c%s"%v)
-    #print(mcp_mu_match_)
-    #print(mcp_mu_)
-    eff = ROOT.TEfficiency(hists["mcp_mu_match_"+v], hists["mcp_mu_"+v])
+    eff = ROOT.TEfficiency(hists["mcp_e_match_"+v], hists["mcp_e_"+v])
     eff.Draw("ape")
     ROOT.gPad.Update()
     eff.SetLineWidth(2)
@@ -226,11 +212,11 @@ c = ROOT.TCanvas("crelpt2d", "crelpt2d")
 h_2d_relpt.Draw("colz")
 h_2d_relpt.GetXaxis().SetTitle("pt")
 h_2d_relpt.GetYaxis().SetTitle("drelpt")
-c.SaveAs("plots/d_mu_relpt_2d.png")
+c.SaveAs("plots/d_e_relpt_2d.png")
 
 c = ROOT.TCanvas("crelpt2dprof", "crelpt2dprof")
 h_prof = h_2d_relpt.ProfileX("_pfx", 1, -1, "s")
 h_prof.GetXaxis().SetTitle("pt")
 h_prof.GetYaxis().SetTitle("drelpt")
 h_prof.Draw()
-c.SaveAs("plots/d_mu_relpt_prof.png")
+c.SaveAs("plots/d_e_relpt_prof.png")
