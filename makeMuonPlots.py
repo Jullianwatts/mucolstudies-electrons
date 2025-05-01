@@ -14,9 +14,9 @@ max_events = -1
 # Gather input files
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
 
-fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_1000_5000*/*.slcio")
+#fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_1000_5000*/*.slcio")
 
-#fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
+fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50*/*.slcio")
 #the one above worked!! but is only from 0-50 
 
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
@@ -40,7 +40,7 @@ print("Found %i files."%len(fnames))
 # Set up histograms
 # This is an algorithmic way of making a bunch of histograms and storing them in a dictionary
 variables = {}
-variables["pt"] =  {"nbins": 20, "xmin": 0, "xmax": 2000}
+variables["pt"] =  {"nbins": 20, "xmin": 0, "xmax": 50}
 variables["eta"] = {"nbins": 20, "xmin": -3, "xmax": 3}
 variables["phi"] = {"nbins": 20, "xmin": -3.5, "xmax": 3.5}
 variables["n"] = {"nbins": 20, "xmin": 0, "xmax": 20}
