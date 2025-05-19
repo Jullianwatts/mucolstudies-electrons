@@ -21,7 +21,7 @@ fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*/*.slc
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
 #the one above worked for muons ---- now switching to electrons
 
-##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/reco/muonGun/*.slcio")
+
 ##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/k4reco/muonGun_pT_0_50/*.root")
 ##fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun_pT_250_1000*/*.slcio")
 ##fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun_pT_50_250/*.slcio")
