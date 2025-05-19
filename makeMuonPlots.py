@@ -10,20 +10,17 @@ ROOT.gROOT.SetBatch()
 
 # Set up some options
 max_events = -1
-##-- shows the paths im trying as of 4/19 to get the script to run properly(with muons)
+
 # Gather input files
 # Note: these are using the path convention from the singularity command in the MuCol tutorial (see README)
 
-#fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_1000_5000*/*.slcio")
 
 fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*/*.slcio")
 
 
 ##fnames= glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun_pT_0_50/muonGun_pT_0_50_reco_10.slcio")
-#the one above worked!
+#the one above worked for muons ---- now switching to electrons
 
-
-####fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/recoBIB/muonGun*/*.slcio")
 ##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/reco/muonGun/*.slcio")
 ##fnames = glob.glob("/data/fmeloni/DataMuc_MuColl10_v0A/v0/k4reco/muonGun_pT_0_50/*.root")
 ##fnames = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun_pT_250_1000*/*.slcio")
@@ -190,7 +187,8 @@ for ibin in range(1, h.GetNbinsX()+1):
 c = ROOT.TCanvas("cint", "cint")
 hint.Draw()
 hint.GetXaxis().SetTitle("p_T threshold [GeV]")
-hint.GetYaxis().SetTitle("Number of true muons over threshold")
+hint.GetYaxis().SetTitle("Number of true electrons over threshold")
+
 c.SaveAs("plots/mcp_e_pt_thresh.png")
 
 # Make efficiency plots
