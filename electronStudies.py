@@ -201,8 +201,8 @@ for i, h in enumerate(hists[s]):
         xlabel = variables["evt"][var_name]["label"]
 
     # Call plotting function
-    plotHistograms(hists_to_plot, "plots/electronStudies/"+h+".png", xlabel, "Entries")
-    plotHistograms(hists_to_plot, "plots/electronStudies/"+h+".png", xlabel, "Entries")
+    plotHistograms(hists_to_plot, "plots/"+h+".png", xlabel, "Entries")
+    plotHistograms(hists_to_plot, "plots/"+h+".png", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons/"+h+".png", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons/"+h+".root", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons_no_el_req/"+h+".png", xlabel, "Entries")
