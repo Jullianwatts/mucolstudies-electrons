@@ -201,8 +201,10 @@ for i, h in enumerate(hists[s]):
         xlabel = variables["evt"][var_name]["label"]
 
     # Call plotting function
-    plotHistograms(hists_to_plot, "plots/electrons/"+h+".png", xlabel, "Entries")
-    plotHistograms(hists_to_plot, "plots/electrons/"+h+".root", xlabel, "Entries")
+    plotHistograms(hists_to_plot, "plots/electronStudies/"+h+".png", xlabel, "Entries")
+    plotHistograms(hists_to_plot, "plots/electronStudies/"+h+".png", xlabel, "Entries")
+    #plotHistograms(hists_to_plot, "plots/electrons/"+h+".png", xlabel, "Entries")
+    #plotHistograms(hists_to_plot, "plots/electrons/"+h+".root", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons_no_el_req/"+h+".png", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons_no_el_req/"+h+".root", xlabel, "Entries")
 
@@ -212,4 +214,5 @@ for s in hists2d:
         hists2d[s][h].Draw("colz")
         hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0])
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1])
-        c.SaveAs(f"plots/electrons/{hists2d[s][h].GetName()}.png")
+        #c.SaveAs(f"plots/electrons/{hists2d[s][h].GetName()}.png")
+        c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")

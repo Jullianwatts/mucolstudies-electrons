@@ -173,7 +173,7 @@ for i, h in enumerate(hists):
         p = f.GetParameters()
         latex.DrawLatexNDC(.64, .85, "Mean: %f"%p[1])
         latex.DrawLatexNDC(.64, .78, "Sigma: %f"%p[2])
-    c.SaveAs("plots/%s.png"%h)
+    c.SaveAs("plots/makeElectronPlots/%s.png"%h)
 
 # Test out IntegralAndError
 # Make plot that's fraction of mcp mu above a given pt cut
@@ -189,7 +189,7 @@ hint.Draw()
 hint.GetXaxis().SetTitle("p_T threshold [GeV]")
 hint.GetYaxis().SetTitle("Number of true electrons over threshold")
 
-c.SaveAs("plots/mcp_e_pt_thresh.png")
+c.SaveAs("plots/makeElectronPlots/mcp_e_pt_thresh.png")
 
 # Make efficiency plots
 # In these files, there are at most 1 PFO mu, so matching isn't needed
@@ -203,18 +203,18 @@ for v in variables:
     eff.GetPaintedGraph().SetMinimum(0)
     eff.GetPaintedGraph().SetMaximum(1)
     eff.SetTitle(";%s;Efficiency"%v)
-    c.SaveAs("plots/eff_%s.png"%v)
+    c.SaveAs("plots/makeElectronPlots/eff_%s.png"%v)
 
 # Make 2D plot and a TProfile to understand pT resolution v pT
 c = ROOT.TCanvas("crelpt2d", "crelpt2d")
 h_2d_relpt.Draw("colz")
 h_2d_relpt.GetXaxis().SetTitle("pt")
 h_2d_relpt.GetYaxis().SetTitle("drelpt")
-c.SaveAs("plots/d_e_relpt_2d.png")
+c.SaveAs("plots/makeElectronPlots/d_e_relpt_2d.png")
 
 c = ROOT.TCanvas("crelpt2dprof", "crelpt2dprof")
 h_prof = h_2d_relpt.ProfileX("_pfx", 1, -1, "s")
 h_prof.GetXaxis().SetTitle("pt")
 h_prof.GetYaxis().SetTitle("drelpt")
 h_prof.Draw()
-c.SaveAs("plots/d_e_relpt_prof.png")
+c.SaveAs("plots/makeElectronPlots/d_e_relpt_prof.png")

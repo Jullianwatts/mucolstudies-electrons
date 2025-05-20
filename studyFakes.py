@@ -11,7 +11,8 @@ ROOT.gROOT.SetBatch()
 max_events = 10000
 magnetic_field = 5.00
 max_E = 100
-filenames = "/data/fmeloni/DataMuC_MuColl10_v0A/v2/recoBIB/photonGun_*"
+filenames = "/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*/*.slcio"
+#filenames = "/data/fmeloni/DataMuC_MuColl10_v0A/v2/recoBIB/photonGun_*"
 min_energy = 20
 max_eta = 2.6
 
