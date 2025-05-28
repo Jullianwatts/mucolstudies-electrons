@@ -23,11 +23,11 @@ append = "rose3"
 # Set up things for each object
 settings = {
         "fnames": {
-                    "ph": "/data/fmeloni/DataMuC_MuColl10_v0A/reco/photonGun*",
+                    "ph": "/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/photonGun*",
                     #"ph": "/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/photonGun*",
                     #"ph": "/data/fmeloni/DataMuC_MuColl10_v0A/reco/photonGun*",
-                    "mu": "/data/fmeloni/DataMuC_MuColl10_v0A/reco/muonGun*",
-                    "el": "/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*"},
+                    "mu": "/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/muonGun*",
+                    "el": "/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*"},
         "labelname": {  "ph": "Photon",
                         "mu": "Muon",
                         "el": "Electron"},

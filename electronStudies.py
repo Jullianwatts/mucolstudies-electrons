@@ -39,23 +39,47 @@ for s in samples:
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el_match"]:
+    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el_match", "clus", "clus_el_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
 
+# so plots print with correct ranges on x and y axis
+sliceRange = {
+        "0_50": (0,50),
+        "50_250": (50,250),
+        "250_1000": (250,1000),
+        "1000_5000": (1000,5000)
+}
+
+
 hists2d = {}
 for s in files:
     hists2d[s] = {}
+
+    # using sliceRange above
+    sliceName = s.split("electronGun_pT_")[-1]
+    ptMin, ptMax = sliceRange[sliceName]
+   
     hists2d[s]["trk_eta_v_trk_pt"] = ROOT.TH2F(f"trk_eta_v_trk_pt_{s}", f"trk_eta_v_trk_pt_{s}", 30,-3,3,30,0,3000)
     hists2d[s]["trk_eta_v_trk_phi"] = ROOT.TH2F(f"trk_eta_v_trk_phi_{s}", f"trk_eta_v_trk_phi_{s}", 30,-3,3,30,-3,3)
     hists2d[s]["trk_eta_v_trk_n"] = ROOT.TH2F(f"trk_eta_v_trk_n_{s}", f"trk_eta_v_trk_n_{s}", 30,-3,3,20,0,20)
     hists2d[s]["trk_eta_v_mcp_eta"] = ROOT.TH2F(f"trk_eta_v_mcp_eta_{s}", f"trk_eta_v_mcp_eta_{s}", 30,-3,3,30,-3,3)
     hists2d[s]["trk_eta_v_mcp_pt"] = ROOT.TH2F(f"trk_eta_v_mcp_pt_{s}", f"trk_eta_v_mcp_pt_{s}", 30,-3,3,30,0,3000)
     hists2d[s]["trk_eta_v_mcp_phi"] = ROOT.TH2F(f"trk_eta_v_mcp_phi_{s}", f"trk_eta_v_mcp_phi_{s}", 30,-3,3,30,-3,3)
-    hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
-    hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
+    hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
+    hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
     hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
+
+    #hists2d[s]["trk_eta_v_trk_pt"] = ROOT.TH2F(f"trk_eta_v_trk_pt_{s}", f"trk_eta_v_trk_pt_{s}", 30,-3,3,30,0,3000)
+    #hists2d[s]["trk_eta_v_trk_phi"] = ROOT.TH2F(f"trk_eta_v_trk_phi_{s}", f"trk_eta_v_trk_phi_{s}", 30,-3,3,30,-3,3)
+    #hists2d[s]["trk_eta_v_trk_n"] = ROOT.TH2F(f"trk_eta_v_trk_n_{s}", f"trk_eta_v_trk_n_{s}", 30,-3,3,20,0,20)
+    #hists2d[s]["trk_eta_v_mcp_eta"] = ROOT.TH2F(f"trk_eta_v_mcp_eta_{s}", f"trk_eta_v_mcp_eta_{s}", 30,-3,3,30,-3,3)
+    #hists2d[s]["trk_eta_v_mcp_pt"] = ROOT.TH2F(f"trk_eta_v_mcp_pt_{s}", f"trk_eta_v_mcp_pt_{s}", 30,-3,3,30,0,3000)
+    #hists2d[s]["trk_eta_v_mcp_phi"] = ROOT.TH2F(f"trk_eta_v_mcp_phi_{s}", f"trk_eta_v_mcp_phi_{s}", 30,-3,3,30,-3,3)
+    #hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
+    #hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
+    #hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
 
 
 
@@ -67,7 +91,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SiTracks_Refitted"])
+reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SiTracks_Refitted","PandoraClusters"])
 
 # Loop over the different samples
 for s in files:
@@ -109,7 +133,7 @@ for s in files:
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks_Refitted")
-
+            clusters = event.getCollection("PandoraClusters")
             ######## Loop over MCPs
 
             for mcp in mcps:
@@ -125,6 +149,7 @@ for s in files:
                 # Look at electrons only
                 if abs(mcp.getPDG()) == 11:
                     fillObjHists(hists[s], "mcp_el", mcp_tlv)
+                    hists[s]["mcp_el_eff_eta"].Fill(abs(mcp_tlv.Eta()))
                     my_mcp_el = mcp_tlv
                     n_mcp_el += 1
 
@@ -133,6 +158,25 @@ for s in files:
 
             hists[s]["mcp_n"].Fill(n_mcp)
             hists[s]["mcp_el_n"].Fill(n_mcp_el)
+
+
+            ######## Loop over clusters
+            for clus in clusters:
+                clus_pos = clus.getPosition()
+                clus_E = clus.getEnergy()
+                magnitude = math.sqrt(clus_pos[0]**2 + clus_pos[1]**2 + clus_pos[2]**2)
+                if magnitude == 0: continue
+                
+                px = clus_E * clus_pos[0] / magnitude
+                py = clus_E * clus_pos[1] / magnitude
+                pz = clus_E * clus_pos[2] / magnitude
+                clus_tlv = ROOT.TLorentzVector(px, py, pz, clus_E)
+                fillObjHists(hists[s], "clus", clus_tlv)      ## for all clustering plots
+                if isMatched(clus_tlv, my_mcp_el):   ## for matching clusters and mc electrons
+                    fillObjHists(hists[s], "clus_el_match", my_mcp_el)
+                    hists[s]["clus_el_match_eff_eta"].Fill(abs(my_mcp_el.Eta()))
+
+
 
             ######## Loop over PFOs
 
