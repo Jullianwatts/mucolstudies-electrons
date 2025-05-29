@@ -7,7 +7,8 @@ variables = {"obj": {}, "evt": {}}
 variables["obj"]["pt"] =  {"nbins": 30, "xmin": 0,     "xmax": 3000,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
 variables["obj"]["eta"] = {"nbins": 20, "xmin": -3,    "xmax": 3,       "accessor": ".Eta()",   "label": "#eta"}
 variables["obj"]["phi"] = {"nbins": 20, "xmin": -3.5,  "xmax": 3.5,     "accessor": ".Phi()",   "label": "#phi"}
-variables["obj"]["eff_eta"] = {"nbins": 6, "xmin": -3, "xmax": 3, "accessor": ".Eta()", "label": "#eta"}
+variables["obj"]["eff_eta"] = {"nbins": 20, "xmin": -3, "xmax": 3, "accessor": ".Eta()", "label": "#eta"}
+#variables["obj"]["eff_eta"] = {"nbins": 6, "xmin": -3, "xmax": 3, "accessor": ".Eta()", "label": "#eta"}
 variables["evt"]["n"] =   {"nbins": 20, "xmin": 0,     "xmax": 20,      "accessor": "",         "label": "number per event"}
 
 colors =        [ROOT.TColor.GetColor("#FFA900"),   # Sunny Orange
