@@ -26,7 +26,7 @@ max_events = -1
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
 samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 files = {}
-#slices = ["250_1000"]
+
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices: files[f"electronGun_pT_{s}"] = []
 for s in samples:
@@ -39,18 +39,18 @@ for s in samples:
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el_match", "clus", "clus_el_match","pfo_el_match"]:
+    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "trk", "trk_el", "clus", "clus_el"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
 
 # so plots print with correct ranges on x and y axis
-sliceRange = {
-        "0_50": (0,50),
-        "50_250": (50,250),
-        "250_1000": (250,1000),
-        "1000_5000": (1000,5000)
-}
+#sliceRange = {
+#        "0_50": (0,50),
+#        "50_250": (50,250),
+#        "250_1000": (250,1000),
+#        "1000_5000": (1000,5000)
+#}
 
 
 hists2d = {}
@@ -58,28 +58,28 @@ for s in files:
     hists2d[s] = {}
 
     # using sliceRange above
-    sliceName = s.split("electronGun_pT_")[-1]
-    ptMin, ptMax = sliceRange[sliceName]
+   #sliceName = s.split("electronGun_pT_")[-1]
+   #ptMin, ptMax = sliceRange[sliceName]
    
+#   hists2d[s]["trk_eta_v_trk_pt"] = ROOT.TH2F(f"trk_eta_v_trk_pt_{s}", f"trk_eta_v_trk_pt_{s}", 30,-3,3,30,0,3000)
+#   hists2d[s]["trk_eta_v_trk_phi"] = ROOT.TH2F(f"trk_eta_v_trk_phi_{s}", f"trk_eta_v_trk_phi_{s}", 30,-3,3,30,-3,3)
+#   hists2d[s]["trk_eta_v_trk_n"] = ROOT.TH2F(f"trk_eta_v_trk_n_{s}", f"trk_eta_v_trk_n_{s}", 30,-3,3,20,0,20)
+#   hists2d[s]["trk_eta_v_mcp_eta"] = ROOT.TH2F(f"trk_eta_v_mcp_eta_{s}", f"trk_eta_v_mcp_eta_{s}", 30,-3,3,30,-3,3)
+#   hists2d[s]["trk_eta_v_mcp_pt"] = ROOT.TH2F(f"trk_eta_v_mcp_pt_{s}", f"trk_eta_v_mcp_pt_{s}", 30,-3,3,30,0,3000)
+#   hists2d[s]["trk_eta_v_mcp_phi"] = ROOT.TH2F(f"trk_eta_v_mcp_phi_{s}", f"trk_eta_v_mcp_phi_{s}", 30,-3,3,30,-3,3)
+#   hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
+#   hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
+#   hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
+
     hists2d[s]["trk_eta_v_trk_pt"] = ROOT.TH2F(f"trk_eta_v_trk_pt_{s}", f"trk_eta_v_trk_pt_{s}", 30,-3,3,30,0,3000)
     hists2d[s]["trk_eta_v_trk_phi"] = ROOT.TH2F(f"trk_eta_v_trk_phi_{s}", f"trk_eta_v_trk_phi_{s}", 30,-3,3,30,-3,3)
     hists2d[s]["trk_eta_v_trk_n"] = ROOT.TH2F(f"trk_eta_v_trk_n_{s}", f"trk_eta_v_trk_n_{s}", 30,-3,3,20,0,20)
     hists2d[s]["trk_eta_v_mcp_eta"] = ROOT.TH2F(f"trk_eta_v_mcp_eta_{s}", f"trk_eta_v_mcp_eta_{s}", 30,-3,3,30,-3,3)
     hists2d[s]["trk_eta_v_mcp_pt"] = ROOT.TH2F(f"trk_eta_v_mcp_pt_{s}", f"trk_eta_v_mcp_pt_{s}", 30,-3,3,30,0,3000)
     hists2d[s]["trk_eta_v_mcp_phi"] = ROOT.TH2F(f"trk_eta_v_mcp_phi_{s}", f"trk_eta_v_mcp_phi_{s}", 30,-3,3,30,-3,3)
-    hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
-    hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,ptMin,ptMax,30,ptMin,ptMax)
+    hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
+    hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
     hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
-
-    #hists2d[s]["trk_eta_v_trk_pt"] = ROOT.TH2F(f"trk_eta_v_trk_pt_{s}", f"trk_eta_v_trk_pt_{s}", 30,-3,3,30,0,3000)
-    #hists2d[s]["trk_eta_v_trk_phi"] = ROOT.TH2F(f"trk_eta_v_trk_phi_{s}", f"trk_eta_v_trk_phi_{s}", 30,-3,3,30,-3,3)
-    #hists2d[s]["trk_eta_v_trk_n"] = ROOT.TH2F(f"trk_eta_v_trk_n_{s}", f"trk_eta_v_trk_n_{s}", 30,-3,3,20,0,20)
-    #hists2d[s]["trk_eta_v_mcp_eta"] = ROOT.TH2F(f"trk_eta_v_mcp_eta_{s}", f"trk_eta_v_mcp_eta_{s}", 30,-3,3,30,-3,3)
-    #hists2d[s]["trk_eta_v_mcp_pt"] = ROOT.TH2F(f"trk_eta_v_mcp_pt_{s}", f"trk_eta_v_mcp_pt_{s}", 30,-3,3,30,0,3000)
-    #hists2d[s]["trk_eta_v_mcp_phi"] = ROOT.TH2F(f"trk_eta_v_mcp_phi_{s}", f"trk_eta_v_mcp_phi_{s}", 30,-3,3,30,-3,3)
-    #hists2d[s]["trk_pt_v_mcp_pt"] = ROOT.TH2F(f"trk_pt_v_mcp_pt_{s}", f"trk_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
-    #hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
-    #hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
 
 
 
@@ -101,11 +101,6 @@ for s in files:
     # Loop over the files in a sample
     for f in files[s]:
         if max_events > 0 and i >= max_events: break
-
-        #reader = Reader(f)
-        #reader.collections = ["MCParticle", "PandoraPFOs"]#, "SiTracks_Refitted"]
-        #print(type(reader))
-        #print(dir(reader))
 
         reader.open(f)
 
@@ -149,7 +144,6 @@ for s in files:
                 # Look at electrons only
                 if abs(mcp.getPDG()) == 11:
                     fillObjHists(hists[s], "mcp_el", mcp_tlv)
-                    hists[s]["mcp_el_eff_eta"].Fill(abs(mcp_tlv.Eta()))
                     my_mcp_el = mcp_tlv
                     n_mcp_el += 1
 
@@ -161,7 +155,7 @@ for s in files:
 
 
             ######## Loop over clusters
-            for clus in clusters:
+            for clus in clusters:      ### need to fix this section
                 clus_pos = clus.getPosition()
                 clus_E = clus.getEnergy()
                 magnitude = math.sqrt(clus_pos[0]**2 + clus_pos[1]**2 + clus_pos[2]**2)
@@ -195,7 +189,6 @@ for s in files:
                     # Look at electrons matched to the gun electron
                     if isMatched(pfo_tlv, my_mcp_el):
                         fillObjHists(hists[s], "mcp_el_match", my_mcp_el)
-                        hists[s]["pfo_el_match_eff_eta"].Fill(abs(my_mcp_el.Eta()))
                         n_matched_el += 1
 
             hists[s]["pfo_n"].Fill(n_pfo)
@@ -228,9 +221,9 @@ for s in files:
 
         reader.close()
 
-        ### making efficiency plots
-for s in hists:
-    denom = hists[s]["mcp_el_eff_eta"]
+        ### making efficiency plots (need to fix how these work)
+for s in hists: 
+    denom = hists[s]["mcp_el_eff_eta"] #just want mcp el? or mcp el eta
     if denom.GetEntries() == 0:
         continue
 

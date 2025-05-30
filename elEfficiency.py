@@ -3,8 +3,9 @@ import glob
 ROOT.gROOT.SetBatch()
 
 exec(open("./plotHelper.py").read())
+fnames = "plots/*.root"
 
-fnames = "plots/electrons/*.root"
+#fnames = "plots/electrons/*.root"
 #fnames = "plots/electrons_no_el_req/*.root"
 files = glob.glob(fnames)
 print(f"Found {len(files)} files.")
