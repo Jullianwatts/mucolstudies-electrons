@@ -39,7 +39,7 @@ for s in samples:
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el_match", "clus", "clus_el_match"]:
+    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el_match", "clus", "clus_el_match","pfo_el_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
@@ -195,6 +195,7 @@ for s in files:
                     # Look at electrons matched to the gun electron
                     if isMatched(pfo_tlv, my_mcp_el):
                         fillObjHists(hists[s], "mcp_el_match", my_mcp_el)
+                        hists[s]["pfo_el_match_eff_eta"].Fill(abs(my_mcp_el.Eta()))
                         n_matched_el += 1
 
             hists[s]["pfo_n"].Fill(n_pfo)
@@ -226,6 +227,25 @@ for s in files:
             i += 1
 
         reader.close()
+
+        ### making efficiency plots
+for s in hists:
+    denom = hists[s]["mcp_el_eff_eta"]
+    if denom.GetEntries() == 0:
+        continue
+
+    for obj in ["trk_el_match", "pfo_el_match", "clus_el_match"]:
+        if obj+"_eff_eta" not in hists[s]:
+            continue
+        num = hists[s][obj+"_eff_eta"]
+        eff = num.Clone(s + "_" + obj + "_eta_eff")
+        eff.Divide(denom)
+        eff.SetTitle(f"{obj} Efficiency vs eta")
+        eff.GetXaxis().SetTitle("eta")
+        eff.GetYaxis().SetTitle("Efficiency")
+        c = ROOT.TCanvas("can", "can")
+        eff.Draw("hist")
+        c.SaveAs(f"plots/{s}_{obj}_eff_eta.png")
 
 print("ntracks entries", hists[s]["trk_n"].GetEntries())
 print("ntracks integral from 1", hists[s]["trk_n"].GetEntries())
