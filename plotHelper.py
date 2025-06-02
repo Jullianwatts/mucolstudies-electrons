@@ -43,6 +43,14 @@ def getTrackTLV(trk, m = .106, b_field = 5):
     trk_tlv = ROOT.TLorentzVector()
     trk_tlv.SetPxPyPzE(px, py, pz, E)
     return trk_tlv
+# for clusters
+def getClusterTLV(cluster):
+    p = cluster.getPosition()
+    E = cluster.getEnergy()
+
+    cluster_tlv = ROOT.TLorentzVector()
+    cluster_tlv.SetPxPyPzE(p[0], p[1], p[2], E)
+    return cluster_tlv
 
 def fillObjHists(hists, objtype, obj):
     for var in variables["obj"]:
