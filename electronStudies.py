@@ -218,23 +218,74 @@ for s in files:
             i += 1
 
         reader.close()
-for s in hists:
-    if hists[s]["mcp_el_eta"].GetEntries() == 0:
-        continue
 
+
+from plotHelper import plotHistograms
+
+# Helper for display names
+label_map = {
+    "electronGun_pT_0_50": "pT 0-50 GeV",
+    "electronGun_pT_50_250": "pT 50-250 GeV",
+    "electronGun_pT_250_1000": "pT 250-1000 GeV",
+    "electronGun_pT_1000_5000": "pT 1000-5000 GeV"
+}
+
+# === Track Efficiency as a function of eta ===
+eff_eta_trk = {}
+for s in hists:
+    if hists[s]["mcp_el_eta"].GetEntries() == 0 or hists[s]["trk_el_match_eta"].GetEntries() == 0:
+        continue
     num = hists[s]["trk_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
-
     eff = num.Clone(f"{s}_trk_eff_eta")
     eff.Divide(denom)
-    eff.SetTitle("Track Matching Efficiency vs η")
-    eff.GetXaxis().SetTitle("η")
-    eff.GetYaxis().SetTitle("Efficiency")
+    eff.SetTitle("")
+    eff_eta_trk[label_map[s]] = eff
 
-    c = ROOT.TCanvas("c", "c")
-    eff.Draw("hist")
-    c.SaveAs(f"plots/{s}_trk_eff_eta.png")
+plotHistograms(
+    eff_eta_trk,
+    "plots/track_efficiency_as_function_of_eta_allSlices.png",
+    xlabel="#eta",
+    ylabel="Track Matching Efficiency"
+)
 
+# === PFO Efficiency as a function of eta ===
+eff_eta_pfo = {}
+for s in hists:
+    if "pfo_el_match_eta" not in hists[s] or hists[s]["pfo_el_match_eta"].GetEntries() == 0:
+        continue
+    num = hists[s]["pfo_el_match_eta"]
+    denom = hists[s]["mcp_el_eta"]
+    eff = num.Clone(f"{s}_pfo_eff_eta")
+    eff.Divide(denom)
+    eff.SetTitle("")
+    eff_eta_pfo[label_map[s]] = eff
+
+plotHistograms(
+    eff_eta_pfo,
+    "plots/pfo_efficiency_as_function_of_eta_allSlices.png",
+    xlabel="#eta",
+    ylabel="PFO Matching Efficiency"
+)
+
+# === Cluster Efficiency as a function of eta ===
+eff_eta_clus = {}
+for s in hists:
+    if "clusters_el_match_eta" not in hists[s] or hists[s]["clusters_el_match_eta"].GetEntries() == 0:
+        continue
+    num = hists[s]["clusters_el_match_eta"]
+    denom = hists[s]["mcp_el_eta"]
+    eff = num.Clone(f"{s}_cluster_eff_eta")
+    eff.Divide(denom)
+    eff.SetTitle("")
+    eff_eta_clus[label_map[s]] = eff
+
+plotHistograms(
+    eff_eta_clus,
+    "plots/cluster_efficiency_as_function_of_eta_allSlices.png",
+    xlabel="#eta",
+    ylabel="Cluster Matching Efficiency"
+)
     
 
 print("ntracks entries", hists[s]["trk_n"].GetEntries())
