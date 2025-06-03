@@ -38,7 +38,7 @@ for s in samples:
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo", "pfo_el","pfo_el_match", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el", "trk_el_match",  "clusters", "clusters_el", "clusters_el_match"]:
+    for obj in ["pfo","pfo_el","pfo_el_match", "mcp", "mcp_el", "trk", "trk_el", "trk_el_match",  "clusters", "clusters_el_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
@@ -81,6 +81,10 @@ for s in files:
 # Perform matching between two TLVs
 def isMatched(tlv1, tlv2):
     if tlv1.DeltaR(tlv2) < 0.1 and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:
+        return True
+    return False
+def isClusterMatched(tlv1, tlv2):
+    if tlv1.DeltaR(tlv2) < .2 and abs(tlv1.Perp() - tlv2.Perp()) / tlv2.Perp() < .5:
         return True
     return False
 
@@ -176,23 +180,23 @@ for s in files:
 
             hists[s]["pfo_n"].Fill(n_pfo)
             hists[s]["pfo_el_n"].Fill(n_pfo_el)
-            hists[s]["mcp_el_match_n"].Fill(n_matched_el)
 
 
             ### loop over clusters
+            
+
             for cluster in clusters:
                 cluster_tlv = getClusterTLV(cluster)
                 fillObjHists(hists[s], "clusters", cluster_tlv)
                 n_clusters += 1
                 
-              #  if my_mcp_el is None:
-            #        print("No MC electron to match against in this event.")
-                if isMatched(cluster_tlv, my_mcp_el):
-                    fillObjHists(hists[s], "clusters_el_match", my_mcp_el)
+                if isClusterMatched(cluster_tlv, my_mcp_el):
+                    fillObjHists(hists[s], "clusters_el_match", cluster_tlv)
                     n_matched_clusters += 1
+               
+
                     
             hists[s]["clusters_n"].Fill(n_clusters)
-            hists[s]["clusters_el_n"].Fill(n_matched_clusters)
 
             ######## Loop over tracks
             for trk in trks:
