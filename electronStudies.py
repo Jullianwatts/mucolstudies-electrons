@@ -38,7 +38,7 @@ for s in samples:
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo", "pfo_el", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el", "trk_el_match",  "clusters", "clusters_el", "clusters_el_match"]:
+    for obj in ["pfo", "pfo_el","pfo_el_match", "mcp", "mcp_el", "mcp_el_match", "trk", "trk_el", "trk_el_match",  "clusters", "clusters_el", "clusters_el_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
@@ -170,7 +170,8 @@ for s in files:
 
                     # Look at electrons matched to the gun electron
                     if isMatched(pfo_tlv, my_mcp_el):
-                        fillObjHists(hists[s], "mcp_el_match", my_mcp_el)
+                        fillObjHists(hists[s], "pfo_el_match", pfo_tlv)
+                        #fillObjHists(hists[s], "mcp_el_match", my_mcp_el)
                         n_matched_el += 1
 
             hists[s]["pfo_n"].Fill(n_pfo)
@@ -230,7 +231,7 @@ label_map = {
     "electronGun_pT_1000_5000": "pT 1000-5000 GeV"
 }
 
-# === Track Efficiency as a function of eta ===
+# Track Efficiency as a function of eta
 eff_eta_trk = {}
 for s in hists:
     if hists[s]["mcp_el_eta"].GetEntries() == 0 or hists[s]["trk_el_match_eta"].GetEntries() == 0:
@@ -245,11 +246,11 @@ for s in hists:
 plotHistograms(
     eff_eta_trk,
     "plots/track_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="#eta",
+    xlabel="eta",
     ylabel="Track Matching Efficiency"
 )
 
-# === PFO Efficiency as a function of eta ===
+# PFO Efficiency as a function of eta
 eff_eta_pfo = {}
 for s in hists:
     if "pfo_el_match_eta" not in hists[s] or hists[s]["pfo_el_match_eta"].GetEntries() == 0:
@@ -264,11 +265,11 @@ for s in hists:
 plotHistograms(
     eff_eta_pfo,
     "plots/pfo_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="#eta",
+    xlabel="eta",
     ylabel="PFO Matching Efficiency"
 )
 
-# === Cluster Efficiency as a function of eta ===
+# Cluster Efficiency as a function of eta
 eff_eta_clus = {}
 for s in hists:
     if "clusters_el_match_eta" not in hists[s] or hists[s]["clusters_el_match_eta"].GetEntries() == 0:
@@ -283,7 +284,7 @@ for s in hists:
 plotHistograms(
     eff_eta_clus,
     "plots/cluster_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="#eta",
+    xlabel="eta",
     ylabel="Cluster Matching Efficiency"
 )
     
