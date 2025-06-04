@@ -77,16 +77,17 @@ for s in files:
     hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
 
 
-
+ # and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:
+#tlv1.DeltaR(tlv2) < 0.1
 # Perform matching between two TLVs
 def isMatched(tlv1, tlv2):
-    if tlv1.DeltaR(tlv2) < 0.1 and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:
+    if tlv1.DeltaR(tlv2) < 0.1 and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:       
         return True
     return False
-def isClusterMatched(tlv1, tlv2):
-    if tlv1.DeltaR(tlv2) < .2 and abs(tlv1.Perp() - tlv2.Perp()) / tlv2.Perp() < .5:
-        return True
-    return False
+#def isClusterMatched(tlv1, tlv2):
+    #if tlv1.DeltaR(tlv2) < .2 and abs(tlv1.Perp() - tlv2.Perp()) / tlv2.Perp() < .5:
+        #return True
+    #return False
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
@@ -186,17 +187,30 @@ for s in files:
             
 
             for cluster in clusters:
-                cluster_tlv = getClusterTLV(cluster)
+                cluster_position = cluster.getPosition()
+                cluster_E = cluster.getEnergy()
+                if cluster_E <= 0:
+                    continue
+
+                cluster_vec = ROOT.TVector3()
+                cluster_vec= ROOT.TVector3(cluster_position[0], cluster_position[1], cluster_position[2])
+                direction = cluster_vec.Unit()
+                cluster_tlv = ROOT.TLorentzVector()
+                cluster_tlv.SetVect(direction * cluster_E)
+                cluster_tlv.SetE(cluster_E)
+                
                 fillObjHists(hists[s], "clusters", cluster_tlv)
                 n_clusters += 1
                 
-                if isClusterMatched(cluster_tlv, my_mcp_el):
+                if isMatched(cluster_tlv, my_mcp_el):
                     fillObjHists(hists[s], "clusters_el_match", cluster_tlv)
                     n_matched_clusters += 1
                
 
+
                     
             hists[s]["clusters_n"].Fill(n_clusters)
+            hists[s]["clusters_el_match_n"].Fill(n_matched_clusters)
 
             ######## Loop over tracks
             for trk in trks:
@@ -253,6 +267,11 @@ plotHistograms(
     xlabel="eta",
     ylabel="Track Matching Efficiency"
 )
+print("\nTrack Matching Efficiency Summary:")
+for s in hists:
+    matched = hists[s]["trk_el_match_eta"].GetEntries() if "trk_el_match_eta" in hists[s] else 0
+    total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
 
 # PFO Efficiency as a function of eta
 eff_eta_pfo = {}
@@ -272,6 +291,11 @@ plotHistograms(
     xlabel="eta",
     ylabel="PFO Matching Efficiency"
 )
+print("\nPFO Matching Efficiency Summary:")
+for s in hists:
+    matched = hists[s]["pfo_el_match_eta"].GetEntries() if "pfo_el_match_eta" in hists[s] else 0
+    total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
 
 # Cluster Efficiency as a function of eta
 eff_eta_clus = {}
@@ -291,6 +315,11 @@ plotHistograms(
     xlabel="eta",
     ylabel="Cluster Matching Efficiency"
 )
+print("\nCluster Matching Efficiency Summary:")
+for s in hists:
+    matched = hists[s]["clusters_el_match_eta"].GetEntries() if "clusters_el_match_eta" in hists[s] else 0
+    total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
     
 
 print("ntracks entries", hists[s]["trk_n"].GetEntries())
