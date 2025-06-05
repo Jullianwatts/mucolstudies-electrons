@@ -33,7 +33,7 @@ for s in samples:
     if sname not in files: continue
     #files[sname] = glob.glob(f"{s}/*.root")
     files[sname] = glob.glob(f"{s}/*.slcio")
-
+mcp_el_counts = {s: 0 for s in files}
 # Set up histograms
 hists = {}
 for s in files:
@@ -142,7 +142,7 @@ for s in files:
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
                 hists2d[s]["mcp_E_v_mcp_p"].Fill(mcp.getEnergy(), momentum)
                 n_mcp += 1
-
+                n_mcp_el += 1
 
                 # Look at electrons only
                 if abs(mcp.getPDG()) == 11:
@@ -232,12 +232,15 @@ for s in files:
 
             hists[s]["trk_n"].Fill(n_trk)
             hists[s]["trk_el_match_n"].Fill(n_matched_trk)
-
-            # Iterate counter
+            
             i += 1
+        if "1000_5000" in s:
+            mcp_el_counts[s] += n_mcp_el
+
 
         reader.close()
-
+total = sum(mcp_el_counts[s] for s in mcp_el_counts if "1000_5000" in s)
+print(f"\nTotal nymber of MC electrons in 1000-5000 GeV slice: {total}")
 
 from plotHelper import plotHistograms
 
@@ -260,6 +263,9 @@ for s in hists:
     eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_trk[label_map[s]] = eff
+    #new with error bars
+    eff_graph = ROOT.TGraphAsymmErrors(num, denom, "cl=.683 b(1,1) mode")
+    eff_graph.SetTitle("")
 
 plotHistograms(
     eff_eta_trk,
@@ -284,6 +290,9 @@ for s in hists:
     eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_pfo[label_map[s]] = eff
+    # for error bar plots
+    eff_graph_pfo = ROOT.TGraphAsymmErrors(num, denom, "cl=.683 b(1,1) mode")
+    eff_graph_pfo.SetTitle("")
 
 plotHistograms(
     eff_eta_pfo,
@@ -308,6 +317,9 @@ for s in hists:
     eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_clus[label_map[s]] = eff
+    ## for error bars
+    eff_graph_clus = ROOT.TGraphAsymmErrors(num, denom, "cl=.683 b(1,1) mode")
+    eff_graph_clus.SetTitle("")
 
 plotHistograms(
     eff_eta_clus,
@@ -322,9 +334,37 @@ for s in hists:
     print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
     
 
-print("ntracks entries", hists[s]["trk_n"].GetEntries())
-print("ntracks integral from 1", hists[s]["trk_n"].GetEntries())
-print("trackpt entries", hists[s]["trk_pt"].GetEntries())
+#print("ntracks entries", hists[s]["trk_n"].GetEntries())
+#print("ntracks integral from 1", hists[s]["trk_n"].GetEntries())
+#print("trackpt entries", hists[s]["trk_pt"].GetEntries())
+# Save binomial error plots 
+def draw_eff_graphs_multislice(obj_key, ylabel, save_name):
+    c = ROOT.TCanvas()
+    legend = ROOT.TLegend(0.15, 0.7, 0.5, 0.88)
+    first = True
+    colors = [ROOT.kRed+1, ROOT.kBlue+1, ROOT.kGreen+2, ROOT.kMagenta+1]
+    for i, s in enumerate(hists):
+        if obj_key not in hists[s] or "mcp_el_eta" not in hists[s]:
+            continue
+        num = hists[s][obj_key]
+        denom = hists[s]["mcp_el_eta"]
+        g = ROOT.TGraphAsymmErrors(num, denom, "cl=0.683 b(1,1) mode")
+        g.SetLineColor(colors[i % len(colors)])
+        g.SetMarkerColor(colors[i % len(colors)])
+        g.SetMarkerStyle(20 + i)
+        g.SetTitle(f";#eta;{ylabel}")
+        if first:
+            g.Draw("AP")
+            first = False
+        else:
+            g.Draw("P same")
+            legend.AddEntry(g, label_map.get(s, s), "lp")
+            legend.Draw()
+            c.SaveAs(f"plots/{save_name}")
+draw_eff_graphs_multislice("trk_el_match_eta", "Track Matching Efficiency", "binomial_trk_eff_eta_allSlices.png")
+draw_eff_graphs_multislice("pfo_el_match_eta", "PFO Matching Efficiency", "binomial_pfo_eff_eta_allSlices.png")
+draw_eff_graphs_multislice("clusters_el_match_eta", "Cluster Matching Efficiency", "binomial_cluster_eff_eta_allSlices.png")
+
 
 # Draw all the 1D histograms you filled
 for i, h in enumerate(hists[s]):
