@@ -43,15 +43,6 @@ for s in files:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
 
-# so plots print with correct ranges on x and y axis
-#sliceRange = {
-#        "0_50": (0,50),
-#        "50_250": (50,250),
-#        "250_1000": (250,1000),
-#        "1000_5000": (1000,5000)
-#}
-
-
 hists2d = {}
 for s in files:
     hists2d[s] = {}
@@ -265,9 +256,11 @@ for s in hists:
         continue
     num = hists[s]["trk_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
-    print("denom:", denom, "type:", type(denom))
+    print("Numerator (matched entries):", hists[s]["trk_el_match_eta"].GetEntries())
+    print("Denominator (matched entries):", hists[s]["mcp_el_eta"].GetEntries())
+
     eff = num.Clone(f"{s}_trk_eff_eta")
-    eff.Divide(denom, option = "B")
+    eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_trk[label_map[s]] = eff
 
@@ -277,6 +270,7 @@ plotHistograms(
     xlabel="eta",
     ylabel="Track Matching Efficiency"
 )
+
 print("\nTrack Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["trk_el_match_eta"].GetEntries() if "trk_el_match_eta" in hists[s] else 0
@@ -291,12 +285,10 @@ for s in hists:
     num = hists[s]["pfo_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
     eff = num.Clone(f"{s}_pfo_eff_eta")
-    eff.Divide(denom, option = "B")
+    eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_pfo[label_map[s]] = eff
-    # for error bar plots
-    #eff_graph_pfo = ROOT.TGraphAsymmErrors(num, denom, "cl=.683 b(1,1) mode")
-    #eff_graph_pfo.SetTitle("")
+
 
 plotHistograms(
     eff_eta_pfo,
@@ -304,6 +296,7 @@ plotHistograms(
     xlabel="eta",
     ylabel="PFO Matching Efficiency"
 )
+
 print("\nPFO Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["pfo_el_match_eta"].GetEntries() if "pfo_el_match_eta" in hists[s] else 0
@@ -318,12 +311,9 @@ for s in hists:
     num = hists[s]["clusters_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
     eff = num.Clone(f"{s}_cluster_eff_eta")
-    eff.Divide(denom, option = "B")
+    eff.Divide(denom)
     eff.SetTitle("")
     eff_eta_clus[label_map[s]] = eff
-    ## for error bars
-    #eff_graph_clus = ROOT.TGraphAsymmErrors(num, denom, "cl=.683 b(1,1) mode")
-    #eff_graph_clus.SetTitle("")
 
 plotHistograms(
     eff_eta_clus,
@@ -331,6 +321,7 @@ plotHistograms(
     xlabel="eta",
     ylabel="Cluster Matching Efficiency"
 )
+
 print("\nCluster Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["clusters_el_match_eta"].GetEntries() if "clusters_el_match_eta" in hists[s] else 0
