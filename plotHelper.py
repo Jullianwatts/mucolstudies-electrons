@@ -118,46 +118,71 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
     can.SaveAs(save_name)
     return
 
-def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange=""):
+#def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange=""):
 
-    can = ROOT.TCanvas("can", "can")
-    if len(eff_map)<1:
-        return
+    #can = ROOT.TCanvas("can", "can")
+    #if len(eff_map)<1:
+        #return
 
-    colorHists(eff_map.values())
+    #colorHists(eff_map.values())
 
-    for i, k in enumerate(eff_map):
-        if i==0:
-            if not xrange=="":
-                background = ROOT.TH1D("bkg", "bkg", 1, x_range[0], x_range[1])
-                background.SetLineWidth(0)
-                background.SetTitle(";%s;%s"%(xlabel,ylabel))
-                background.SetMinimum(0)
-                background.SetMaximum(1)
-                background.Draw()
-                eff_map[k].Draw("pe same")
-            else:
-                eff_map[k].Draw("ape")
-            eff_map[k].SetTitle(";%s;%s"%(xlabel,ylabel))
-            ROOT.gPad.Update()
+    #for i, k in enumerate(eff_map):
+        #if i==0:
+            #if not xrange=="":
+                #background = ROOT.TH1D("bkg", "bkg", 1, x_range[0], x_range[1])
+                #background.SetLineWidth(0)
+                #background.SetTitle(";%s;%s"%(xlabel,ylabel))
+                #background.SetMinimum(0)
+                #background.SetMaximum(1)
+                #background.Draw()
+                #eff_map[k].Draw("pe same")
+            #else:
+                #eff_map[k].Draw("ape")
+            #eff_map[k].SetTitle(";%s;%s"%(xlabel,ylabel))
+            #ROOT.gPad.Update()
 
-            eff_map[k].GetPaintedGraph().GetXaxis().SetTitle(xlabel)
-            eff_map[k].GetPaintedGraph().GetYaxis().SetTitle(ylabel)
-            eff_map[k].GetPaintedGraph().SetMinimum(0)
-            eff_map[k].GetPaintedGraph().SetMaximum(1)
-            if not xrange=="":
-                print("Updating axis range", xrange)
+            #eff_map[k].GetPaintedGraph().GetXaxis().SetTitle(xlabel)
+            #eff_map[k].GetPaintedGraph().GetYaxis().SetTitle(ylabel)
+            #eff_map[k].GetPaintedGraph().SetMinimum(0)
+            #eff_map[k].GetPaintedGraph().SetMaximum(1)
+            #if not xrange=="":
+               # print("Updating axis range", xrange)
                 #eff_map[k].GetPaintedGraph().GetXaxis().SetRange(x_range[0], x_range[1])
                 #eff_map[k].GetPaintedGraph().GetXaxis().SetMin(x_range[0])
                 #eff_map[k].GetPaintedGraph().GetXaxis().SetMax(x_range[1])
-                eff_map[k].Draw("pe same")
-            else:
-                eff_map[k].Draw("ape")
-            ROOT.gPad.Update()
+                #eff_map[k].Draw("pe same")
+            #else:
+                #eff_map[k].Draw("ape")
+            #ROOT.gPad.Update()
 
-        else: eff_map[k].Draw("pe same")
+        #else: eff_map[k].Draw("pe same")
 
-        ROOT.gPad.Update()
+        #ROOT.gPad.Update()
+
+    #leg = ROOT.TLegend(.66, .24, .9, .38)
+    #for k in eff_map:
+        #leg.AddEntry(eff_map[k], k, "p")
+    #leg.Draw()
+
+    #can.SaveAs(save_name)
+    #return
+def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange=""):
+    can = ROOT.TCanvas("can", "can")
+    if len(eff_map) < 1:
+        return
+
+    colorHists(list(eff_map.values()))
+
+    for i, k in enumerate(eff_map):
+        if i == 0:
+            eff_map[k].Draw("ape")
+            eff_map[k].SetTitle(";%s;%s" % (xlabel, ylabel))
+            eff_map[k].GetXaxis().SetTitle(xlabel)
+            eff_map[k].GetYaxis().SetTitle(ylabel)
+            eff_map[k].SetMinimum(0)
+            eff_map[k].SetMaximum(1.2)  # Allow >100% for your "all matches"
+        else:
+            eff_map[k].Draw("pe same")
 
     leg = ROOT.TLegend(.66, .24, .9, .38)
     for k in eff_map:

@@ -16,7 +16,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -58,17 +58,11 @@ for s in files:
     hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
 
 
- # and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:
-#tlv1.DeltaR(tlv2) < 0.1
 # Perform matching between two TLVs
 def isMatched(tlv1, tlv2):
     if tlv1.DeltaR(tlv2) < 0.1: #and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:       
         return True
     return False
-#def isClusterMatched(tlv1, tlv2):
-    #if tlv1.DeltaR(tlv2) < .2 and abs(tlv1.Perp() - tlv2.Perp()) / tlv2.Perp() < .5:
-        #return True
-    #return False
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
@@ -101,7 +95,7 @@ for s in files:
             n_matched_clusters = 0
             n_matched_el = 0
             n_clusters = 0
-            my_mcp_el = None
+            #my_mcp_el = None
 
             # Get the collections we care about
             #mcps = event.get("MCParticle")
@@ -112,15 +106,17 @@ for s in files:
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks_Refitted")
             clusters = event.getCollection("PandoraClusters")
-            ######## Loop over MCPs
-           # print(f"# clusters in event: {clusters.getNumberOfElements()}")
+            mcp_electrons = []
+            pfo_electrons = []
+            trk_electrons = []
+            cluster_electrons = []
+######## Loop over MCPs
 
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
                 mcp_tlv = getTLV(mcp)
                 if mcp_tlv.E() < 20: continue
                 if abs(mcp_tlv.Eta())>2: continue
-                #print(f" For file {i} what particles: {mcp.getPDG()} with pt {mcp_tlv.Pt()}")
                 fillObjHists(hists[s], "mcp", mcp_tlv)
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
                 hists2d[s]["mcp_E_v_mcp_p"].Fill(mcp.getEnergy(), momentum)
@@ -129,7 +125,7 @@ for s in files:
                 # Look at electrons only
                 if abs(mcp.getPDG()) == 11:
                     fillObjHists(hists[s], "mcp_el", mcp_tlv)
-                    my_mcp_el = mcp_tlv
+                    mcp_electrons.append(mcp_tlv)
                     n_mcp_el += 1
 
             # Only consider events that had at least one electron in our fiducial region
@@ -137,7 +133,6 @@ for s in files:
 
             hists[s]["mcp_n"].Fill(n_mcp)
             hists[s]["mcp_el_n"].Fill(n_mcp_el)
-            print(f"Sample {s}: {n_mcp_el} MC electrons passed all cuts")
     
  
 
@@ -147,25 +142,16 @@ for s in files:
             for pfo in pfos:
                 pfo_tlv = getTLV(pfo)
                 if pfo_tlv.E() < 10: continue
-                if my_mcp_el is None: continue
                 fillObjHists(hists[s], "pfo", pfo_tlv)
                 n_pfo += 1
 
-                hists2d[s]["pfo_pt_v_mcp_pt"].Fill(pfo_tlv.Perp(), my_mcp_el.Perp())
+                #hists2d[s]["pfo_pt_v_mcp_pt"].Fill(pfo_tlv.Perp(), my_mcp_el.Perp())
 
                 # Look at electrons only
                 if abs(pfo.getType()) == 11:
                     fillObjHists(hists[s], "pfo_el", pfo_tlv)
-                    #print(f"For pfo in file {i}: {pfo_tlv.Pt()}")
+                    pfo_electrons.append(pfo_tlv)
                     n_pfo_el += 1
-
-                    # Look at electrons matched to the gun electron
-                    if isMatched(pfo_tlv, my_mcp_el):
-                        if "mcp_el_eta" not in hists[s] or hists[s]["mcp_el_eta"].GetEntries() == 0:
-                            continue
-                        fillObjHists(hists[s], "pfo_el_match", pfo_tlv)
-                        #fillObjHists(hists[s], "mcp_el_match", my_mcp_el)
-                        n_matched_el += 1
 
             hists[s]["pfo_n"].Fill(n_pfo)
             hists[s]["pfo_el_n"].Fill(n_pfo_el)
@@ -173,11 +159,10 @@ for s in files:
 
             ### loop over clusters
             
-
             for cluster in clusters:
                 cluster_position = cluster.getPosition()
                 cluster_E = cluster.getEnergy()
-                if cluster_E <= 10:
+                if cluster_E < 10:
                     continue
 
                 cluster_vec = ROOT.TVector3()
@@ -186,57 +171,83 @@ for s in files:
                 cluster_tlv = ROOT.TLorentzVector()
                 cluster_tlv.SetVect(direction * cluster_E)
                 cluster_tlv.SetE(cluster_E)
-                if my_mcp_el is None: continue
                 
                 fillObjHists(hists[s], "clusters", cluster_tlv)
+                cluster_electrons.append(cluster_tlv)
                 n_clusters += 1
                 
-                if isMatched(cluster_tlv, my_mcp_el):
-                    if "mcp_el_eta" not in hists[s] or hists[s]["mcp_el_eta"].GetEntries() == 0:
-                        continue
-
-                    fillObjHists(hists[s], "clusters_el_match", cluster_tlv)
-                    n_matched_clusters += 1
-               
-
-
-                    
+    
             hists[s]["clusters_n"].Fill(n_clusters)
-            hists[s]["clusters_el_match_n"].Fill(n_matched_clusters)
+            
 
             ######## Loop over tracks
             for trk in trks:
                 trk_tlv = getTrackTLV(trk, m=0.0005)
                 if trk_tlv.E() < 10: continue
-                if my_mcp_el is None: continue
                 fillObjHists(hists[s], "trk", trk_tlv)
 
                 hists2d[s]["trk_eta_v_trk_pt"].Fill(trk_tlv.Eta(), trk_tlv.Perp())
                 hists2d[s]["trk_eta_v_trk_phi"].Fill(trk_tlv.Eta(), trk_tlv.Phi())
                 hists2d[s]["trk_eta_v_trk_n"].Fill(trk_tlv.Eta(), len(trks))
-                hists2d[s]["trk_eta_v_mcp_eta"].Fill(trk_tlv.Eta(), my_mcp_el.Eta())
-                hists2d[s]["trk_eta_v_mcp_pt"].Fill(trk_tlv.Eta(), my_mcp_el.Perp())
-                hists2d[s]["trk_eta_v_mcp_phi"].Fill(trk_tlv.Eta(), my_mcp_el.Phi())
-                hists2d[s]["trk_pt_v_mcp_pt"].Fill(trk_tlv.Perp(), my_mcp_el.Perp())
+                #hists2d[s]["trk_eta_v_mcp_eta"].Fill(trk_tlv.Eta(), my_mcp_el.Eta())
+                #hists2d[s]["trk_eta_v_mcp_pt"].Fill(trk_tlv.Eta(), my_mcp_el.Perp())
+                #hists2d[s]["trk_eta_v_mcp_phi"].Fill(trk_tlv.Eta(), my_mcp_el.Phi())
+                #hists2d[s]["trk_pt_v_mcp_pt"].Fill(trk_tlv.Perp(), my_mcp_el.Perp())
+                trk_electrons.append(trk_tlv)
                 n_trk += 1
-                #print(f"For track in file {i}: {trk_tlv.DeltaR(my_mcp_el)}")
                 
-                if isMatched(trk_tlv, my_mcp_el):
-                    if "mcp_el_eta" not in hists[s] or hists[s]["mcp_el_eta"].GetEntries() == 0:
-                        continue
-                    fillObjHists(hists[s], "trk_el_match", my_mcp_el)
-                    n_matched_trk += 1
-
             hists[s]["trk_n"].Fill(n_trk)
-            hists[s]["trk_el_match_n"].Fill(n_matched_trk)
             
+            #one-to-one matching for each MCP electron
+            for mcp_el in mcp_electrons:
+                # Find best track match
+                best_track = None
+                best_track_dr = 999
+                for track in trk_electrons:
+                    dr = mcp_el.DeltaR(track)
+                    if dr < 0.1 and dr < best_track_dr:
+                        best_track = track
+                        best_track_dr = dr
+                
+                if best_track:
+                    fillObjHists(hists[s], "trk_el_match", mcp_el)  # Fill with MCP!
+                    n_matched_trk += 1
+                
+                # Find best PFO match
+                best_pfo = None
+                best_pfo_dr = 999
+                for pfo in pfo_electrons:
+                    dr = mcp_el.DeltaR(pfo)
+                    if dr < 0.1 and dr < best_pfo_dr:
+                        best_pfo = pfo
+                        best_pfo_dr = dr
+                
+                if best_pfo:
+                    fillObjHists(hists[s], "pfo_el_match", mcp_el)  # Fill with MCP!
+                    n_matched_el += 1
+                
+                # Find best cluster match
+                best_cluster = None
+                best_cluster_dr = 999
+                for cluster in cluster_electrons:
+                    dr = mcp_el.DeltaR(cluster)
+                    if dr < 0.1 and dr < best_cluster_dr:
+                        best_cluster = cluster
+                        best_cluster_dr = dr
+                
+                if best_cluster:
+                    fillObjHists(hists[s], "clusters_el_match", mcp_el)  # Fill with MCP!
+                    n_matched_clusters += 1
+
+            hists[s]["trk_el_match_n"].Fill(n_matched_trk)
+            hists[s]["clusters_el_match_n"].Fill(n_matched_clusters)
+
             i += 1
             if "1000_5000" in s:
                 mcp_el_counts[s] += n_mcp_el
 
-
         reader.close()
-total = sum(mcp_el_counts[s] for s in mcp_el_counts if "1000_5000" in s)
+#total = sum(mcp_el_counts[s] for s in mcp_el_counts if "1000_5000" in s)
 #print(f"\nTotal nymber of MC electrons in 1000-5000 GeV slice: {total}")
 
 from plotHelper import plotHistograms
@@ -249,91 +260,87 @@ label_map = {
     "electronGun_pT_1000_5000": "pT 1000-5000 GeV"
 }
 
-# Track Efficiency as a function of eta
+# TRACK EFFICIENCY CALCULATION
+print("\n=== CALCULATING TRACK EFFICIENCY ===")
 eff_eta_trk = {}
 for s in hists:
-    if hists[s]["mcp_el_eta"].GetEntries() == 0 or hists[s]["trk_el_match_eta"].GetEntries() == 0:
+    if hists[s]["mcp_el_eta"].GetEntries() == 0:
         continue
+    if hists[s]["trk_el_match_eta"].GetEntries() == 0:
+        continue
+    
     num = hists[s]["trk_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
-    print("Numerator (matched entries):", hists[s]["trk_el_match_eta"].GetEntries())
-    print("Denominator (matched entries):", hists[s]["mcp_el_eta"].GetEntries())
-
-    eff = num.Clone(f"{s}_trk_eff_eta")
-    eff.Divide(denom)
-    eff.SetTitle("")
+    eff = ROOT.TGraphAsymmErrors()
+    eff.BayesDivide(num, denom, "B")
     eff_eta_trk[label_map[s]] = eff
 
-plotHistograms(
-    eff_eta_trk,
-    "plots/track_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="eta",
-    ylabel="Track Matching Efficiency"
+plotEfficiencies(eff_eta_trk,"plots/track_efficiency_as_function_of_eta_allSlices.png",
+        xlabel="eta",ylabel="Track Matching Efficiency"
 )
 
 print("\nTrack Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["trk_el_match_eta"].GetEntries() if "trk_el_match_eta" in hists[s] else 0
     total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
-    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
+    efficiency = matched/total if total > 0 else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}, eff = {efficiency:.3f}")
 
-# PFO Efficiency as a function of eta
+# PFO EFFICIENCY CALCULATION
+print("\n=== CALCULATING PFO EFFICIENCY ===")
 eff_eta_pfo = {}
 for s in hists:
     if "pfo_el_match_eta" not in hists[s] or hists[s]["pfo_el_match_eta"].GetEntries() == 0:
         continue
+    if hists[s]["mcp_el_eta"].GetEntries() == 0:
+        continue
     num = hists[s]["pfo_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
-    eff = num.Clone(f"{s}_pfo_eff_eta")
-    eff.Divide(denom)
-    eff.SetTitle("")
+    eff = ROOT.TGraphAsymmErrors()
+    eff.BayesDivide(num, denom, "B")
     eff_eta_pfo[label_map[s]] = eff
 
-
-plotHistograms(
-    eff_eta_pfo,
-    "plots/pfo_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="eta",
-    ylabel="PFO Matching Efficiency"
-)
+plotEfficiencies(eff_eta_pfo,"plots/pfo_efficiency_as_function_of_eta_allSlices.png",
+        xlabel="eta", ylabel="PFO Matching Efficiency"
+    )
 
 print("\nPFO Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["pfo_el_match_eta"].GetEntries() if "pfo_el_match_eta" in hists[s] else 0
     total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
-    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
+    efficiency = matched/total if total > 0 else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}, eff = {efficiency:.3f}")
 
-# Cluster Efficiency as a function of eta
+# CLUSTER EFFICIENCY CALCULATION
+print("\n=== CALCULATING CLUSTER EFFICIENCY ===")
 eff_eta_clus = {}
 for s in hists:
     if "clusters_el_match_eta" not in hists[s] or hists[s]["clusters_el_match_eta"].GetEntries() == 0:
+        print(f"Skipping {s}: no matched clusters")
         continue
+    if hists[s]["mcp_el_eta"].GetEntries() == 0:
+        print(f"Skipping {s}: no MCP electrons")
+        continue
+    
     num = hists[s]["clusters_el_match_eta"]
     denom = hists[s]["mcp_el_eta"]
-    eff = num.Clone(f"{s}_cluster_eff_eta")
-    eff.Divide(denom)
-    eff.SetTitle("")
+    eff = ROOT.TGraphAsymmErrors()
+    eff.BayesDivide(num, denom, "B")
     eff_eta_clus[label_map[s]] = eff
-
-plotHistograms(
-    eff_eta_clus,
-    "plots/cluster_efficiency_as_function_of_eta_allSlices.png",
-    xlabel="eta",
-    ylabel="Cluster Matching Efficiency"
-)
+    
+plotEfficiencies(eff_eta_clus,"plots/cluster_efficiency_as_function_of_eta_allSlices.png",
+        xlabel="eta",ylabel="Cluster Matching Efficiency"
+    )
 
 print("\nCluster Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["clusters_el_match_eta"].GetEntries() if "clusters_el_match_eta" in hists[s] else 0
     total = hists[s]["mcp_el_eta"].GetEntries() if "mcp_el_eta" in hists[s] else 0
-    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}")
-    
+    efficiency = matched/total if total > 0 else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}, eff = {efficiency:.3f}")
 
-#print("ntracks entries", hists[s]["trk_n"].GetEntries())
-#print("ntracks integral from 1", hists[s]["trk_n"].GetEntries())
-#print("trackpt entries", hists[s]["trk_pt"].GetEntries())
 
-# Draw all the 1D histograms you filled
+
 for i, h in enumerate(hists[s]):
 
     # Collect hists that go on a single plot
