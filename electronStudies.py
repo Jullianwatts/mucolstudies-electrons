@@ -16,7 +16,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -116,7 +116,7 @@ for s in files:
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
                 mcp_tlv = getTLV(mcp)
-                if mcp_tlv.E() < 20: continue
+                if mcp_tlv.E() < 10: continue
                 if abs(mcp_tlv.Eta())>2: continue
                 fillObjHists(hists[s], "mcp", mcp_tlv)
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
@@ -142,7 +142,7 @@ for s in files:
 
             for pfo in pfos:
                 pfo_tlv = getTLV(pfo)
-                if pfo_tlv.E() < 20: continue
+                if pfo_tlv.E() < 10: continue
                 fillObjHists(hists[s], "pfo", pfo_tlv)
                 n_pfo += 1
 
@@ -163,7 +163,7 @@ for s in files:
             for cluster in clusters:
                 cluster_position = cluster.getPosition()
                 cluster_E = cluster.getEnergy()
-                if cluster_E < 20:
+                if cluster_E < 10:
                     continue
 
                 cluster_vec = ROOT.TVector3()
@@ -184,7 +184,7 @@ for s in files:
             ######## Loop over tracks
             for trk in trks:
                 trk_tlv = getTrackTLV(trk, m=0.0005)
-                if trk_tlv.E() < 20: continue
+                if trk_tlv.E() < 10: continue
                 fillObjHists(hists[s], "trk", trk_tlv)
 
                 hists2d[s]["trk_eta_v_trk_pt"].Fill(trk_tlv.Eta(), trk_tlv.Perp())
@@ -243,7 +243,7 @@ for s in files:
             hists[s]["trk_el_match_n"].Fill(n_matched_trk)
             hists[s]["clusters_el_match_n"].Fill(n_matched_clusters)
 
-            #i += 1
+            i += 1
             #if "1000_5000" in s:
                 #mcp_el_counts[s] += n_mcp_el
 
