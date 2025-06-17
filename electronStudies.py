@@ -16,7 +16,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1
+max_events = 10
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -24,6 +24,7 @@ max_events = -1
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/recoBIB/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
 samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
 
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
@@ -141,7 +142,7 @@ for s in files:
 
             for pfo in pfos:
                 pfo_tlv = getTLV(pfo)
-                if pfo_tlv.E() < 10: continue
+                if pfo_tlv.E() < 20: continue
                 fillObjHists(hists[s], "pfo", pfo_tlv)
                 n_pfo += 1
 
@@ -162,7 +163,7 @@ for s in files:
             for cluster in clusters:
                 cluster_position = cluster.getPosition()
                 cluster_E = cluster.getEnergy()
-                if cluster_E < 10:
+                if cluster_E < 20:
                     continue
 
                 cluster_vec = ROOT.TVector3()
@@ -183,7 +184,7 @@ for s in files:
             ######## Loop over tracks
             for trk in trks:
                 trk_tlv = getTrackTLV(trk, m=0.0005)
-                if trk_tlv.E() < 10: continue
+                if trk_tlv.E() < 20: continue
                 fillObjHists(hists[s], "trk", trk_tlv)
 
                 hists2d[s]["trk_eta_v_trk_pt"].Fill(trk_tlv.Eta(), trk_tlv.Perp())
@@ -202,7 +203,7 @@ for s in files:
             for mcp_el in mcp_electrons:
                 # Find best track match
                 best_track = None
-                best_track_dr = 999
+                best_track_dr = 10
                 for track in trk_electrons:
                     dr = mcp_el.DeltaR(track)
                     if dr < 0.1 and dr < best_track_dr:
@@ -215,7 +216,7 @@ for s in files:
                 
                 # Find best PFO match
                 best_pfo = None
-                best_pfo_dr = 999
+                best_pfo_dr = 10
                 for pfo in pfo_electrons:
                     dr = mcp_el.DeltaR(pfo)
                     if dr < 0.1 and dr < best_pfo_dr:
@@ -228,7 +229,7 @@ for s in files:
                 
                 # Find best cluster match
                 best_cluster = None
-                best_cluster_dr = 999
+                best_cluster_dr = 10
                 for cluster in cluster_electrons:
                     dr = mcp_el.DeltaR(cluster)
                     if dr < 0.1 and dr < best_cluster_dr:
@@ -242,9 +243,9 @@ for s in files:
             hists[s]["trk_el_match_n"].Fill(n_matched_trk)
             hists[s]["clusters_el_match_n"].Fill(n_matched_clusters)
 
-            i += 1
-            if "1000_5000" in s:
-                mcp_el_counts[s] += n_mcp_el
+            #i += 1
+            #if "1000_5000" in s:
+                #mcp_el_counts[s] += n_mcp_el
 
         reader.close()
 #total = sum(mcp_el_counts[s] for s in mcp_el_counts if "1000_5000" in s)
