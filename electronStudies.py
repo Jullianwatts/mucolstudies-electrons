@@ -6,6 +6,7 @@
 # apptainer run --no-home -B /collab/project/snowmass21/data/muonc:/data -B /home/$USER k4toroid.sif
 # source /setup.sh
 
+import math
 import glob
 import ROOT
 #from ROOT import edm4hep
@@ -23,7 +24,8 @@ max_events = -1
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/recoBIB/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
 
@@ -43,6 +45,8 @@ for s in files:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, variables[vtype][var]["nbins"], variables[vtype][var]["xmin"], variables[vtype][var]["xmax"])
+    hists[s]["cluster_nhits"] = ROOT.TH1F(s+"_cluster_nhits", s, 50, 0, 100)
+    hists[s]["cluster_r"] = ROOT.TH1F(s+"_cluster_r", s, 50, 0, 3000)
 
 hists2d = {}
 for s in files:
@@ -58,7 +62,6 @@ for s in files:
     hists2d[s]["pfo_pt_v_mcp_pt"] = ROOT.TH2F(f"pfo_pt_v_mcp_pt_{s}", f"pfo_pt_v_mcp_pt_{s}", 30,0,3000,30,0,3000)
     hists2d[s]["mcp_E_v_mcp_p"] = ROOT.TH2F(f"mcp_E_v_mcp_p_{s}", f"mcp_E_v_mcp_p_{s}", 30,0,1000,30,0,1000)
 
-
 # Perform matching between two TLVs
 def isMatched(tlv1, tlv2):
     if tlv1.DeltaR(tlv2) < 0.1: #and abs(tlv1.Perp()-tlv2.Perp())/tlv2.Perp() < 0.2:       
@@ -67,7 +70,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SiTracks_Refitted","PandoraClusters"])
+reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
 
 # Loop over the different samples
 for s in files:
@@ -105,7 +108,7 @@ for s in files:
             #lnks = event.get("MCParticle_SiTracks_Refitted")
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
-            trks = event.getCollection("SiTracks_Refitted")
+            trks = event.getCollection("SeedTracks") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
             mcp_electrons = []
             pfo_electrons = []
@@ -116,7 +119,7 @@ for s in files:
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
                 mcp_tlv = getTLV(mcp)
-                if mcp_tlv.E() < 10: continue
+                if mcp_tlv.E() < 20: continue
                 if abs(mcp_tlv.Eta())>2: continue
                 fillObjHists(hists[s], "mcp", mcp_tlv)
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
@@ -136,10 +139,6 @@ for s in files:
             hists[s]["mcp_el_n"].Fill(n_mcp_el)
     
  
-
-
-            ######## Loop over PFOs
-
             for pfo in pfos:
                 pfo_tlv = getTLV(pfo)
                 if pfo_tlv.E() < 10: continue
@@ -153,7 +152,6 @@ for s in files:
                     fillObjHists(hists[s], "pfo_el", pfo_tlv)
                     pfo_electrons.append(pfo_tlv)
                     n_pfo_el += 1
-
             hists[s]["pfo_n"].Fill(n_pfo)
             hists[s]["pfo_el_n"].Fill(n_pfo_el)
 
@@ -165,7 +163,14 @@ for s in files:
                 cluster_E = cluster.getEnergy()
                 if cluster_E < 10:
                     continue
-
+                cluster_nhits = len(cluster.getCalorimeterHits()) if cluster.getCalorimeterHits() else 0
+                cluster_x, cluster_y, cluster_z = cluster_position[0], cluster_position[1], cluster_position[2]
+                cluster_r = math.sqrt(cluster_x**2 + cluster_y**2)
+                cluster_theta = math.atan2(cluster_r, cluster_z)
+                cluster_eta = -math.log(math.tan(cluster_theta/2))
+                if i < 3:  # Only for first few events
+                    print(f"Cluster: E={cluster_E:.2f}, nhits={cluster_nhits}, eta={cluster_eta:.2f}")
+ 
                 cluster_vec = ROOT.TVector3()
                 cluster_vec= ROOT.TVector3(cluster_position[0], cluster_position[1], cluster_position[2])
                 direction = cluster_vec.Unit()
@@ -176,10 +181,9 @@ for s in files:
                 fillObjHists(hists[s], "clusters", cluster_tlv)
                 cluster_electrons.append(cluster_tlv)
                 n_clusters += 1
-                
-    
-            hists[s]["clusters_n"].Fill(n_clusters)
-            
+                hists[s]["clusters_n"].Fill(n_clusters)
+                hists[s]["cluster_nhits"].Fill(cluster_nhits)
+            hists[s]["cluster_r"].Fill(cluster_r)
 
             ######## Loop over tracks
             for trk in trks:
@@ -203,7 +207,7 @@ for s in files:
             for mcp_el in mcp_electrons:
                 # Find best track match
                 best_track = None
-                best_track_dr = 10
+                best_track_dr = 20
                 for track in trk_electrons:
                     dr = mcp_el.DeltaR(track)
                     if dr < 0.1 and dr < best_track_dr:
@@ -216,7 +220,7 @@ for s in files:
                 
                 # Find best PFO match
                 best_pfo = None
-                best_pfo_dr = 10
+                best_pfo_dr = 20
                 for pfo in pfo_electrons:
                     dr = mcp_el.DeltaR(pfo)
                     if dr < 0.1 and dr < best_pfo_dr:
@@ -229,7 +233,7 @@ for s in files:
                 
                 # Find best cluster match
                 best_cluster = None
-                best_cluster_dr = 10
+                best_cluster_dr = 20
                 for cluster in cluster_electrons:
                     dr = mcp_el.DeltaR(cluster)
                     if dr < 0.1 and dr < best_cluster_dr:
@@ -343,6 +347,8 @@ for s in hists:
 
 
 for i, h in enumerate(hists[s]):
+    if h in ["cluster_nhits", "cluster_r"]:
+        continue
 
     # Collect hists that go on a single plot
     hists_to_plot = {}
@@ -361,7 +367,19 @@ for i, h in enumerate(hists[s]):
     #plotHistograms(hists_to_plot, "plots/electrons/"+h+".root", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons_no_el_req/"+h+".png", xlabel, "Entries")
     #plotHistograms(hists_to_plot, "plots/electrons_no_el_req/"+h+".root", xlabel, "Entries")
+cluster_hists_nhits = {}
+cluster_hists_r = {}
 
+for s in files:
+    if "cluster_nhits" in hists[s]:
+        cluster_hists_nhits[s] = hists[s]["cluster_nhits"]
+    if "cluster_r" in hists[s]:
+        cluster_hists_r[s] = hists[s]["cluster_r"]
+
+if cluster_hists_nhits:
+    plotHistograms(cluster_hists_nhits, "plots/cluster_nhits.png", "Number of Hits per Cluster", "Entries")
+if cluster_hists_r:
+    plotHistograms(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 for s in hists2d:
     for h in hists2d[s]:
         c = ROOT.TCanvas("can", "can")
