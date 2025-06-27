@@ -17,7 +17,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1
+max_events = 10
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -70,7 +70,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
+reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SiTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
 
 # Loop over the different samples
 for s in files:
@@ -108,7 +108,7 @@ for s in files:
             #lnks = event.get("MCParticle_SiTracks_Refitted")
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
-            trks = event.getCollection("SeedTracks") #also changed from SiTracks_refitted
+            trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
             mcp_electrons = []
             pfo_electrons = []
@@ -166,8 +166,7 @@ for s in files:
                 cluster_nhits = len(cluster.getCalorimeterHits()) if cluster.getCalorimeterHits() else 0
                 cluster_x, cluster_y, cluster_z = cluster_position[0], cluster_position[1], cluster_position[2]
                 cluster_r = math.sqrt(cluster_x**2 + cluster_y**2)
-                cluster_theta = math.atan2(cluster_r, cluster_z)
-                cluster_eta = -math.log(math.tan(cluster_theta/2))
+                cluster_eta = math.asinh(cluster_z / cluster_r) if cluster_r > 0 else 0
                 if i < 3:  # Only for first few events
                     print(f"Cluster: E={cluster_E:.2f}, nhits={cluster_nhits}, eta={cluster_eta:.2f}")
  
