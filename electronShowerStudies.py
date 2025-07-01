@@ -4,10 +4,10 @@ import glob
 import math
 from plotHelper import plotHistograms
 
-max_events = 10
+max_events = -1 
 
 ecal_collections = [
-    "ECalBarrelCollection", "ECalEndcapCollection"
+    "ECalBarrelCollectionSel", "ECalEndcapCollectionSel"
 ]
 
 collections_to_read = ["PandoraClusters", "MCParticle"] + ecal_collections
@@ -207,7 +207,6 @@ def create_cluster_plots(hists, hists2d):
             c.Clear()
 
 def main():
-    # File discovery
     samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
     files = {}
     
@@ -245,7 +244,7 @@ def main():
             for event in reader:
                 if max_events > 0 and i >= max_events:
                     break
-                if i % 1000 == 0:
+                if i % 100 == 0:
                     print(f"\tProcessing event: {i}")
 
                 try:
