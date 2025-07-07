@@ -1,305 +1,354 @@
+import math
+import glob
 import ROOT
 import pyLCIO
-import glob
-import math
-from plotHelper import plotHistograms
 
-max_events = -1 
+# Load plotHelper the same way as your working script
+exec(open("./plotHelper.py").read())
+ROOT.gROOT.SetBatch()
 
-ecal_collections = [
-    "ECalBarrelCollectionSel", "ECalEndcapCollectionSel"
-]
+# Set up some options
+max_events = 10
 
-collections_to_read = ["PandoraClusters", "MCParticle"] + ecal_collections
+# Find samples using the same pattern as your working script
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
+files = {}
 
-def setup_cluster_histograms():
-    hists = {}
-    hists2d = {}
+slices = ["0_50", "50_250", "250_1000", "1000_5000"]
+for s in slices:
+    files[f"electronGun_pT_{s}"] = []
 
-    samples = ["electronGun_pT_0_50", "electronGun_pT_50_250", "electronGun_pT_250_1000", "electronGun_pT_1000_5000"]
+for s in samples:
+    sname = s.split("/")[-1]
+    if sname not in files:
+        continue
+    files[sname] = glob.glob(f"{s}/*.slcio")
 
-    for sample in samples:
-        hists[sample] = {}
-        hists2d[sample] = {}
-
-        # Basic cluster properties
-        hists[sample]["cluster_energy"] = ROOT.TH1F(f"cluster_energy_{sample}", f"Cluster Energy - {sample}", 100, 0, 100)
-        hists[sample]["clusters_per_event"] = ROOT.TH1F(f"clusters_per_event_{sample}", f"Number of Clusters per Event - {sample}", 10, 0, 10)
-        
-        # Cluster position from cluster.getPosition()
-        hists[sample]["cluster_x"] = ROOT.TH1F(f"cluster_x_{sample}", f"Cluster X Position - {sample}", 100, -2000, 2000)
-        hists[sample]["cluster_y"] = ROOT.TH1F(f"cluster_y_{sample}", f"Cluster Y Position - {sample}", 100, -2000, 2000) 
-        hists[sample]["cluster_z"] = ROOT.TH1F(f"cluster_z_{sample}", f"Cluster Z Position - {sample}", 100, -3000, 3000)
-        hists[sample]["cluster_radius"] = ROOT.TH1F(f"cluster_radius_{sample}", f"Cluster Radius from Origin - {sample}", 100, 0, 2000)
-        
-        # Cluster shape parameters from cluster.getShape()
-        hists[sample]["cluster_shape_0"] = ROOT.TH1F(f"cluster_shape_0_{sample}", f"Cluster Shape Parameter 0 - {sample}", 100, 0, 1000)
-        hists[sample]["cluster_shape_1"] = ROOT.TH1F(f"cluster_shape_1_{sample}", f"Cluster Shape Parameter 1 - {sample}", 100, 0, 1000)
-        hists[sample]["cluster_shape_2"] = ROOT.TH1F(f"cluster_shape_2_{sample}", f"Cluster Shape Parameter 2 - {sample}", 100, 0, 1000)
-        hists[sample]["cluster_shape_3"] = ROOT.TH1F(f"cluster_shape_3_{sample}", f"Cluster Shape Parameter 3 - {sample}", 100, 0, 1000)
-        hists[sample]["cluster_shape_4"] = ROOT.TH1F(f"cluster_shape_4_{sample}", f"Cluster Shape Parameter 4 - {sample}", 100, 0, 1000)
-        hists[sample]["cluster_shape_5"] = ROOT.TH1F(f"cluster_shape_5_{sample}", f"Cluster Shape Parameter 5 - {sample}", 100, 0, 1000)
-        
-        # Subdetector energies from cluster.getSubdetectorEnergies()
-        hists[sample]["subdet_energy_0"] = ROOT.TH1F(f"subdet_energy_0_{sample}", f"Subdetector 0 Energy - {sample}", 100, 0, 100)
-        hists[sample]["subdet_energy_1"] = ROOT.TH1F(f"subdet_energy_1_{sample}", f"Subdetector 1 Energy - {sample}", 100, 0, 100)
-        hists[sample]["subdet_energy_2"] = ROOT.TH1F(f"subdet_energy_2_{sample}", f"Subdetector 2 Energy - {sample}", 100, 0, 100)
-        
-        # Cluster type and particle ID related
-        hists[sample]["cluster_type"] = ROOT.TH1F(f"cluster_type_{sample}", f"Cluster Type - {sample}", 10, 0, 10)
-        
-        # Event-level: total energy in clusters vs total energy in hits
-        hists[sample]["total_cluster_energy"] = ROOT.TH1F(f"total_cluster_energy_{sample}", f"Total Cluster Energy per Event - {sample}", 100, 0, 100)
-        hists[sample]["total_hit_energy"] = ROOT.TH1F(f"total_hit_energy_{sample}", f"Total Hit Energy per Event - {sample}", 100, 0, 100)
-        hists[sample]["cluster_efficiency"] = ROOT.TH1F(f"cluster_efficiency_{sample}", f"Cluster Energy / Hit Energy - {sample}", 100, 0, 2)
-
-        # 2D correlations
-        hists2d[sample]["cluster_xy"] = ROOT.TH2F(f"cluster_xy_{sample}", f"Cluster Positions (X vs Y) - {sample}", 100, -2000, 2000, 100, -2000, 2000)
-        hists2d[sample]["cluster_rz"] = ROOT.TH2F(f"cluster_rz_{sample}", f"Cluster Positions (R vs Z) - {sample}", 100, -3000, 3000, 100, 0, 2000)
-        hists2d[sample]["energy_vs_radius"] = ROOT.TH2F(f"energy_vs_radius_{sample}", f"Cluster Energy vs Radius - {sample}", 100, 0, 2000, 100, 0, 100)
-        hists2d[sample]["shape_0_vs_energy"] = ROOT.TH2F(f"shape_0_vs_energy_{sample}", f"Shape Parameter 0 vs Energy - {sample}", 100, 0, 100, 100, 0, 1000)
-
-    return hists, hists2d
-
-def analyze_cluster_properties(cluster, hists, hists2d, sample_name, cluster_num, event_num, debug_mode=False):
-    try:
-        # Basic cluster energy
-        cluster_energy = cluster.getEnergy()
-        hists[sample_name]["cluster_energy"].Fill(cluster_energy)
-        
-        if debug_mode and event_num < 3:
-            print(f"    Cluster {cluster_num}: Energy = {cluster_energy:.3f} GeV")
-        
-    except Exception as e:
-        if debug_mode:
-            print(f"    Cluster {cluster_num}: Error getting energy: {e}")
-        return
+# Set up histograms for spatial matching analysis
+hists = {}
+for s in files:
+    hists[s] = {}
+    # Basic cluster properties
+    hists[s]["cluster_energy"] = ROOT.TH1F(s+"_cluster_energy", s, 100, 0, 200)
+    hists[s]["cluster_nhits"] = ROOT.TH1F(s+"_cluster_nhits", s, 50, 0, 100)
+    hists[s]["cluster_r"] = ROOT.TH1F(s+"_cluster_r", s, 50, 0, 3000)
     
-    try:
-        # Cluster position
-        cluster_pos = cluster.getPosition()
-        x, y, z = cluster_pos[0], cluster_pos[1], cluster_pos[2]
-        radius = math.sqrt(x*x + y*y)
-        
-        hists[sample_name]["cluster_x"].Fill(x)
-        hists[sample_name]["cluster_y"].Fill(y)
-        hists[sample_name]["cluster_z"].Fill(z)
-        hists[sample_name]["cluster_radius"].Fill(radius)
-        
-        # Fill 2D position plots
-        hists2d[sample_name]["cluster_xy"].Fill(x, y)
-        hists2d[sample_name]["cluster_rz"].Fill(z, radius)
-        hists2d[sample_name]["energy_vs_radius"].Fill(radius, cluster_energy)
-        
-        if debug_mode and event_num < 3:
-            print(f"      Position: ({x:.1f}, {y:.1f}, {z:.1f}) mm, R = {radius:.1f} mm")
-            
-    except Exception as e:
-        if debug_mode and event_num < 3:
-            print(f"    Cluster {cluster_num}: Error getting position: {e}")
-    
-    try:
-        # Cluster shape parameters
-        shape_params = cluster.getShape()
-        if len(shape_params) > 0:
-            for i, param in enumerate(shape_params[:6]):  # First 6 shape parameters
-                hist_name = f"cluster_shape_{i}"
-                if hist_name in hists[sample_name]:
-                    hists[sample_name][hist_name].Fill(param)
-                    
-            # Fill 2D correlation for first shape parameter
-            if len(shape_params) > 0:
-                hists2d[sample_name]["shape_0_vs_energy"].Fill(cluster_energy, shape_params[0])
-            
-            if debug_mode and event_num < 3:
-                print(f"      Shape params: {[f'{p:.2f}' for p in shape_params[:3]]}")
-                
-    except Exception as e:
-        if debug_mode and event_num < 3:
-            print(f"    Cluster {cluster_num}: Error getting shape: {e}")
-    
-    try:
-        # Subdetector energies
-        subdet_energies = cluster.getSubdetectorEnergies()
-        if len(subdet_energies) > 0:
-            for i, energy in enumerate(subdet_energies[:3]):  # First 3 subdetectors
-                hist_name = f"subdet_energy_{i}"
-                if hist_name in hists[sample_name]:
-                    hists[sample_name][hist_name].Fill(energy)
-            
-            if debug_mode and event_num < 3:
-                print(f"      Subdet energies: {[f'{e:.3f}' for e in subdet_energies[:3]]}")
-                
-    except Exception as e:
-        if debug_mode and event_num < 3:
-            print(f"    Cluster {cluster_num}: Error getting subdetector energies: {e}")
-    
-    try:
-        # Cluster type (if available)
-        cluster_type = cluster.getType()
-        hists[sample_name]["cluster_type"].Fill(cluster_type)
-        
-        if debug_mode and event_num < 3:
-            print(f"      Type: {cluster_type}")
-            
-    except Exception as e:
-        if debug_mode and event_num < 3:
-            print(f"    Cluster {cluster_num}: Error getting type: {e}")
+    # Spatial matching shower analysis (region-independent)
+    hists[s]["shower_start_depth"] = ROOT.TH1F(s+"_shower_start_depth", s, 50, 0, 270)  # First hit depth
+    hists[s]["shower_penetration"] = ROOT.TH1F(s+"_shower_penetration", s, 50, 0, 270)  # Last hit depth
+    hists[s]["shower_max_position"] = ROOT.TH1F(s+"_shower_max_position", s, 50, 0, 270)  # Energy-weighted center
+    hists[s]["shower_width"] = ROOT.TH1F(s+"_shower_width", s, 50, 0, 100)  # RMS width in depth
+    hists[s]["matched_hits_count"] = ROOT.TH1F(s+"_matched_hits_count", s, 50, 0, 200)  # Number of matched hits
+    hists[s]["cluster_hit_ratio"] = ROOT.TH1F(s+"_cluster_hit_ratio", s, 50, 0, 2.0)  # Matched hits / cluster energy
 
-def calculate_total_hit_energy(event, ecal_collections):
-    total_energy = 0
-    for coll_name in ecal_collections:
+def is_barrel_cluster(cluster):
+    try:
+        pos = cluster.getPosition()
+        z = abs(pos[2])  # mm
+        r = math.sqrt(pos[0]**2 + pos[1]**2)  # mm
+        # ECAL Barrel: R = 185.7-212.5 cm, |Z| < 230.7 cm
+        # ECAL Endcap: R = 31.0-212.5 cm, |Z| = 230.7-257.5 cm
+        return z < 2307 and r > 1857  # Barrel region (in mm)
+    except:
+        return True
+
+def get_available_hits(event, event_num):
+    all_hits = []
+    hit_sources = {}
+    
+    # Try different hit collections
+    collections_to_try = [
+        ('EcalBarrelCollectionRec', 'barrel_rec'),
+        ('EcalEndcapCollectionRec', 'endcap_rec'), 
+        ('EcalEndcapCollectionDigi', 'endcap_digi'),
+        ('EcalBarrelCollectionDigi', 'barrel_digi')
+    ]
+    
+    for collection_name, source_name in collections_to_try:
         try:
-            collection = event.getCollection(coll_name)
-            for i in range(collection.getNumberOfElements()):
-                hit = collection.getElementAt(i)
-                try:
-                    total_energy += hit.getEnergy()
-                except:
-                    continue
+            hit_collection = event.getCollection(collection_name)
+            if len(hit_collection) > 0:
+                all_hits.extend(hit_collection)
+                hit_sources[source_name] = len(hit_collection)
+                if event_num < 3:
+                    print(f"        Found {len(hit_collection)} hits in {collection_name}")
         except:
+            hit_sources[source_name] = 0
             continue
-    return total_energy
-
-def create_cluster_plots(hists, hists2d):
     
-    # Plot 1D histograms - let plotHistograms handle everything
-    hist_names = ["cluster_energy", "clusters_per_event", "cluster_x", "cluster_y", "cluster_z", 
-                  "cluster_radius", "cluster_shape_0", "cluster_shape_1", "cluster_shape_2",
-                  "cluster_shape_3", "cluster_shape_4", "cluster_shape_5",
-                  "subdet_energy_0", "subdet_energy_1", "subdet_energy_2", "cluster_type",
-                  "total_cluster_energy", "total_hit_energy", "cluster_efficiency"]
+    if event_num < 3:
+        print(f"        Total available hits: {len(all_hits)}")
+        
+    return all_hits, hit_sources
 
-    xlabel_map = {
-        "cluster_energy": "Cluster Energy [GeV]",
-        "clusters_per_event": "Number of Clusters per Event",
-        "cluster_x": "Cluster X Position [mm]",
-        "cluster_y": "Cluster Y Position [mm]",
-        "cluster_z": "Cluster Z Position [mm]",
-        "cluster_radius": "Cluster Radius [mm]",
-        "cluster_shape_0": "Cluster Shape Parameter 0",
-        "cluster_shape_1": "Cluster Shape Parameter 1", 
-        "cluster_shape_2": "Cluster Shape Parameter 2",
-        "cluster_shape_3": "Cluster Shape Parameter 3",
-        "cluster_shape_4": "Cluster Shape Parameter 4",
-        "cluster_shape_5": "Cluster Shape Parameter 5",
-        "subdet_energy_0": "Subdetector 0 Energy [GeV]",
-        "subdet_energy_1": "Subdetector 1 Energy [GeV]",
-        "subdet_energy_2": "Subdetector 2 Energy [GeV]",
-        "cluster_type": "Cluster Type",
-        "total_cluster_energy": "Total Cluster Energy per Event [GeV]",
-        "total_hit_energy": "Total Hit Energy per Event [GeV]",
-        "cluster_efficiency": "Cluster Energy / Hit Energy"
-    }
+def spatial_match_hits(cluster, all_hits, match_radius_mm=80.0, event_num=0):
+    """Find hits within spatial radius of cluster center"""
+    try:
+        cluster_pos = cluster.getPosition()
+        cluster_x, cluster_y, cluster_z = cluster_pos[0], cluster_pos[1], cluster_pos[2]
+        
+        matched_hits = []
+        
+        for hit in all_hits:
+            if not hit:  # Skip null hits
+                continue
+                
+            try:
+                hit_pos = hit.getPosition()
+                hit_energy = hit.getEnergy()
+                
+                if hit_energy <= 0:  # Skip zero energy hits
+                    continue
+                
+                # Calculate 3D distance between cluster center and hit
+                dx = hit_pos[0] - cluster_x
+                dy = hit_pos[1] - cluster_y  
+                dz = hit_pos[2] - cluster_z
+                distance_3d = math.sqrt(dx*dx + dy*dy + dz*dz)
+                
+                if distance_3d <= match_radius_mm:
+                    matched_hits.append(hit)
+                    
+            except:
+                continue
+        
+        if event_num < 3:
+            print(f"        Matched {len(matched_hits)}/{len(all_hits)} hits within {match_radius_mm}mm")
+            
+        return matched_hits
+        
+    except Exception as e:
+        if event_num < 3:
+            print(f"        ERROR in spatial matching: {e}")
+        return []
 
-    for hist_name in hist_names:
-        hists_to_plot = {s: hists[s][hist_name] for s in hists if hist_name in hists[s]}
-        if hists_to_plot:
-            plotHistograms(hists_to_plot, f"plots/cluster_{hist_name}.png",
-                          xlabel_map.get(hist_name, hist_name), "Entries")
+def analyze_matched_hits(cluster, matched_hits, event_num):
+    try:
+        if len(matched_hits) == 0:
+            return None, None, None, None, None, None
+        
+        cluster_pos = cluster.getPosition()
+        is_barrel = is_barrel_cluster(cluster)
+        
+        depths = []
+        energies = []
+        
+        for hit in matched_hits:
+            try:
+                hit_pos = hit.getPosition()
+                hit_energy = hit.getEnergy()
+                
+                # Calculate depth from ECAL surface
+                if is_barrel:
+                    r = math.sqrt(hit_pos[0]**2 + hit_pos[1]**2)
+                    depth = r - 1857  # ECAL barrel starts at 185.7 cm = 1857 mm
+                else:
+                    z = abs(hit_pos[2])
+                    depth = z - 2307  # ECAL endcap starts at 230.7 cm = 2307 mm
+                
+                if depth >= 0:  # Only consider hits inside ECAL
+                    depths.append(depth)
+                    energies.append(hit_energy)
+                    
+            except:
+                continue
+        
+        if len(depths) == 0:
+            return None, None, None, None, None, None
+        
+        # Calculate shower properties
+        total_energy = sum(energies)
+        
+        # 1. Energy-weighted shower center (where most energy is deposited)
+        if total_energy > 0:
+            weighted_depth = sum(d * e for d, e in zip(depths, energies))
+            shower_max_depth = weighted_depth / total_energy
+        else:
+            shower_max_depth = sum(depths) / len(depths)
+        
+        # 2. Shower start (minimum depth)
+        shower_start = min(depths)
+        
+        # 3. Shower penetration (maximum depth)  
+        shower_penetration = max(depths)
+        
+        # 4. RMS width of shower in depth direction
+        mean_depth = sum(depths) / len(depths)
+        if len(depths) > 1:
+            variance = sum((d - mean_depth)**2 for d in depths) / len(depths)
+            shower_width = math.sqrt(variance)
+        else:
+            shower_width = 0.0
+        
+        # 5. Hit efficiency (matched hits per GeV)
+        cluster_energy = cluster.getEnergy()
+        hit_ratio = len(matched_hits) / cluster_energy if cluster_energy > 0 else 0
+        
+        if event_num < 3:
+            region = "BARREL" if is_barrel else "ENDCAP"
+            print(f"        {region} shower analysis: {len(matched_hits)} hits, {len(depths)} valid")
+            print(f"          Start: {shower_start:.1f}mm, Max: {shower_penetration:.1f}mm")
+            print(f"          Energy center: {shower_max_depth:.1f}mm, Width: {shower_width:.1f}mm")
+            print(f"          Hit ratio: {hit_ratio:.2f} hits/GeV")
+        
+        return shower_max_depth, shower_start, shower_penetration, shower_width, len(matched_hits), hit_ratio
+        
+    except Exception as e:
+        if event_num < 3:
+            print(f"        ERROR in analyze_matched_hits: {e}")
+        return None, None, None, None, None, None
 
-    # Simple 2D histograms - one canvas per plot
-    for sample_name in hists2d:
-        for hist_name in hists2d[sample_name]:
-            c = ROOT.TCanvas("c", "c", 800, 600)
-            hists2d[sample_name][hist_name].Draw("colz")
-            c.SaveAs(f"plots/cluster_2d_{sample_name}_{hist_name}.png")
-            c.Clear()
+# Create a reader object
+reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
+reader.setReadCollectionNames(["PandoraClusters", "MCParticles", "ECalBarrelCollection", "ECalEndcapCollection", "EcalBarrelCollectionRec", "EcalEndcapCollectionRec","EcalBarrelCollectionDigi","EcalEndcapCollectionDigi", "EcalEndcapCollectionConed", "EcalEndcapCollectionSel"])
 
-def main():
-    samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
-    files = {}
-    
-    slices = ["0_50", "50_250", "250_1000", "1000_5000"]
-    for s in slices:
-        files[f"electronGun_pT_{s}"] = []
+# Loop over the different samples
+for s in files:
+    print("Working on sample", s)
+    i = 0
 
-    for s in samples:
-        sname = s.split("/")[-1]
-        if sname not in files:
-            continue
-        files[sname] = glob.glob(f"{s}/*.slcio")
+    # Loop over the files in a sample
+    for f in files[s]:
+        reader.open(f)
 
-    # Print file counts
-    for sample_name, file_list in files.items():
-        print(f"Found {len(file_list)} files for {sample_name}")
-
-    hists, hists2d = setup_cluster_histograms()
-
-    # Create reader
-    reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-    reader.setReadCollectionNames(collections_to_read)
-
-    # Loop over samples
-    for s in files:
-        print(f"Working on sample {s}")
-        i = 0
-
-        for f in files[s]:
+        # Loop over events in each file
+        for event in reader:
             if max_events > 0 and i >= max_events:
                 break
+            if i % 100 == 0:
+                print(f"\tProcessing event: {i}")
 
-            reader.open(f)
+            try:
+                clusters = event.getCollection("PandoraClusters")
 
-            for event in reader:
-                if max_events > 0 and i >= max_events:
-                    break
-                if i % 100 == 0:
-                    print(f"\tProcessing event: {i}")
+                # Get all available reconstructed hits for this event
+                all_hits, hit_sources = get_available_hits(event, i)
 
-                try:
-                    clusters = event.getCollection("PandoraClusters")
-                    num_clusters = clusters.getNumberOfElements()
-                    
-                    # Fill number of clusters per event
-                    hists[s]["clusters_per_event"].Fill(num_clusters)
-                    
-                    # If no clusters, skip but continue (as you requested)
-                    if num_clusters == 0:
+                # Debug: count clusters
+                n_clusters_total = len(clusters)
+                n_clusters_processed = 0
+                n_clusters_with_matches = 0
+
+                if i < 3:
+                    print(f"  Event {i}: {n_clusters_total} clusters, {len(all_hits)} total hits available")
+
+                # Loop over clusters
+                for cluster in clusters:
+                    cluster_position = cluster.getPosition()
+                    cluster_E = cluster.getEnergy()
+                    cluster_x, cluster_y, cluster_z = cluster_position[0], cluster_position[1], cluster_position[2]
+                    cluster_r = math.sqrt(cluster_x**2 + cluster_y**2)
+                    is_barrel = is_barrel_cluster(cluster)
+
+                    # Debug: print cluster info for first few events
+                    if i < 3:
+                        region = "BARREL" if is_barrel else "ENDCAP"
+                        print(f"    Cluster: E={cluster_E:.1f}GeV, R={cluster_r:.1f}mm, Z={abs(cluster_z):.1f}mm -> {region}")
+
+                    if cluster_E < 10:  # Skip low energy clusters
                         if i < 3:
-                            print(f"  Event {i}: No clusters found, continuing...")
-                        i += 1
+                            print(f"      -> SKIPPED (E < 10 GeV)")
                         continue
+
+                    n_clusters_processed += 1
+
+                    # Fill basic histograms
+                    hists[s]["cluster_energy"].Fill(cluster_E)
+                    hists[s]["cluster_r"].Fill(cluster_r)
+
+                    # Spatial matching and shower analysis
+                    matched_hits = spatial_match_hits(cluster, all_hits, match_radius_mm=80.0, event_num=i)
                     
-                    # Debug info
-                    if i < 3:
-                        print(f"  Event {i}: Found {num_clusters} clusters")
-                    
-                    # Calculate total energies for comparison
-                    total_cluster_energy = 0
-                    total_hit_energy = calculate_total_hit_energy(event, ecal_collections)
-                    
-                    # Analyze each cluster
-                    for j in range(num_clusters):
-                        cluster = clusters.getElementAt(j)
-                        analyze_cluster_properties(cluster, hists, hists2d, s, j, i, debug_mode=(i < 3))
-                        try:
-                            total_cluster_energy += cluster.getEnergy()
-                        except:
-                            pass
-                    
-                    # Fill event-level histograms
-                    hists[s]["total_cluster_energy"].Fill(total_cluster_energy)
-                    hists[s]["total_hit_energy"].Fill(total_hit_energy)
-                    if total_hit_energy > 0:
-                        efficiency = total_cluster_energy / total_hit_energy
-                        hists[s]["cluster_efficiency"].Fill(efficiency)
+                    if len(matched_hits) > 0:
+                        n_clusters_with_matches += 1
                         
-                    if i < 3:
-                        print(f"    Total cluster energy: {total_cluster_energy:.3f} GeV")
-                        print(f"    Total hit energy: {total_hit_energy:.3f} GeV")
-                        print(f"    Efficiency: {efficiency:.3f}" if total_hit_energy > 0 else "    Efficiency: N/A")
+                        # Analyze shower properties from matched hits
+                        shower_max, shower_start, shower_penetration, shower_width, n_matched, hit_ratio = analyze_matched_hits(
+                            cluster, matched_hits, i
+                        )
 
-                except Exception as e:
-                    if i < 3:
-                        print(f"  Event {i}: Error accessing clusters: {e}")
+                        # Fill histograms if analysis succeeded
+                        if shower_max is not None:
+                            hists[s]["shower_max_position"].Fill(shower_max)
+                        if shower_start is not None:
+                            hists[s]["shower_start_depth"].Fill(shower_start)
+                        if shower_penetration is not None:
+                            hists[s]["shower_penetration"].Fill(shower_penetration)
+                        if shower_width is not None:
+                            hists[s]["shower_width"].Fill(shower_width)
+                        if n_matched is not None:
+                            hists[s]["matched_hits_count"].Fill(n_matched)
+                        if hit_ratio is not None:
+                            hists[s]["cluster_hit_ratio"].Fill(hit_ratio)
 
-                i += 1
+                # Debug: print counts for first few events
+                if i < 3:
+                    print(f"  -> Processed {n_clusters_processed}/{n_clusters_total} clusters, {n_clusters_with_matches} with matched hits")
 
-            reader.close()
+            except Exception as e:
+                # Print errors for first few events to help debug
+                if i < 3:
+                    print(f"    ERROR in event processing: {e}")
+                pass
+            i += 1
 
-    # Generate plots
-    create_cluster_plots(hists, hists2d)
+        reader.close()
 
-if __name__ == "__main__":
-    main()
+# Print final statistics for debugging
+print("\n=== FINAL STATISTICS ===")
+for s in files:
+    energy_entries = hists[s]["cluster_energy"].GetEntries()
+    shower_max_entries = hists[s]["shower_max_position"].GetEntries()
+    shower_start_entries = hists[s]["shower_start_depth"].GetEntries()
+    matched_hits_entries = hists[s]["matched_hits_count"].GetEntries()
+    print(f"{s}:")
+    print(f"  Cluster energy entries: {energy_entries}")
+    print(f"  Shower max entries: {shower_max_entries}")
+    print(f"  Shower start entries: {shower_start_entries}")
+    print(f"  Matched hits entries: {matched_hits_entries}")
+
+# Helper for display names
+label_map = {
+    "electronGun_pT_0_50": "pT 0-50 GeV",
+    "electronGun_pT_50_250": "pT 50-250 GeV", 
+    "electronGun_pT_250_1000": "pT 250-1000 GeV",
+    "electronGun_pT_1000_5000": "pT 1000-5000 GeV"
+}
+
+# Plot histograms
+hist_names_to_plot = [
+    "cluster_energy",
+    "shower_max_position", 
+    "shower_start_depth",
+    "shower_penetration",
+    "shower_width",
+    "matched_hits_count",
+    "cluster_hit_ratio"
+]
+
+for hist_name in hist_names_to_plot:
+    # Collect hists that go on a single plot
+    hists_to_plot = {}
+    for j, s in enumerate(hists):
+        if hist_name in hists[s] and hists[s][hist_name].GetEntries() > 0:
+            hists_to_plot[label_map.get(s, s)] = hists[s][hist_name]
+
+    # Determine xlabel
+    xlabel_map = {
+        "cluster_energy": "Cluster Energy [GeV]",
+        "shower_max_position": "Energy-Weighted Shower Center [mm]",
+        "shower_start_depth": "Shower Start Depth [mm]", 
+        "shower_penetration": "Maximum Shower Penetration [mm]",
+        "shower_width": "Shower RMS Width [mm]",
+        "matched_hits_count": "Number of Matched Hits per Cluster",
+        "cluster_hit_ratio": "Matched Hits per GeV"
+    }
+    
+    xlabel = xlabel_map.get(hist_name, hist_name)
+
+    # Call plotting function
+    if hists_to_plot:
+        plotHistograms(hists_to_plot, "plots/"+hist_name+".png", xlabel, "Entries")
+        print(f"Created plot: plots/{hist_name}.png")
+
+print("Analysis complete!")

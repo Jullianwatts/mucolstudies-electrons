@@ -17,15 +17,15 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = 100
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/recoBIB/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
@@ -71,8 +71,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "SiTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
-
+reader.setReadCollectionNames(["MCParticle","SiTracks", "AllTracks", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
 # Loop over the different samples
 for s in files:
     print("Working on sample", s)
@@ -111,6 +110,11 @@ for s in files:
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
+            print(f"Found {len(pfos)} PandoraPFOs in event {i}")
+            for j, pfo in enumerate(pfos):
+                pdg_id = pfo.getType()
+                print(f"  PFO {j}: PDG ID = {pdg_id}")
+
             mcp_electrons = []
             pfo_electrons = []
             trk_electrons = []
@@ -387,4 +391,4 @@ for s in hists2d:
         hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0])
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1])
         #c.SaveAs(f"plots/electrons/{hists2d[s][h].GetName()}.png")
-        c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
+        c.SaveAs(f"plots/{hists2d[s][h].GetName()}:.png")
