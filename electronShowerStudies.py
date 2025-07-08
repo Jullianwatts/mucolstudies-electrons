@@ -6,6 +6,7 @@ import pyLCIO
 # Load plotHelper the same way as your working script
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
+ROOT.gROOT.Reset()
 
 # Set up some options
 max_events = 10
@@ -29,17 +30,29 @@ hists = {}
 for s in files:
     hists[s] = {}
     # Basic cluster properties
-    hists[s]["cluster_energy"] = ROOT.TH1F(s+"_cluster_energy", s, 100, 0, 200)
+    hists[s]["cluster_energy"] = ROOT.TH1F(s+"_cluster_energy", s, 50, 0, 250)
     hists[s]["cluster_nhits"] = ROOT.TH1F(s+"_cluster_nhits", s, 50, 0, 100)
     hists[s]["cluster_r"] = ROOT.TH1F(s+"_cluster_r", s, 50, 0, 3000)
     
     # Spatial matching shower analysis (region-independent)
-    hists[s]["shower_start_depth"] = ROOT.TH1F(s+"_shower_start_depth", s, 50, 0, 270)  # First hit depth
-    hists[s]["shower_penetration"] = ROOT.TH1F(s+"_shower_penetration", s, 50, 0, 270)  # Last hit depth
-    hists[s]["shower_max_position"] = ROOT.TH1F(s+"_shower_max_position", s, 50, 0, 270)  # Energy-weighted center
-    hists[s]["shower_width"] = ROOT.TH1F(s+"_shower_width", s, 50, 0, 100)  # RMS width in depth
-    hists[s]["matched_hits_count"] = ROOT.TH1F(s+"_matched_hits_count", s, 50, 0, 200)  # Number of matched hits
-    hists[s]["cluster_hit_ratio"] = ROOT.TH1F(s+"_cluster_hit_ratio", s, 50, 0, 2.0)  # Matched hits / cluster energy
+    hists[s]["shower_start_depth"] = ROOT.TH1F(s+"_shower_start_depth", s, 25, 0, 25)  # First hit depth, do 25, 0, 25 if 50,0,50 doesnt work
+    hists[s]["shower_start_depth_barrel"] = ROOT.TH1F(s+"_shower_start_depth_barrel", s, 25, 0, 25)
+    hists[s]["shower_start_depth_endcap"] = ROOT.TH1F(s+"_shower_start_depth_endcap", s, 25, 0, 25)
+    hists[s]["shower_penetration"] = ROOT.TH1F(s+"_shower_penetration", s, 30, 0, 300)  # Last hit depth
+    hists[s]["shower_penetration_barrel"] = ROOT.TH1F(s+"_shower_penetration_barrel", s, 30, 0, 300)
+    hists[s]["shower_penetration_endcap"] = ROOT.TH1F(s+"_shower_penetration_endcap", s, 30, 0 ,300)
+    hists[s]["shower_max_position"] = ROOT.TH1F(s+"_shower_max_position", s, 32, 0, 160)  # Energy-weighted center
+    hists[s]["shower_max_position_barrel"] = ROOT.TH1F(s+"_shower_max_position_barrel", s, 32, 0, 160)
+    hists[s]["shower_max_position_endcap"] = ROOT.TH1F(s+"_shower_max_position_barrel", s, 32, 0, 160)
+    hists[s]["shower_width"] = ROOT.TH1F(s+"_shower_width", s, 50, 0, 50)  # RMS width in depth
+    hists[s]["shower_width_barrel"] = ROOT.TH1F(s+"_shower_width_barrel", s, 50, 0, 50)
+    hists[s]["shower_width_endcap"] = ROOT.TH1F(s+"_shower_width_endcap", s, 50, 0, 50)
+    hists[s]["matched_hits_count"] = ROOT.TH1F(s+"_matched_hits_count", s, 50, 0, 100)  # Number of matched hits
+    hists[s]["matched_hits_count_barrel"] = ROOT.TH1F(s+"_matched_hits_count_barrel", s, 50, 0, 100)
+    hists[s]["matched_hits_count_endcap"] = ROOT.TH1F(s+"_matched_hits_count_endcap", s, 50, 0, 100)
+    hists[s]["cluster_hit_ratio"] = ROOT.TH1F(s+"_cluster_hit_ratio", s, 35, 1.0, 8.0)  # Matched hits / cluster energy
+    hists[s]["cluster_hit_ratio_barrel"] = ROOT.TH1F(s+"_cluster_hit_ratio_barrel", s, 35, 1.0, 8.0)
+    hists[s]["cluster_hit_ratio_endcap"] = ROOT.TH1F(s+"_cluster_hit_ratio_endcap", s, 35, 1.0, 8.0)
 
 def is_barrel_cluster(cluster):
     try:
@@ -59,9 +72,9 @@ def get_available_hits(event, event_num):
     # Try different hit collections
     collections_to_try = [
         ('EcalBarrelCollectionRec', 'barrel_rec'),
-        ('EcalEndcapCollectionRec', 'endcap_rec'), 
-        ('EcalEndcapCollectionDigi', 'endcap_digi'),
-        ('EcalBarrelCollectionDigi', 'barrel_digi')
+        ('EcalEndcapCollectionRec', 'endcap_rec') 
+        #('EcalEndcapCollectionDigi', 'endcap_digi'),
+        #('EcalBarrelCollectionDigi', 'barrel_digi')
     ]
     
     for collection_name, source_name in collections_to_try:
@@ -82,7 +95,6 @@ def get_available_hits(event, event_num):
     return all_hits, hit_sources
 
 def spatial_match_hits(cluster, all_hits, match_radius_mm=80.0, event_num=0):
-    """Find hits within spatial radius of cluster center"""
     try:
         cluster_pos = cluster.getPosition()
         cluster_x, cluster_y, cluster_z = cluster_pos[0], cluster_pos[1], cluster_pos[2]
@@ -183,13 +195,12 @@ def analyze_matched_hits(cluster, matched_hits, event_num):
         # 5. Hit efficiency (matched hits per GeV)
         cluster_energy = cluster.getEnergy()
         hit_ratio = len(matched_hits) / cluster_energy if cluster_energy > 0 else 0
-        
-        if event_num < 3:
-            region = "BARREL" if is_barrel else "ENDCAP"
-            print(f"        {region} shower analysis: {len(matched_hits)} hits, {len(depths)} valid")
-            print(f"          Start: {shower_start:.1f}mm, Max: {shower_penetration:.1f}mm")
-            print(f"          Energy center: {shower_max_depth:.1f}mm, Width: {shower_width:.1f}mm")
-            print(f"          Hit ratio: {hit_ratio:.2f} hits/GeV")
+        #if event_num < 3:
+            #region = "BARREL" if is_barrel else "ENDCAP"
+            #print(f"        {region} shower analysis: {len(matched_hits)} hits, {len(depths)} valid")
+            #print(f"          Start: {shower_start:.1f}mm, Max: {shower_penetration:.1f}mm")
+            #print(f"          Energy center: {shower_max_depth:.1f}mm, Width: {shower_width:.1f}mm")
+            #print(f"          Hit ratio: {hit_ratio:.2f} hits/GeV")
         
         return shower_max_depth, shower_start, shower_penetration, shower_width, len(matched_hits), hit_ratio
         
@@ -245,10 +256,10 @@ for s in files:
                         region = "BARREL" if is_barrel else "ENDCAP"
                         print(f"    Cluster: E={cluster_E:.1f}GeV, R={cluster_r:.1f}mm, Z={abs(cluster_z):.1f}mm -> {region}")
 
-                    if cluster_E < 10:  # Skip low energy clusters
-                        if i < 3:
-                            print(f"      -> SKIPPED (E < 10 GeV)")
-                        continue
+                    #if cluster_E < 10:  # Skip low energy clusters
+                        #if i < 3:
+                            #print(f"      -> SKIPPED (E < 10 GeV)")
+                        #continue
 
                     n_clusters_processed += 1
 
@@ -270,16 +281,41 @@ for s in files:
                         # Fill histograms if analysis succeeded
                         if shower_max is not None:
                             hists[s]["shower_max_position"].Fill(shower_max)
+                            if is_barrel:
+                                hists[s]["shower_max_position_barrel"].Fill(shower_max)
+                            else:
+                                hists[s]["shower_max_position_endcap"].Fill(shower_max)
                         if shower_start is not None:
                             hists[s]["shower_start_depth"].Fill(shower_start)
+                            if is_barrel:
+                                hists[s]["shower_start_depth_barrel"].Fill(shower_start)
+                            else:
+                                hists[s]["shower_start_depth_endcap"].Fill(shower_start)
                         if shower_penetration is not None:
                             hists[s]["shower_penetration"].Fill(shower_penetration)
+                            if is_barrel:
+                                hists[s]["shower_penetration_barrel"].Fill(shower_penetration)
+                            else:
+                                hists[s]["shower_penetration_endcap"].Fill(shower_penetration)
                         if shower_width is not None:
                             hists[s]["shower_width"].Fill(shower_width)
+                            if is_barrel:
+                                hists[s]["shower_width_barrel"].Fill(shower_width)
+                            else:
+                                hists[s]["shower_width_endcap"].Fill(shower_width)
                         if n_matched is not None:
                             hists[s]["matched_hits_count"].Fill(n_matched)
+                            if is_barrel:
+                                hists[s]["matched_hits_count_barrel"].Fill(n_matched)
+                            else:
+                                hists[s]["matched_hits_count_endcap"].Fill(n_matched)
                         if hit_ratio is not None:
                             hists[s]["cluster_hit_ratio"].Fill(hit_ratio)
+                            if is_barrel:
+                                hists[s]["cluster_hit_ratio_barrel"].Fill(hit_ratio)
+                            else:
+                                hists[s]["cluster_hit_ratio_endcap"].Fill(hit_ratio)
+
 
                 # Debug: print counts for first few events
                 if i < 3:
@@ -323,7 +359,9 @@ hist_names_to_plot = [
     "shower_penetration",
     "shower_width",
     "matched_hits_count",
-    "cluster_hit_ratio"
+    "cluster_hit_ratio",
+    "cluster_hit_ratio_barrel",
+    "cluster_hit_ratio_endcap"
 ]
 
 for hist_name in hist_names_to_plot:
