@@ -25,7 +25,9 @@ max_events = 100
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/recoBIB/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/reco/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
@@ -110,7 +112,7 @@ for s in files:
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
-            print(f"Found {len(pfos)} PandoraPFOs in event {i}")
+            #print(f"Found {len(pfos)} PandoraPFOs in event {i}")
             for j, pfo in enumerate(pfos):
                 pdg_id = pfo.getType()
                 print(f"  PFO {j}: PDG ID = {pdg_id}")
