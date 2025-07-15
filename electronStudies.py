@@ -17,7 +17,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 100
+max_events = -1
 
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -26,9 +26,9 @@ max_events = 100
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
 
@@ -73,7 +73,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle","SiTracks", "AllTracks", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
+reader.setReadCollectionNames(["MCParticle","SiTracks_Refitted", "AllTracks", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
 # Loop over the different samples
 for s in files:
     print("Working on sample", s)
@@ -110,12 +110,12 @@ for s in files:
             #lnks = event.get("MCParticle_SiTracks_Refitted")
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
-            trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
+            trks = event.getCollection("SiTracks_Refitted") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
             #print(f"Found {len(pfos)} PandoraPFOs in event {i}")
-            for j, pfo in enumerate(pfos):
-                pdg_id = pfo.getType()
-                print(f"  PFO {j}: PDG ID = {pdg_id}")
+            #for j, pfo in enumerate(pfos):
+                #pdg_id = pfo.getType()
+                #print(f"  PFO {j}: PDG ID = {pdg_id}")
 
             mcp_electrons = []
             pfo_electrons = []
