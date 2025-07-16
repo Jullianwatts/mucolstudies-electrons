@@ -9,7 +9,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1  # Set to -1 for all events
+max_events = 10
 
 import os
 
@@ -46,7 +46,7 @@ variables = {
         "theta": {"nbins": 30, "xmin": 0, "xmax": 3.14},
         "shower_start_layer": {"nbins": 20, "xmin": 0, "xmax": 20},
         "shower_max_layer": {"nbins": 20, "xmin": 0, "xmax": 20},
-        "max_cell_energy": {"nbins": 50, "xmin": 0, "xmax": 10},
+        "max_cell_energy": {"nbins": 50, "xmin": 0, "xmax": 50},
         "profile_discrepancy": {"nbins": 50, "xmin": 0, "xmax": 1},
         "E_over_p": {"nbins": 50, "xmin": 0, "xmax": 2},
         "residual_E_over_p": {"nbins": 50, "xmin": 0, "xmax": 1},
@@ -77,7 +77,7 @@ for s in files:
     # Special cluster histograms
     hists[s]["cluster_nhits"] = ROOT.TH1F(f"{s}_cluster_nhits", f"{s}_cluster_nhits", 50, 0, 100)
     hists[s]["cluster_r"] = ROOT.TH1F(f"{s}_cluster_r", f"{s}_cluster_r", 50, 0, 3000)
-    
+    hists[s]["pfo_shower_start_layer"] = ROOT.TH1F(f"{s}_pfo_shower_start_layer", f"{s}_pfo_shower_start_layer", 20, 0, 20)
     # LCElectronId parameter histograms
     hists[s]["lcelectronid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
     hists[s]["lcelectronid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
@@ -117,7 +117,6 @@ for s in files:
         max_y = 20
     hists2d[s]["shower_start_layer_v_max_cell_energy"] = ROOT.TH2F(f"shower_start_layer_v_max_cell_energy_{s}", f"shower_start_layer_v_max_cell_energy_{s}", 20, 0, 20, 50, 0, 10)
     hists2d[s]["cluster_rms_width_v_n_hits"] = ROOT.TH2F(f"cluster_rms_width_v_n_hits_{s}", f"cluster_rms_width_v_n_hits_{s}", 50, 0, 200, 50, 0, 100)
-
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
     """Check if two TLorentzVectors are matched"""
@@ -274,12 +273,12 @@ for slice_name in files:
             hists[slice_name]["mcp_theta"].Fill(tlv_truth.Theta())
             
             # Only fill electron-specific histograms if it's an electron
-            if abs(trueElectron.getPDG()) == 11:
-                hists[slice_name]["mcp_el_E"].Fill(trueE)
-                hists[slice_name]["mcp_el_pt"].Fill(tlv_truth.Perp())
-                hists[slice_name]["mcp_el_eta"].Fill(tlv_truth.Eta())
-                hists[slice_name]["mcp_el_phi"].Fill(tlv_truth.Phi())
-                hists[slice_name]["mcp_el_theta"].Fill(tlv_truth.Theta())
+            #if abs(trueElectron.getPDG()) == 11:
+                #hists[slice_name]["mcp_el_E"].Fill(trueE)
+                #hists[slice_name]["mcp_el_pt"].Fill(tlv_truth.Perp())
+                #hists[slice_name]["mcp_el_eta"].Fill(tlv_truth.Eta())
+                #hists[slice_name]["mcp_el_phi"].Fill(tlv_truth.Phi())
+                #hists[slice_name]["mcp_el_theta"].Fill(tlv_truth.Theta())
 
             # Try to get track information - COMMENTED OUT
             # track_momentum = -1
@@ -342,44 +341,74 @@ for slice_name in files:
             # ECAL hit analysis
             cluster_energy = 0.0
             ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']   #also changed these from Sel to Rec
-            max_cell_energy = 0.0
+            max_cluster_energies = []
             
             for coll in ecal_coll:
                 try:
                     ECALhitCollection = event.getCollection(coll)
                     encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
                     decoder = UTIL.BitField64(encoding)
-                    
-                    for hit in ECALhitCollection:
-                        cellID = int(hit.getCellID0())
-                        decoder.setValue(cellID)
-                        layer = decoder["layer"].value()
-                        
-                        hit_pos = hit.getPosition()
+                    cluster_hit_energies = []   
+                    for hit in ECALhitCollection: 
                         hit_energy = hit.getEnergy()
-                        
-                        hit_vec = TLorentzVector()
-                        hit_vec.SetPxPyPzE(hit_pos[0], hit_pos[1], hit_pos[2], hit_energy)
-                        
-                        # Tight cone for electrons
-                        hit_dR = tlv_truth.DeltaR(hit_vec)
-                        if hit_dR < 0.02:
-                            cluster_energy += hit_energy
-                            cluster_hit_positions.append([hit_pos[0], hit_pos[1], hit_pos[2]])
-                            cluster_hit_energies.append(hit_energy)
-                            
-                            # Track energy by layer
-                            if layer not in hit_energies_by_layer:
-                                hit_energies_by_layer[layer] = 0.0
-                            hit_energies_by_layer[layer] += hit_energy
-                            
-                            # Track maximum cell energy
-                            if hit_energy > max_cell_energy:
-                                max_cell_energy = hit_energy
+                        cluster_hit_energies.append(hit_energy)
+                    if cluster_hit_energies:
+                        max_energy = max(cluster_hit_energies)
+                        max_cluster_energies.append(max_energy)
 
                 except Exception as e:
                     pass  # ECAL collection not available
+            print("Maximum cell energy per ECAL collection:", max_cluster_energies)
+# PFO shower start layer analysis (ADD THIS INSIDE THE EVENT LOOP)
+            try:
+                pfoCollection = event.getCollection('PandoraPFOs')
+                print(f"Found {len(pfoCollection)} PFOs")  # Debug
+    
+                for pfo in pfoCollection:
+                    if abs(pfo.getCharge()) > 0.5:  # Charged PFO
+                    pfo_clusters = pfo.getClusters()
+                    print(f"PFO has {len(pfo_clusters)} clusters")  # Debug
+            
+                    for cluster in pfo_clusters:
+                        pfo_hit_energies_by_layer = {}
+                        hits = cluster.getCalorimeterHits()
+                        print(f"Cluster has {len(hits)} hits")  # Debug
+                
+                        for hit in hits:
+                            hit_pos = hit.getPosition()
+                            hit_energy = hit.getEnergy()
+                            cellID = int(hit.getCellID0())
+                    
+                            hit_vec = TLorentzVector()
+                            hit_vec.SetPxPyPzE(hit_pos[0], hit_pos[1], hit_pos[2], hit_energy)
+                    
+                            hit_dR = tlv_truth.DeltaR(hit_vec)
+                            if hit_dR < 0.1:  # Increased cone size
+                                print(f"Hit within cone! dR = {hit_dR}")  # Debug
+                        # Get layer using your existing decoder setup
+                                ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
+                                for coll in ecal_coll:
+                                    try:
+                                        ECALhitCollection = event.getCollection(coll)
+                                        encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
+                                        decoder = UTIL.BitField64(encoding)
+                                        decoder.setValue(cellID)
+                                        layer = decoder["layer"].value()
+                                
+                                        if layer not in pfo_hit_energies_by_layer:
+                                        pfo_hit_energies_by_layer[layer] = 0.0
+                                        pfo_hit_energies_by_layer[layer] += hit_energy
+                                        break
+                                    except:
+                                        continue
+                
+                            pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.05)
+                            if pfo_shower_start_layer > 0:
+                                print(f"Filling PFO histogram with layer {pfo_shower_start_layer}")  # Debug
+                                hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
 
+except Exception as e:
+    print(f"PFO analysis failed: {e}")  # Debug
             # Store longitudinal profile information
             for layer, energy in hit_energies_by_layer.items():
                 if layer not in longitudinal_profile[slice_name]:
@@ -426,13 +455,13 @@ for slice_name in files:
             # Fill LCElectronId parameter histograms
             hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
             hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
-            hists[slice_name]["electron_max_cell_energy"].Fill(max_cell_energy)
+            hists[slice_name]["electron_max_cell_energy"].Fill(max_energy)
             hists[slice_name]["electron_profile_discrepancy"].Fill(profile_discrepancy)
             hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
             
             # Fill LCElectronId specific histograms
             hists[slice_name]["lcelectronid_max_profile_start"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
-            hists[slice_name]["lcelectronid_max_energy"].Fill(max_cell_energy)
+            hists[slice_name]["lcelectronid_max_energy"].Fill(max_energy)
             hists[slice_name]["lcelectronid_max_profile_discrepancy"].Fill(profile_discrepancy)
 
             # Fill reconstructed quantities if we have a cluster
@@ -542,7 +571,24 @@ for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "c
     if lcelectronid_hists[param]:
         plotHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png", 
                       param.replace("_", " ").title(), "Entries")
+pfo_shower_hists = {}
+for s in hists:
+    if "pfo_shower_start_layer" in hists[s]:
+        pfo_shower_hists[s] = hists[s]["pfo_shower_start_layer"]
 
+if pfo_shower_hists:
+    plotHistograms(pfo_shower_hists, "plots/pfo_shower_start_layer.png", "PFO Shower Start Layer", "Entries")
+    for s, hist in pfo_shower_hists.items():
+        if hist.GetEntries() > 0:
+            c = ROOT.TCanvas("can", "can", 800, 600)
+            c.SetLogy()
+            hist.SetLineColor(ROOT.kBlue)
+            hist.SetLineWidth(2)
+            hist.GetXaxis().SetTitle("PFO Shower Start Layer")
+            hist.GetYaxis().SetTitle("Entries")
+            hist.Draw("HIST")
+            c.SaveAs(f"plots/pfo_shower_start_layer_{s}.png")
+            c.Close()
 # Plot 2D histograms
 for s in hists2d:
     for h in hists2d[s]:
