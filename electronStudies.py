@@ -28,7 +28,8 @@ max_events = -1
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
 
@@ -37,7 +38,6 @@ for s in slices: files[f"electronGun_pT_{s}"] = []
 for s in samples:
     sname = s.split("/")[-1]
     if sname not in files: continue
-    #files[sname] = glob.glob(f"{s}/*.root")
     files[sname] = glob.glob(f"{s}/*.slcio")
 mcp_el_counts = {s: 0 for s in files}
 # Set up histograms

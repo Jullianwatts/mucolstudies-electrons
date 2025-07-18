@@ -359,56 +359,93 @@ for slice_name in files:
                 except Exception as e:
                     pass  # ECAL collection not available
             print("Maximum cell energy per ECAL collection:", max_cluster_energies)
-# PFO shower start layer analysis (ADD THIS INSIDE THE EVENT LOOP)
+            
             try:
+                collection_names = event.getCollectionNames()
+                if "PandoraPFOs" not in collection_names:
+                    continue
                 pfoCollection = event.getCollection('PandoraPFOs')
                 print(f"Found {len(pfoCollection)} PFOs")  # Debug
-    
-                for pfo in pfoCollection:
-                    if abs(pfo.getCharge()) > 0.5:  # Charged PFO
-                    pfo_clusters = pfo.getClusters()
-                    print(f"PFO has {len(pfo_clusters)} clusters")  # Debug
-            
-                    for cluster in pfo_clusters:
-                        pfo_hit_energies_by_layer = {}
-                        hits = cluster.getCalorimeterHits()
-                        print(f"Cluster has {len(hits)} hits")  # Debug
-                
-                        for hit in hits:
-                            hit_pos = hit.getPosition()
-                            hit_energy = hit.getEnergy()
-                            cellID = int(hit.getCellID0())
-                    
-                            hit_vec = TLorentzVector()
-                            hit_vec.SetPxPyPzE(hit_pos[0], hit_pos[1], hit_pos[2], hit_energy)
-                    
-                            hit_dR = tlv_truth.DeltaR(hit_vec)
-                            if hit_dR < 0.1:  # Increased cone size
-                                print(f"Hit within cone! dR = {hit_dR}")  # Debug
-                        # Get layer using your existing decoder setup
-                                ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
-                                for coll in ecal_coll:
+                if pfoCollection is None:
+                    continue
+                pfos = []
+                for i in range(len(pfoCollection)):
+                    pfo = pfoCollection[i]
+                    if pfo is not None:
+                        pfos.append(pfo)
+                for pfo in pfos:
+                    try:
+                        if abs(pfo.getCharge()) > 0.5:  # Charged PFO
+                            pfo_clusters = pfo.getClusters()
+                            print(f"PFO has {len(pfo_clusters)} clusters")  # Debug
+                            clusters = []
+                            for i in range(len(pfo_clusters)):
+                                cluster  = pfo_clusters[i]
+                                if cluster is not None:
+                                    clusters.append(cluster)
+                            for cluster in clusters:
+                                pfo_hit_energies_by_layer = {}
+                                hits = cluster.getCalorimeterHits()
+                                print(f"Cluster has {len(hits)} hits")
+                                if len(hits) == 0:
+                                    continue
+                                hit_list = []
+                                for i in range(len(hits)):
                                     try:
-                                        ECALhitCollection = event.getCollection(coll)
-                                        encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
-                                        decoder = UTIL.BitField64(encoding)
-                                        decoder.setValue(cellID)
-                                        layer = decoder["layer"].value()
-                                
-                                        if layer not in pfo_hit_energies_by_layer:
-                                        pfo_hit_energies_by_layer[layer] = 0.0
-                                        pfo_hit_energies_by_layer[layer] += hit_energy
-                                        break
+                                        hit = hits[i]
+                                        if hit is not None:
+                                            hit_list.append(hit)
                                     except:
                                         continue
-                
-                            pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.05)
-                            if pfo_shower_start_layer > 0:
-                                print(f"Filling PFO histogram with layer {pfo_shower_start_layer}")  # Debug
-                                hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
+                                print(f"hit_list has {len(hit_list)} hits")
+                                for i, hit in enumerate(hit_list):
+                                    print(f"Hit {i}: {hit}")
+                                    print(f"Hit type: {type(hit)}")
+                                    print(f"Hit is None: {hit is None}")
+                                    if hit is not None:
+                                        try:
+                                            hit_pos = hit.getPosition()
+                                            print(f"YAY! Position is: {pos}")
+                                        except Exception as e:
+                                            print(f"error type: {type(e)}")
+                                    if i>2:
+                                        break
+                                        hit_energy = hit.getEnergy()
+                                        if hit_pos is None or hit_energy <= 0:
+                                            continue
+                                        cellID = int(hit.getCellID0())
+                                        ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
+                                        layer_found = false
+                                        for coll in ecal_coll:
+                                            if layer_found:
+                                                break
+                                            try:
+                                                ECALhitCollection = event.getCollection(coll)
+                                                encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
+                                                decoder = UTIL.BitField64(encoding)
+                                                decoder.setValue(cellID)
+                                                layer = decoder["layer"].value()
+                                        
+                                                if layer not in pfo_hit_energies_by_layer:
+                                                    pfo_hit_energies_by_layer[layer] = 0.0
+                                                pfo_hit_energies_by_layer[layer] += hit_energy
+                                                layer_found = True
+                                            except Exception as e:
+                                                continue
+                                    #except Exception as e:
+                                        #continue
 
-except Exception as e:
-    print(f"PFO analysis failed: {e}")  # Debug
+                                if pfo_hit_energies_by_layer:
+                                    pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.05)
+                                    if pfo_shower_start_layer >= 0:
+                                        print(f"Filling PFO histogram with layer {pfo_shower_start_layer}")
+                                        hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
+                
+                    except Exception as e:
+                        continue
+            except Exception as e:
+                print(f"PFO analysis failed: {e}")  # Debug
+            
             # Store longitudinal profile information
             for layer, energy in hit_energies_by_layer.items():
                 if layer not in longitudinal_profile[slice_name]:
