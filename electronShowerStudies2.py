@@ -9,7 +9,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 
 import os
 
@@ -140,7 +140,7 @@ def calculate_rms_width(hit_positions, hit_energies, center):
     
     return math.sqrt(weighted_r_squared / total_energy)
 
-def find_shower_start_layer(energy_by_layer, threshold=0.05):
+def find_shower_start_layer(energy_by_layer, threshold=0.01):
     """Find first layer with significant energy deposition"""
     if not energy_by_layer:
         return -1
@@ -355,17 +355,17 @@ for slice_name in files:
                     if cluster_hit_energies:
                         max_energy = max(cluster_hit_energies)
                         max_cluster_energies.append(max_energy)
-
+                        max_energy = max(max_cluster_energies) if max_cluster_energies else 0 
                 except Exception as e:
                     pass  # ECAL collection not available
-            print("Maximum cell energy per ECAL collection:", max_cluster_energies)
+            #print("Maximum cell energy per ECAL collection:", max_cluster_energies)
             
             try:
                 collection_names = event.getCollectionNames()
                 if "PandoraPFOs" not in collection_names:
                     continue
                 pfoCollection = event.getCollection('PandoraPFOs')
-                print(f"Found {len(pfoCollection)} PFOs")  # Debug
+                #print(f"Found {len(pfoCollection)} PFOs")  # Debug
                 if pfoCollection is None:
                     continue
                 pfos = []
@@ -377,7 +377,7 @@ for slice_name in files:
                     try:
                         if abs(pfo.getCharge()) > 0.5:  # Charged PFO
                             pfo_clusters = pfo.getClusters()
-                            print(f"PFO has {len(pfo_clusters)} clusters")  # Debug
+                            #print(f"PFO has {len(pfo_clusters)} clusters")  # Debug
                             clusters = []
                             for i in range(len(pfo_clusters)):
                                 cluster  = pfo_clusters[i]
@@ -386,7 +386,7 @@ for slice_name in files:
                             for cluster in clusters:
                                 pfo_hit_energies_by_layer = {}
                                 hits = cluster.getCalorimeterHits()
-                                print(f"Cluster has {len(hits)} hits")
+                                #print(f"Cluster has {len(hits)} hits")
                                 if len(hits) == 0:
                                     continue
                                 hit_list = []
@@ -397,44 +397,33 @@ for slice_name in files:
                                             hit_list.append(hit)
                                     except:
                                         continue
-                                print(f"hit_list has {len(hit_list)} hits")
-                                for i, hit in enumerate(hit_list):
-                                    print(f"Hit {i}: {hit}")
-                                    print(f"Hit type: {type(hit)}")
-                                    print(f"Hit is None: {hit is None}")
-                                    if hit is not None:
+                                    for i, hit in enumerate(hit_list):
                                         try:
                                             hit_pos = hit.getPosition()
-                                            print(f"YAY! Position is: {pos}")
-                                        except Exception as e:
-                                            print(f"error type: {type(e)}")
-                                    if i>2:
-                                        break
-                                        hit_energy = hit.getEnergy()
-                                        if hit_pos is None or hit_energy <= 0:
-                                            continue
-                                        cellID = int(hit.getCellID0())
-                                        ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
-                                        layer_found = false
-                                        for coll in ecal_coll:
-                                            if layer_found:
-                                                break
-                                            try:
-                                                ECALhitCollection = event.getCollection(coll)
-                                                encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
-                                                decoder = UTIL.BitField64(encoding)
-                                                decoder.setValue(cellID)
-                                                layer = decoder["layer"].value()
-                                        
-                                                if layer not in pfo_hit_energies_by_layer:
-                                                    pfo_hit_energies_by_layer[layer] = 0.0
-                                                pfo_hit_energies_by_layer[layer] += hit_energy
-                                                layer_found = True
-                                            except Exception as e:
+                                            hit_energy = hit.getEnergy()
+                                            if hit_pos is None or hit_energy <= 0:
                                                 continue
-                                    #except Exception as e:
-                                        #continue
-
+                                            cellID = int(hit.getCellID0())
+                                            ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
+                                            layer_found = False
+                                            for coll in ecal_coll:
+                                                if layer_found:
+                                                    break
+                                                try:
+                                                    ECALhitCollection = event.getCollection(coll)
+                                                    encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
+                                                    decoder = UTIL.BitField64(encoding)
+                                                    decoder.setValue(cellID)
+                                                    layer = decoder["layer"].value()
+                                        
+                                                    if layer not in pfo_hit_energies_by_layer:
+                                                        pfo_hit_energies_by_layer[layer] = 0.0
+                                                    pfo_hit_energies_by_layer[layer] += hit_energy
+                                                    layer_found = True
+                                                except Exception as e:
+                                                    continue
+                                        except Exception as e:
+                                            continue 
                                 if pfo_hit_energies_by_layer:
                                     pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.05)
                                     if pfo_shower_start_layer >= 0:
