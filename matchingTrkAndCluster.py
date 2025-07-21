@@ -72,3 +72,78 @@ def getShowerProfile(hits, ecal_frontface_z=185.7):
                 first_layer_over_threshold = i
                 break
     return profile, first_layer_over_threshold
+#NEED TO CHECK BOTH DEF BELOW
+def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=1.0):
+    """
+    Generate expected EM shower profile using a Gamma distribution.
+    Pandora's reference profile is typically energy-dependent, so 'a' depends on E.
+    """
+    # Shape parameters (approximate) from EM shower physics
+    a = 1.0 + 0.5 * math.log(energy / 0.01)  # energy in GeV
+    b = 0.5  # shower decay rate
+
+    expected_profile = {}
+    norm = 0.0
+
+    for i in range(num_layers):
+        t = i * X0_scale  # depth in radiation lengths
+        f = (b * (b * t) ** (a - 1) * exp(-b * t)) / gamma(a)
+        expected_profile[i] = f
+        norm += f
+
+    # Normalize the profile to sum to 1
+    for i in expected_profile:
+        expected_profile[i] /= norm
+
+    return expected_profile
+
+
+def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
+                             min_fraction_per_layer=0.01,
+                             sigma_per_layer=0.02,
+                             num_layers=60):
+    """
+    Pandora-style calculation of max profile discrepancy.
+    Returns:
+        max_layer (int): the pseudo-layer with max cumulative discrepancy
+        max_discrepancy (float): the chi2 value at that layer
+    """
+    if total_energy == 0 or len(energy_by_layer) < 3:
+        return -1, 0.0
+
+    # 1. Generate expected profile using Gamma distribution
+    expected_profile = generate_expected_em_profile(num_layers=num_layers, energy=energy)
+
+    # 2. Normalize observed energy fractions
+    observed_fractions = {
+        l: e / total_energy
+        for l, e in energy_by_layer.items()
+        if e > min_fraction_per_layer * total_energy
+    }
+
+    # 3. Sort layers
+    layers = sorted(observed_fractions.keys())
+
+    # 4. Accumulate chi2 discrepancy
+    cumulative_discrepancy = 0.0
+    max_discrepancy = -1.0
+    max_discrepancy_layer = -1
+
+    for l in layers:
+        f_obs = observed_fractions.get(l, 0.0)
+        f_exp = expected_profile.get(l, 0.0)
+        sigma = sigma_per_layer
+
+        if sigma <= 0:
+            continue
+
+        diff = f_obs - f_exp
+        chi2 = (diff ** 2) / (sigma ** 2)
+        cumulative_discrepancy += chi2
+
+        if cumulative_discrepancy > max_discrepancy:
+            max_discrepancy = cumulative_discrepancy
+            max_discrepancy_layer = l
+
+    return max_discrepancy_layer, max_discrepancy
+

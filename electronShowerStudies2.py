@@ -155,27 +155,80 @@ def find_shower_start_layer(energy_by_layer, threshold=0.01):
         if energy_by_layer[layer] / total_energy > threshold:
             return layer
     return sorted_layers[0] if sorted_layers else -1
+###NEED TO CHECK
+def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=1.0):
+    """
+    Generate expected EM shower profile using a Gamma distribution.
+    Pandora's reference profile is typically energy-dependent, so 'a' depends on E.
+    """
+    # Shape parameters (approximate) from EM shower physics
+    a = 1.0 + 0.5 * math.log(energy / 0.01)  # energy in GeV
+    b = 0.5  # shower decay rate
 
-def calculate_profile_discrepancy(energy_by_layer):
-    """Calculate longitudinal profile discrepancy (simplified)"""
-    if not energy_by_layer:
-        return 1.0
+    expected_profile = {}
+    norm = 0.0
 
-    layers = sorted(energy_by_layer.keys())
-    if len(layers) < 3:
-        return 1.0
+    for i in range(num_layers):
+        t = i * X0_scale  # depth in radiation lengths
+        f = (b * (b * t) ** (a - 1) * exp(-b * t)) / gamma(a)
+        expected_profile[i] = f
+        norm += f
 
-    energies = [energy_by_layer[layer] for layer in layers]
-    total_energy = sum(energies)
+    # Normalize the profile to sum to 1
+    for i in expected_profile:
+        expected_profile[i] /= norm
 
-    if total_energy == 0:
-        return 1.0
+    return expected_profile
 
-    # Expect peak in first few layers for electrons
-    early_fraction = sum(energies[:min(5, len(energies))]) / total_energy
 
-    # Return discrepancy (0 = perfect, 1 = bad)
-    return max(0.0, 1.0 - early_fraction)
+def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
+                             min_fraction_per_layer=0.01,
+                             sigma_per_layer=0.02,
+                             num_layers=60):
+    """
+    Pandora-style calculation of max profile discrepancy.
+    Returns:
+        max_layer (int): the pseudo-layer with max cumulative discrepancy
+        max_discrepancy (float): the chi2 value at that layer
+    """
+    if total_energy == 0 or len(energy_by_layer) < 3:
+        return -1, 0.0
+
+    # 1. Generate expected profile using Gamma distribution
+    expected_profile = generate_expected_em_profile(num_layers=num_layers, energy=energy)
+
+    # 2. Normalize observed energy fractions
+    observed_fractions = {
+        l: e / total_energy
+        for l, e in energy_by_layer.items()
+        if e > min_fraction_per_layer * total_energy
+    }
+
+    # 3. Sort layers
+    layers = sorted(observed_fractions.keys())
+
+    # 4. Accumulate chi2 discrepancy
+    cumulative_discrepancy = 0.0
+    max_discrepancy = -1.0
+    max_discrepancy_layer = -1
+
+    for l in layers:
+        f_obs = observed_fractions.get(l, 0.0)
+        f_exp = expected_profile.get(l, 0.0)
+        sigma = sigma_per_layer
+
+        if sigma <= 0:
+            continue
+
+        diff = f_obs - f_exp
+        chi2 = (diff ** 2) / (sigma ** 2)
+        cumulative_discrepancy += chi2
+
+        if cumulative_discrepancy > max_discrepancy:
+            max_discrepancy = cumulative_discrepancy
+            max_discrepancy_layer = l
+
+    return max_discrepancy_layer, max_discrepancy
 
 def plotHistograms(hist_dict, output_path, x_title, y_title):
     """Plot multiple histograms on same canvas"""
