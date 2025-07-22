@@ -18,7 +18,6 @@ ROOT.gROOT.SetBatch()
 
 # Set up some options
 max_events = -1
-
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
@@ -26,10 +25,10 @@ max_events = -1
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco_highrange/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
 
@@ -73,7 +72,7 @@ def isMatched(tlv1, tlv2):
 
 # Create a reader object to use for the rest of the time
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle","SiTracks_Refitted", "AllTracks", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
+reader.setReadCollectionNames(["MCParticle","SiTracks", "AllTracks", "PandoraPFOs", "SeedTracks","PandoraClusters"]) #changed from SiTracks_refitted for new path
 # Loop over the different samples
 for s in files:
     print("Working on sample", s)
@@ -110,7 +109,7 @@ for s in files:
             #lnks = event.get("MCParticle_SiTracks_Refitted")
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
-            trks = event.getCollection("SiTracks_Refitted") #also changed from SiTracks_refitted
+            trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
             clusters = event.getCollection("PandoraClusters")
             #print(f"Found {len(pfos)} PandoraPFOs in event {i}")
             #for j, pfo in enumerate(pfos):
@@ -125,6 +124,7 @@ for s in files:
 
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
+                if mcps == 0: continue 
                 mcp_tlv = getTLV(mcp)
                 if mcp_tlv.E() < 20: continue
                 if abs(mcp_tlv.Eta())>2: continue
@@ -265,10 +265,10 @@ from plotHelper import plotHistograms
 
 # Helper for display names
 label_map = {
-    "electronGun_pT_0_50": "pT 0-50 GeV",
-    "electronGun_pT_50_250": "pT 50-250 GeV",
-    "electronGun_pT_250_1000": "pT 250-1000 GeV",
-    "electronGun_pT_1000_5000": "pT 1000-5000 GeV"
+    "electronGun_pT_0_50": "0-50 GeV",
+    "electronGun_pT_50_250": "50-250 GeV",
+    "electronGun_pT_250_1000": "250-1000 GeV",
+    "electronGun_pT_1000_5000": "1000-5000 GeV"
 }
 
 # TRACK EFFICIENCY CALCULATION
@@ -314,7 +314,30 @@ for s in hists:
 plotEfficiencies(eff_eta_pfo,"plots/pfo_efficiency_as_function_of_eta_allSlices.png",
         xlabel="eta", ylabel="PFO Matching Efficiency"
     )
+# PFO EFFICIENCY vs ENERGY
+print("\n=== CALCULATING PFO EFFICIENCY vs ENERGY ===")
+eff_energy_pfo = {}
+for s in hists:
+    if "pfo_el_match_E" not in hists[s] or hists[s]["pfo_el_match_E"].GetEntries() == 0:
+        continue
+    if hists[s]["mcp_el_E"].GetEntries() == 0:
+        continue
+    num = hists[s]["pfo_el_match_E"]
+    denom = hists[s]["mcp_el_E"]
+    eff = ROOT.TGraphAsymmErrors()
+    eff.BayesDivide(num, denom, "B")
+    eff_energy_pfo[label_map[s]] = eff
 
+plotEfficiencies(eff_energy_pfo, "plots/pfo_efficiency_as_function_of_energy_allSlices.png",
+    xlabel="Energy [GeV]", ylabel="PFO Matching Efficiency"
+)
+
+print("\nPFO Matching Efficiency vs Energy Summary:")
+for s in hists:
+    matched = hists[s]["pfo_el_match_E"].GetEntries() if "pfo_el_match_E" in hists[s] else 0
+    total = hists[s]["mcp_el_E"].GetEntries() if "mcp_el_E" in hists[s] else 0
+    efficiency = matched/total if total > 0 else 0
+    print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}, eff = {efficiency:.3f}")
 print("\nPFO Matching Efficiency Summary:")
 for s in hists:
     matched = hists[s]["pfo_el_match_eta"].GetEntries() if "pfo_el_match_eta" in hists[s] else 0

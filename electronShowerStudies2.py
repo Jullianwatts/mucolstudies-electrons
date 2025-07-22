@@ -182,14 +182,12 @@ def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=1.0):
 
 
 def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
-                             min_fraction_per_layer=0.01,
-                             sigma_per_layer=0.02,
-                             num_layers=60):
+                             min_fraction_per_layer=0.6,
+                             num_layers=50):
+    ## .63 fraction/layer comes from barrel ecal tungsten being 2.2mm/3.5mm(each layer) = .6286
     """
     Pandora-style calculation of max profile discrepancy.
     Returns:
-        max_layer (int): the pseudo-layer with max cumulative discrepancy
-        max_discrepancy (float): the chi2 value at that layer
     """
     if total_energy == 0 or len(energy_by_layer) < 3:
         return -1, 0.0
@@ -207,25 +205,16 @@ def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
     # 3. Sort layers
     layers = sorted(observed_fractions.keys())
 
-    # 4. Accumulate chi2 discrepancy
-    cumulative_discrepancy = 0.0
     max_discrepancy = -1.0
     max_discrepancy_layer = -1
 
-    for l in layers:
+    for l in range(num_layers):
         f_obs = observed_fractions.get(l, 0.0)
         f_exp = expected_profile.get(l, 0.0)
-        sigma = sigma_per_layer
-
-        if sigma <= 0:
-            continue
-
-        diff = f_obs - f_exp
-        chi2 = (diff ** 2) / (sigma ** 2)
-        cumulative_discrepancy += chi2
-
-        if cumulative_discrepancy > max_discrepancy:
-            max_discrepancy = cumulative_discrepancy
+        discrepancy = abs(f_obs - f_exp)
+        
+        if discrepancy > max_discrepancy:
+            max_discrepancy = discrepancy
             max_discrepancy_layer = l
 
     return max_discrepancy_layer, max_discrepancy
@@ -415,7 +404,7 @@ for slice_name in files:
 
                                             # Calculate shower start for this cluster
                                             if pfo_hit_energies_by_layer:
-                                                pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.05)
+                                                pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.1)
                                                 if pfo_shower_start_layer >= 0:
                                                     hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
             except:
@@ -440,8 +429,8 @@ for slice_name in files:
                 shower_max_layer = max(hit_energies_by_layer.keys(), key=lambda k: hit_energies_by_layer[k])
 
             # Calculate profile discrepancy
-            profile_discrepancy = calculate_profile_discrepancy(hit_energies_by_layer)
-
+            total_energy = sum(hit_energies_by_layer.values())
+            profile_discrepancy_layer, profile_discrepancy = get_profile_discrepancy(hit_energies_by_layer, total_energy) 
             # Calculate cluster shape properties
             cluster_rms_width = -1
             if cluster_hit_positions and cluster_hit_energies:

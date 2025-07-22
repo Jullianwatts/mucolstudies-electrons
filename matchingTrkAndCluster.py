@@ -111,7 +111,7 @@ def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
     if total_energy == 0 or len(energy_by_layer) < 3:
         return -1, 0.0
 
-    # 1. Generate expected profile using Gamma distribution
+    # 1. Generate longitudinal expected profile using Gamma distribution
     expected_profile = generate_expected_em_profile(num_layers=num_layers, energy=energy)
 
     # 2. Normalize observed energy fractions
@@ -123,27 +123,18 @@ def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
 
     # 3. Sort layers
     layers = sorted(observed_fractions.keys())
-
-    # 4. Accumulate chi2 discrepancy
-    cumulative_discrepancy = 0.0
+    #find discrepancy
     max_discrepancy = -1.0
     max_discrepancy_layer = -1
 
-    for l in layers:
+    for l in range(num_layers):
         f_obs = observed_fractions.get(l, 0.0)
         f_exp = expected_profile.get(l, 0.0)
-        sigma = sigma_per_layer
+        discrepancy = abs(f_obs - f_exp)
 
-        if sigma <= 0:
-            continue
-
-        diff = f_obs - f_exp
-        chi2 = (diff ** 2) / (sigma ** 2)
-        cumulative_discrepancy += chi2
-
-        if cumulative_discrepancy > max_discrepancy:
-            max_discrepancy = cumulative_discrepancy
-            max_discrepancy_layer = l
+        if discrepancy > max_discrepancy:
+            max_discrepancy = discrepancy
+            max_discrepancy_layer = 1 
 
     return max_discrepancy_layer, max_discrepancy
 

@@ -7,8 +7,7 @@ variables = {"obj": {}, "evt": {}}
 variables["obj"]["pt"] =  {"nbins": 30, "xmin": 0,     "xmax": 3000,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
 variables["obj"]["eta"] = {"nbins": 20, "xmin": -3,    "xmax": 3,       "accessor": ".Eta()",   "label": "#eta"}
 variables["obj"]["phi"] = {"nbins": 20, "xmin": -3.5,  "xmax": 3.5,     "accessor": ".Phi()",   "label": "#phi"}
-#variables["obj"]["eff_eta"] = {"nbins": 20, "xmin": -3, "xmax": 3, "accessor": ".Eta()", "label": "#eta"}
-#variables["obj"]["eff_eta"] = {"nbins": 6, "xmin": -3, "xmax": 3, "accessor": ".Eta()", "label": "#eta"}
+variables["obj"]["E"] =   {"nbins": 30, "xmin": 0,     "xmax": 5000,    "accessor": ".E()",     "label": "Energy [GeV]"}
 variables["evt"]["n"] =   {"nbins": 20, "xmin": 0,     "xmax": 20,      "accessor": "",         "label": "number per event"}
 
 colors =        [ROOT.TColor.GetColor("#FFA900"),   # Sunny Orange
@@ -22,7 +21,6 @@ def getTLV(obj):
     obj_p = obj.getMomentum()
     obj_e = obj.getEnergy()
     obj_tlv = ROOT.TLorentzVector()
-    #obj_tlv.SetPxPyPzE(obj_p.x, obj_p.y, obj_p.z, obj_e)
     obj_tlv.SetPxPyPzE(obj_p[0], obj_p[1], obj_p[2], obj_e)
     return obj_tlv
 
@@ -31,8 +29,10 @@ def getTLV(obj):
 # https://bib-pubdb1.desy.de/record/81214/files/LC-DET-2006-004%5B1%5D.pdf
 def getPt(trk, b_field = 5):
     return 3e-4*abs(b_field/trk.getOmega())
+
 def getP(trk, b_field = 5):
     return getPt(trk)*math.sqrt(1+trk.getTanLambda()**2)
+
 def getTrackTLV(trk, m = .106, b_field = 5):
     pt = getPt(trk, b_field)
     p = getP(trk, b_field)
@@ -43,11 +43,11 @@ def getTrackTLV(trk, m = .106, b_field = 5):
     trk_tlv = ROOT.TLorentzVector()
     trk_tlv.SetPxPyPzE(px, py, pz, E)
     return trk_tlv
+
 # for clusters
 def getClusterTLV(cluster):
     p = cluster.getPosition()
     E = cluster.getEnergy()
-
     cluster_tlv = ROOT.TLorentzVector()
     cluster_tlv.SetPxPyPzE(p[0], p[1], p[2], E)
     return cluster_tlv
@@ -71,11 +71,36 @@ def colorHists(hists):
         i %= len(colors)
     return
 
+def addMAIAHeader(with_bib=False):
+    """Add MAIA detector header text to plots"""
+    # Top right header text
+    header = ROOT.TLatex()
+    header.SetNDC()
+    header.SetTextAlign(31)  # Right aligned
+    header.SetTextSize(0.035)
+    header.SetTextFont(42)
+    header.DrawLatex(0.95, 0.95, "MAIA Detector Concept")
+    
+    # Simulation details
+    sim_text = ROOT.TLatex()
+    sim_text.SetNDC()
+    sim_text.SetTextAlign(11)  # Left aligned
+    sim_text.SetTextSize(0.032)
+    sim_text.SetTextFont(42)
+    sim_text.DrawLatex(0.12, 0.92, "Muon Collider")
+    
+    bib_text = "Simulation, with BIB" if with_bib else "Simulation, with No BIB"
+    sim_text.DrawLatex(0.12, 0.88, bib_text)
 
 # From a map of histograms (key as label name), plot them all on a canvas and save
-def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, logy=False, atltext=""):
-
-    can = ROOT.TCanvas("can", "can")
+def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, logy=False, atltext="", with_bib=False):
+    can = ROOT.TCanvas("can", "can", 800, 600)
+    can.SetGrid(1, 1)  # Add grid
+    can.SetLeftMargin(0.12)
+    can.SetBottomMargin(0.12)
+    can.SetTopMargin(0.12)  # Increase top margin for header text
+    can.SetRightMargin(0.05)
+    
     h_keys = list(h_map.keys())
     h_values = list(h_map.values())
 
@@ -89,105 +114,112 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
     if logy:
         maxy*=1e4
         miny = 1e-1
+        can.SetLogy(1)
 
     # Draw histograms
     colorHists(h_values)
+    h_map[h_keys[0]].SetTitle("")  # Remove title
     h_map[h_keys[0]].GetXaxis().SetTitle(xlabel)
     h_map[h_keys[0]].GetYaxis().SetTitle(ylabel)
+    h_map[h_keys[0]].GetXaxis().SetTitleSize(0.045)
+    h_map[h_keys[0]].GetYaxis().SetTitleSize(0.045)
+    h_map[h_keys[0]].GetXaxis().SetLabelSize(0.04)
+    h_map[h_keys[0]].GetYaxis().SetLabelSize(0.04)
     h_values[0].SetMinimum(miny)
     h_values[0].SetMaximum(maxy)
     h_map[h_keys[0]].Draw("hist")
-    if logy: ROOT.gPad.SetLogy(1)
+    
     for k in h_keys[1:]:
         h_map[k].Draw("hist same")
 
-    leg = ROOT.TLegend(.66, .64, .9, .88)
+    # Create better legend
+    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
+    leg.SetBorderSize(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+    leg.SetTextSize(0.035)
+    leg.SetHeader("pT slices", "C")
+    
     for k in h_keys:
-        leg.AddEntry(h_map[k], k, "l")
+        # Clean up legend labels
+        clean_label = k.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
+        leg.AddEntry(h_map[k], clean_label, "l")
     leg.Draw()
-    if interactive: raw_input("...")
 
+    # Add MAIA header text
+    addMAIAHeader(with_bib=with_bib)
+
+    if interactive: 
+        input("Press Enter to continue...")  # Updated for Python 3
+
+    # Handle old atltext parameter if needed
     if atltext != "":
-        ROOT.ATLASLabel(0.2,0.85, atltext[0])
         text = ROOT.TLatex()
         text.SetNDC()
         text.SetTextSize(0.04)
-        for i, t in enumerate(atltext[1:]):
-            text.DrawLatex(0.2,0.85-0.07*(i+1), t)
+        if isinstance(atltext, list):
+            for i, t in enumerate(atltext):
+                text.DrawLatex(0.2, 0.85-0.07*i, t)
+        else:
+            text.DrawLatex(0.2, 0.85, atltext)
 
+    ROOT.gStyle.SetOptStat(0)
     can.SaveAs(save_name)
+    can.Close()
     return
 
-#def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange=""):
-
-    #can = ROOT.TCanvas("can", "can")
-    #if len(eff_map)<1:
-        #return
-
-    #colorHists(eff_map.values())
-
-    #for i, k in enumerate(eff_map):
-        #if i==0:
-            #if not xrange=="":
-                #background = ROOT.TH1D("bkg", "bkg", 1, x_range[0], x_range[1])
-                #background.SetLineWidth(0)
-                #background.SetTitle(";%s;%s"%(xlabel,ylabel))
-                #background.SetMinimum(0)
-                #background.SetMaximum(1)
-                #background.Draw()
-                #eff_map[k].Draw("pe same")
-            #else:
-                #eff_map[k].Draw("ape")
-            #eff_map[k].SetTitle(";%s;%s"%(xlabel,ylabel))
-            #ROOT.gPad.Update()
-
-            #eff_map[k].GetPaintedGraph().GetXaxis().SetTitle(xlabel)
-            #eff_map[k].GetPaintedGraph().GetYaxis().SetTitle(ylabel)
-            #eff_map[k].GetPaintedGraph().SetMinimum(0)
-            #eff_map[k].GetPaintedGraph().SetMaximum(1)
-            #if not xrange=="":
-               # print("Updating axis range", xrange)
-                #eff_map[k].GetPaintedGraph().GetXaxis().SetRange(x_range[0], x_range[1])
-                #eff_map[k].GetPaintedGraph().GetXaxis().SetMin(x_range[0])
-                #eff_map[k].GetPaintedGraph().GetXaxis().SetMax(x_range[1])
-                #eff_map[k].Draw("pe same")
-            #else:
-                #eff_map[k].Draw("ape")
-            #ROOT.gPad.Update()
-
-        #else: eff_map[k].Draw("pe same")
-
-        #ROOT.gPad.Update()
-
-    #leg = ROOT.TLegend(.66, .24, .9, .38)
-    #for k in eff_map:
-        #leg.AddEntry(eff_map[k], k, "p")
-    #leg.Draw()
-
-    #can.SaveAs(save_name)
-    #return
-def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange=""):
-    can = ROOT.TCanvas("can", "can")
+def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_bib=False):
+    can = ROOT.TCanvas("can", "can", 800, 600)
+    can.SetGrid(1, 1)  # Add grid like in MAIA plots
+    can.SetLeftMargin(0.12)
+    can.SetBottomMargin(0.12)
+    can.SetTopMargin(0.12)  # Increase top margin for header text
+    can.SetRightMargin(0.05)
+    
     if len(eff_map) < 1:
         return
 
-    colorHists(list(eff_map.values()))
+    # Use your existing color scheme
+    for i, k in enumerate(eff_map):
+        eff_map[k].SetMarkerColor(colors[i % len(colors)])
+        eff_map[k].SetLineColor(colors[i % len(colors)])
+        eff_map[k].SetMarkerStyle(20 + i)  # Different markers
+        eff_map[k].SetMarkerSize(1.2)
+        eff_map[k].SetLineWidth(2)
 
     for i, k in enumerate(eff_map):
         if i == 0:
             eff_map[k].Draw("ape")
-            eff_map[k].SetTitle(";%s;%s" % (xlabel, ylabel))
+            eff_map[k].SetTitle("")  # Remove title for cleaner look
             eff_map[k].GetXaxis().SetTitle(xlabel)
             eff_map[k].GetYaxis().SetTitle(ylabel)
+            eff_map[k].GetXaxis().SetTitleSize(0.045)
+            eff_map[k].GetYaxis().SetTitleSize(0.045)
+            eff_map[k].GetXaxis().SetLabelSize(0.04)
+            eff_map[k].GetYaxis().SetLabelSize(0.04)
             eff_map[k].SetMinimum(0)
-            eff_map[k].SetMaximum(1.2)  # Allow >100% for your "all matches"
+            eff_map[k].SetMaximum(1.2)
         else:
             eff_map[k].Draw("pe same")
 
-    leg = ROOT.TLegend(.66, .24, .9, .38)
+    # Create legend with header like in your desired style
+    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
+    leg.SetBorderSize(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+    leg.SetTextSize(0.035)
+    leg.SetHeader("pT slices", "C")  # Add header
+    
     for k in eff_map:
-        leg.AddEntry(eff_map[k], k, "p")
+        # Clean up the legend entries
+        clean_label = k.replace("pT slice ", "")
+        leg.AddEntry(eff_map[k], clean_label, "lp")
     leg.Draw()
 
+    # Add MAIA header text
+    addMAIAHeader(with_bib=with_bib)
+
+    ROOT.gStyle.SetOptStat(0)  # Remove stats box
     can.SaveAs(save_name)
+    can.Close()
     return
