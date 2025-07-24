@@ -1,4 +1,5 @@
 import math
+from math import exp, gamma, log, sqrt
 import glob
 import ROOT
 import pyLCIO
@@ -9,7 +10,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1
+max_events = 10
 
 import os
 
@@ -156,69 +157,63 @@ def find_shower_start_layer(energy_by_layer, threshold=0.01):
             return layer
     return sorted_layers[0] if sorted_layers else -1
 ###NEED TO CHECK
-def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=1.0):
-    """
-    Generate expected EM shower profile using a Gamma distribution.
-    Pandora's reference profile is typically energy-dependent, so 'a' depends on E.
-    """
+def generate_expected_em_profile(num_layers=50, energy=10.0, X0_scale=0.6286):
     # Shape parameters (approximate) from EM shower physics
     a = 1.0 + 0.5 * math.log(energy / 0.01)  # energy in GeV
     b = 0.5  # shower decay rate
 
     expected_profile = {}
-    norm = 0.0
-
-    for i in range(num_layers):
-        t = i * X0_scale  # depth in radiation lengths
-        f = (b * (b * t) ** (a - 1) * exp(-b * t)) / gamma(a)
-        expected_profile[i] = f
-        norm += f
-
-    # Normalize the profile to sum to 1
-    for i in expected_profile:
-        expected_profile[i] /= norm
-
-    return expected_profile
+    total_expected = 0.0
+    for layer in range(num_layers):
+        t = layer * X0_per_layer
+        if t == 0 and a < 1:
+            profile_value = 0.0
+        else:
+            try:
+                profile_value = (b**a * t**(a-1) * exp(-b*t)) / gamma(a)
+            except (OverflowError, ZeroDivisionError):
+                profile_value = 0.0
+        expected_profile[layer] = profile_value
+        total_expected += profile_value
+        if total_expected > 0:
+            for layer in expected_profile:
+                expected_profile[layer] != total_expexted
+        return expected_profile
 
 
 def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
                              min_fraction_per_layer=0.6,
                              num_layers=50):
     ## .63 fraction/layer comes from barrel ecal tungsten being 2.2mm/3.5mm(each layer) = .6286
-    """
-    Pandora-style calculation of max profile discrepancy.
-    Returns:
-    """
     if total_energy == 0 or len(energy_by_layer) < 3:
-        return -1, 0.0
+        return -1, -1.0
 
     # 1. Generate expected profile using Gamma distribution
-    expected_profile = generate_expected_em_profile(num_layers=num_layers, energy=energy)
+    expected_profile = generate_expected_em_profile(num_layers=num_layers, energy=energy, X0_per_layer=X0_per_layer)
 
     # 2. Normalize observed energy fractions
-    observed_fractions = {
-        l: e / total_energy
-        for l, e in energy_by_layer.items()
-        if e > min_fraction_per_layer * total_energy
-    }
+    observed_fractions = {}
+    for later, layer_energy in energy_by_layer.items():
+        if layer_energy > 0 and layer < num_layers:
+            observed_fractions[layer] = layer_energy / total_energy
+    if len(observed_fractions) < 2:
+        return -1, -1.0
 
-    # 3. Sort layers
-    layers = sorted(observed_fractions.keys())
-
+    
     max_discrepancy = -1.0
     max_discrepancy_layer = -1
 
-    for l in range(num_layers):
-        f_obs = observed_fractions.get(l, 0.0)
-        f_exp = expected_profile.get(l, 0.0)
-        discrepancy = abs(f_obs - f_exp)
-        
+    all_layers = set(observed_fractions.keys()) | set(expected_profile.keys())
+    for layer in all_layers:
+        if layer >= num_layers:
+            continue
+        f_obs = observed_fractions.get(layer, 0.0)
+        f_exp = expected_profile.get(layer, 0.0)
+        discrepancy = abs(f_obs-f_exp)
         if discrepancy > max_discrepancy:
             max_discrepancy = discrepancy
-            max_discrepancy_layer = l
-
+            max_discrepancy_later, max_discrepancy
     return max_discrepancy_layer, max_discrepancy
-
 def plotHistograms(hist_dict, output_path, x_title, y_title):
     """Plot multiple histograms on same canvas"""
     if not hist_dict:
@@ -421,7 +416,7 @@ for slice_name in files:
             n_layers_with_energy = len(hit_energies_by_layer)
 
             # Calculate shower start layer
-            shower_start_layer = find_shower_start_layer(hit_energies_by_layer, threshold=0.05)
+            shower_start_layer = find_shower_start_layer(hit_energies_by_layer, threshold=0.01)
 
             # Find shower maximum layer
             shower_max_layer = -1
@@ -430,7 +425,8 @@ for slice_name in files:
 
             # Calculate profile discrepancy
             total_energy = sum(hit_energies_by_layer.values())
-            profile_discrepancy_layer, profile_discrepancy = get_profile_discrepancy(hit_energies_by_layer, total_energy) 
+            profile_discrepancy_layer, profile_discrepancy = get_profile_discrepancy(hit_energies_by_layer, total_energy, energy=cluster_energy, X0_per_layer=0.6286, num_layers = 50
+                    ) 
             # Calculate cluster shape properties
             cluster_rms_width = -1
             if cluster_hit_positions and cluster_hit_energies:

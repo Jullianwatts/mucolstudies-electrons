@@ -5,7 +5,6 @@
 # apptainer build k4toroid.sif docker://madbaron/k4test-ubuntu:latest
 # apptainer run --no-home -B /collab/project/snowmass21/data/muonc:/data -B /home/$USER k4toroid.sif
 # source /setup.sh
-
 import math
 import glob
 import ROOT
@@ -31,7 +30,12 @@ max_events = -1
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
-
+print("=== FILE DEBUG ===")
+for s in files:
+    print(f"Sample {s}: {len(files[s])} files found")
+    if len(files[s]) > 0:
+        print(f"  First file: {files[s][0]}")
+print("==================")
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices: files[f"electronGun_pT_{s}"] = []
 for s in samples:
@@ -107,24 +111,22 @@ for s in files:
             #pfos = event.get("PandoraPFOs")
             #trks = event.get("SiTracks_Refitted")
             #lnks = event.get("MCParticle_SiTracks_Refitted")
-            mcps = event.getCollection("MCParticle")
+            try:
+                mcps = event.getCollection("MCParticle")
+            except:
+                mcps = []
+                print("No MCP")
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
-            clusters = event.getCollection("PandoraClusters")
-            #print(f"Found {len(pfos)} PandoraPFOs in event {i}")
-            #for j, pfo in enumerate(pfos):
-                #pdg_id = pfo.getType()
-                #print(f"  PFO {j}: PDG ID = {pdg_id}")
-
+            clusters = event.getCollection("PandoraClusters") 
             mcp_electrons = []
             pfo_electrons = []
             trk_electrons = []
             cluster_electrons = []
 ######## Loop over MCPs
-
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
-                if mcps == 0: continue 
+                if mcp == 0: continue 
                 mcp_tlv = getTLV(mcp)
                 if mcp_tlv.E() < 20: continue
                 if abs(mcp_tlv.Eta())>2: continue
@@ -132,7 +134,6 @@ for s in files:
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
                 hists2d[s]["mcp_E_v_mcp_p"].Fill(mcp.getEnergy(), momentum)
                 n_mcp += 1
-
                 # Look at electrons only
                 if abs(mcp.getPDG()) == 11:
                     fillObjHists(hists[s], "mcp_el", mcp_tlv)
@@ -313,7 +314,7 @@ for s in hists:
 
 plotEfficiencies(eff_eta_pfo,"plots/pfo_efficiency_as_function_of_eta_allSlices.png",
         xlabel="eta", ylabel="PFO Matching Efficiency"
-    )
+        )
 # PFO EFFICIENCY vs ENERGY
 print("\n=== CALCULATING PFO EFFICIENCY vs ENERGY ===")
 eff_energy_pfo = {}

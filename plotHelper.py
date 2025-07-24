@@ -71,28 +71,6 @@ def colorHists(hists):
         i %= len(colors)
     return
 
-def addMAIAHeader(with_bib=False):
-    """Add MAIA detector header text to plots"""
-    # Top right header text
-    header = ROOT.TLatex()
-    header.SetNDC()
-    header.SetTextAlign(31)  # Right aligned
-    header.SetTextSize(0.035)
-    header.SetTextFont(42)
-    header.DrawLatex(0.95, 0.95, "MAIA Detector Concept")
-    
-    # Simulation details
-    sim_text = ROOT.TLatex()
-    sim_text.SetNDC()
-    sim_text.SetTextAlign(11)  # Left aligned
-    sim_text.SetTextSize(0.032)
-    sim_text.SetTextFont(42)
-    sim_text.DrawLatex(0.12, 0.92, "Muon Collider")
-    
-    bib_text = "Simulation, with BIB" if with_bib else "Simulation, with No BIB"
-    sim_text.DrawLatex(0.12, 0.88, bib_text)
-
-# From a map of histograms (key as label name), plot them all on a canvas and save
 def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, logy=False, atltext="", with_bib=False):
     can = ROOT.TCanvas("can", "can", 800, 600)
     can.SetGrid(1, 1)  # Add grid
@@ -146,8 +124,6 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
         leg.AddEntry(h_map[k], clean_label, "l")
     leg.Draw()
 
-    # Add MAIA header text
-    addMAIAHeader(with_bib=with_bib)
 
     if interactive: 
         input("Press Enter to continue...")  # Updated for Python 3
@@ -170,10 +146,9 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
 
 def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_bib=False):
     can = ROOT.TCanvas("can", "can", 800, 600)
-    can.SetGrid(1, 1)  # Add grid like in MAIA plots
     can.SetLeftMargin(0.12)
     can.SetBottomMargin(0.12)
-    can.SetTopMargin(0.12)  # Increase top margin for header text
+    can.SetTopMargin(0.08)
     can.SetRightMargin(0.05)
     
     if len(eff_map) < 1:
@@ -198,17 +173,25 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
             eff_map[k].GetXaxis().SetLabelSize(0.04)
             eff_map[k].GetYaxis().SetLabelSize(0.04)
             eff_map[k].SetMinimum(0)
-            eff_map[k].SetMaximum(1.2)
+            eff_map[k].SetMaximum(1.25)
+            eff_map[k].GetXaxis().SetTickLength(0)
+            eff_map[k].GetYaxis().SetTickLength(0)
+
         else:
             eff_map[k].Draw("pe same")
-
+    line = ROOT.TLine()
+    line.SetLineStyle(2)
+    line.SetLineColor(ROOT.kGray+1)
+    line.SetLineWidth(1)
+    xmin = eff_map[list(eff_map.keys())[0]].GetXaxis().GetXmin()
+    xmax = eff_map[list(eff_map.keys())[0]].GetXaxis().GetXmax()
+    line.DrawLine(xmin, 1.0, xmax, 1.0)
     # Create legend with header like in your desired style
     leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
     leg.SetBorderSize(1)
     leg.SetFillColor(0)
     leg.SetFillStyle(1001)
     leg.SetTextSize(0.035)
-    leg.SetHeader("pT slices", "C")  # Add header
     
     for k in eff_map:
         # Clean up the legend entries
@@ -216,9 +199,25 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
         leg.AddEntry(eff_map[k], clean_label, "lp")
     leg.Draw()
 
-    # Add MAIA header text
-    addMAIAHeader(with_bib=with_bib)
-
+    text = ROOT.TLatex()
+    text.SetNDC()
+    text.SetTextAlign(11)  # Left aligned
+    text.SetTextSize(0.04)
+    text.SetTextFont(62)  # Bold font like in image
+    concept_text = ROOT.TLatex()
+    concept_text.SetNDC()
+    concept_text.SetTextAlign(31)  # Right aligned
+    concept_text.SetTextSize(0.035)
+    concept_text.SetTextFont(42)
+    concept_text.DrawLatex(0.94, 0.92, "MAIA Detector Concept")
+    text.DrawLatex(0.15, 0.92, "Muon Collider")
+    bib_text = "Simulation, with BIB" if with_bib else "Simulation, no BIB"
+    text.SetTextFont(42)  # Regular font
+    text.DrawLatex(0.15, 0.88, bib_text)
+    
+    
+    # Add eta cut information (hardcoded since cut at |eta| < 2)
+    text.DrawLatex(0.15, 0.84, "|#eta| < 2")
     ROOT.gStyle.SetOptStat(0)  # Remove stats box
     can.SaveAs(save_name)
     can.Close()
