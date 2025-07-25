@@ -10,7 +10,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 
 import os
 
@@ -19,8 +19,8 @@ import os
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
-
+#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices:
@@ -183,7 +183,7 @@ def generate_expected_em_profile(num_layers=50, energy=10.0, X0_scale=0.6286):
 
 def get_profile_discrepancy(energy_by_layer, total_energy, energy=10.0,
                              min_fraction_per_layer=0.6,
-                             num_layers=50):
+                             num_layers=50, X0_per_layer=0.628):
     ## .63 fraction/layer comes from barrel ecal tungsten being 2.2mm/3.5mm(each layer) = .6286
     if total_energy == 0 or len(energy_by_layer) < 3:
         return -1, -1.0

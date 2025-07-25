@@ -105,7 +105,7 @@ for s in files:
             n_matched_el = 0
             n_clusters = 0
             #my_mcp_el = None
-
+            no_mcp_count = 0
             # Get the collections we care about
             #mcps = event.get("MCParticle")
             #pfos = event.get("PandoraPFOs")
@@ -115,6 +115,7 @@ for s in files:
                 mcps = event.getCollection("MCParticle")
             except:
                 mcps = []
+                no_mcp_count += 1
                 print("No MCP")
             pfos = event.getCollection("PandoraPFOs")
             trks = event.getCollection("SiTracks") #also changed from SiTracks_refitted
@@ -375,7 +376,7 @@ for s in hists:
     print(f"{label_map.get(s, s)}: matched = {int(matched)}, total = {int(total)}, eff = {efficiency:.3f}")
 
 
-
+print(no_mcp_count)
 for i, h in enumerate(hists[s]):
     if h in ["cluster_nhits", "cluster_r"]:
         continue
