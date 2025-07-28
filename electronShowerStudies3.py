@@ -9,7 +9,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 100
+max_events = 10
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
@@ -355,85 +355,86 @@ for slice_name in files:
             hists[slice_name]["mcp_phi"].Fill(tlv_truth.Phi())
             hists[slice_name]["mcp_theta"].Fill(tlv_truth.Theta())
 
-            # Enhanced track analysis with proper track-cluster matching
+            if events_processed_in_slice < 3:  # Only first 3 events
+                print(f"\n=== EVENT {events_processed_in_slice} DEBUG ===")
+    
+    # Enhanced track analysis with proper track-cluster matching
             track_momentum = -1
             track_cluster_dR = -1
             track_tlv = TLorentzVector()
             matched_track_found = False
+            # Try track collections in priority order
+            track_collections = ["SiTracks_Refitted","SiTracks", "AllTracks", "SeedTracks"]
 
-            try:
-                # Try to get track collection - prioritize the collections that exist in your data
-                track_collections = ["SiTracks_Refitted", "SiTracks", "AllTracks", "SeedTracks"]
+            for track_collection_name in track_collections:
+                try:
+        # Direct collection access - much simpler!
+                trackCollection = event.getCollection(track_collection_name)
+        
+                if trackCollection is None:
+                    continue
+            
+                n_tracks = trackCollection.getNumberOfElements()
+                if n_tracks == 0:
+                    continue
+            
+                print(f"DEBUG - Found {n_tracks} tracks in {track_collection_name}")
+        
+            best_track = None
+            best_dR = 999.0
+        
+        # Loop through all tracks
+            for i in range(n_tracks):
+                track = trackCollection.getElementAt(i)
+                if track is None:
+                    continue
                 
-                for track_collection_name in track_collections:
-                    try:
-                        collection_names = event.getCollectionNames()
-                        collection_exists = False
-                        for i in range(collection_names.size()):
-                            if collection_names[i] == track_collection_name:
-                                collection_exists = True
-                                break
-                        
-                        if not collection_exists:
-                            continue
-                            
-                        trackCollection = event.getCollection(track_collection_name)
-                        if trackCollection is None or trackCollection.getNumberOfElements() == 0:
-                            continue
-                            
-                        best_track = None
-                        best_dR = 999.0
-                        
-                        # Loop through all tracks to find best match to truth electron
-                        for i in range(trackCollection.getNumberOfElements()):
-                            track = trackCollection.getElementAt(i)
-                            if track is None:
-                                continue
-                                
-                            # Get track parameters
-                            try:
-                                # Track momentum vector
-                                track_p = track.getMomentum()
-                                if len(track_p) < 3:  # Check if momentum vector is valid
-                                    continue
-                                    
-                                track_momentum_mag = sqrt(track_p[0]**2 + track_p[1]**2 + track_p[2]**2)
-                                if track_momentum_mag < 0.1:  # Skip very low momentum tracks
-                                    continue
-                                
-                                # Create track TLorentzVector (assuming electron mass)
-                                electron_mass = 0.000511  # GeV
-                                track_energy = sqrt(track_momentum_mag**2 + electron_mass**2)
-                                temp_track_tlv = TLorentzVector()
-                                temp_track_tlv.SetPxPyPzE(track_p[0], track_p[1], track_p[2], track_energy)
-                                
-                                # Check match to truth electron - be more lenient
-                                dR_to_truth = temp_track_tlv.DeltaR(tlv_truth)
-                                
-                                if dR_to_truth < best_dR and dR_to_truth < 0.2:  # Increased from 0.1 to 0.2
-                                    best_track = track
-                                    best_dR = dR_to_truth
-                                    track_tlv = temp_track_tlv
-                                    track_momentum = track_momentum_mag
-                                    
-                            except Exception as e:
-                                continue
-                                
-                        if best_track is not None:
-                            matched_track_found = True
-                            hists[slice_name]["track_momentum"].Fill(track_momentum)
-                            print(f"DEBUG - Event {events_processed_in_slice}: Found track in {track_collection_name}, p={track_momentum:.2f} GeV, dR={best_dR:.3f}")
-                            break  # Found a good track, stop looking in other collections
-                            
-                    except Exception as e:
-                        print(f"DEBUG - Error accessing {track_collection_name}: {e}")
-                        continue  # Try next track collection
-                        
-            except Exception as e:
-                print(f"DEBUG - General track error: {e}")
-                pass  # No tracks available
+                try:
+                # Get track momentum
+                    track_p = track.getMomentum()
+                    if track_p is None or len(track_p) < 3:
+                        continue
+                    
+                    track_momentum_mag = sqrt(track_p[0]**2 + track_p[1]**2 + track_p[2]**2)
+                
+                    if track_momentum_mag < 0.1:  # Skip very low momentum
+                        continue
+                
+                # Create track TLorentzVector
+                    electron_mass = 0.000511
+                    track_energy = sqrt(track_momentum_mag**2 + electron_mass**2)
+                    temp_track_tlv = TLorentzVector()
+                    temp_track_tlv.SetPxPyPzE(track_p[0], track_p[1], track_p[2], track_energy)
+                
+                # Check match to truth electron
+                    dR_to_truth = temp_track_tlv.DeltaR(tlv_truth)
+                
+                    if dR_to_truth < best_dR and dR_to_truth < 0.2:
+                        best_track = track
+                        best_dR = dR_to_truth
+                        track_tlv = temp_track_tlv
+                        track_momentum = track_momentum_mag
+                    
+                except Exception as e:
+                    print(f"DEBUG - Error processing track {i}: {e}")
+                    continue
+                
+                if best_track is not None:
+                    matched_track_found = True
+                    hist[slice_name]["track_momentum"].Fill(track_momentum)
+                    print(f"DEBUG - Found matching track: p={track_momentum:.2f} GeV, dR={best_dR:.3f}")
+                    break  # Found a good track, stop looking
+            
+                except Exception as e:
+                    print(f"DEBUG - Error accessing {track_collection_name}: {e}")
+                    continue  # Try next collection
 
-            # ECAL hit analysis
+                if not matched_track_found:
+                    print(f"DEBUG - No matching tracks found in event {events_processed_in_slice}")
+                else:
+                    print(f"DEBUG - SUCCESS: Found track with p={track_momentum:.2f} GeV")
+            
+
             cluster_energy = 0.0
             max_energy = 0.0
             ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
@@ -1092,41 +1093,39 @@ for s in hists2d:
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
 
-print("\n" + "="*60)
 print("PLOTS SAVED IN plots/ DIRECTORY")
-print("="*60)
-print("\nKey plots created:")
-print("📊 COMBINED PLOT:")
-print("   • plots/profile_discrepancy_all_pt_slices.png (All pT ranges on same plot)")
-print("\n📈 INDIVIDUAL PLOTS:")
+print("Key plots created:")
+print("COMBINED PLOT:")
+print(" plots/profile_discrepancy_all_pt_slices.png (All pT ranges on same plot)")
+print("INDIVIDUAL PLOTS:")
 for s in profile_discrepancy_hists:
     pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-    print(f"   • plots/profile_discrepancy_{s}.png ({pt_range} GeV)")
+    print(f" plots/profile_discrepancy_{s}.png ({pt_range} GeV)")
 
-print("\n📋 OTHER LCELECTRONID PLOTS:")
-print("   • plots/lcelectronid_shower_start_layer.png")
-print("   • plots/lcelectronid_max_cell_energy.png") 
-print("   • plots/lcelectronid_cluster_cone_energy.png")
+print(" OTHER LCELECTRONID PLOTS:")
+print("    plots/lcelectronid_shower_start_layer.png")
+print("    plots/lcelectronid_max_cell_energy.png") 
+print("    plots/lcelectronid_cluster_cone_energy.png")
 
-print("\n📊 LONGITUDINAL PROFILES:")
+print("\ LONGITUDINAL PROFILES:")
 for s in longitudinal_profile:
     if longitudinal_profile[s]:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-        print(f"   • plots/longitudinal_profile_{s}.png ({pt_range} GeV)")
+        print(f" plots/longitudinal_profile_{s}.png ({pt_range} GeV)")
 
-print("\n🎯 2D CORRELATION PLOTS:")
-print("   • plots/*shower_start_layer_v_profile_discrepancy*.png")
-print("   • plots/*cluster_E_v_mcp_E*.png")
-print("   • plots/*cluster_eta_v_mcp_eta*.png")
+print(" 2D CORRELATION PLOTS:")
+print("  plots/*shower_start_layer_v_profile_discrepancy*.png")
+print("  plots/*cluster_E_v_mcp_E*.png")
+print("    plots/*cluster_eta_v_mcp_eta*.png")
 
-print(f"\n✅ Processing complete! Total events: {total_events_processed}")
-print("\n💡 KEY INSIGHTS:")
-print("   • The combined plot shows profile discrepancy distributions across all pT ranges")
-print("   • Individual plots include Pandora's 0.6 threshold line for reference")
-print("   • Statistics table shows what fraction of events exceed the 0.6 threshold")
-print("   • Use this data to optimize your electron identification cuts!")
+print(f"\ Processing complete! Total events: {total_events_processed}")
+print("\� KEY INSIGHTS:")
+print("  The combined plot shows profile discrepancy distributions across all pT ranges")
+print("  Individual plots include Pandora's 0.6 threshold line for reference")
+print("    Statistics table shows what fraction of events exceed the 0.6 threshold")
+print("    Use this data to optimize your electron identification cuts!")
 
-print("\n🔍 NEXT STEPS:")
+print(" NEXT STEPS:")
 print("   1. Check plots/profile_discrepancy_all_pt_slices.png for overall distribution")
 print("   2. Review individual pT slice plots to see energy dependence") 
 print("   3. Use statistics table to decide if 0.6 is the right threshold for your analysis")
