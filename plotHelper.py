@@ -217,7 +217,7 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
     
     
     # Add eta cut information (hardcoded since cut at |eta| < 2)
-    text.DrawLatex(0.15, 0.84, "|#eta| < 2")
+    text.DrawLatex(0.15, 0.84, "|#eta| < 2.4")
     ROOT.gStyle.SetOptStat(0)  # Remove stats box
     can.SaveAs(save_name)
     can.Close()

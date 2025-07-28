@@ -130,7 +130,7 @@ for s in files:
                 if mcp == 0: continue 
                 mcp_tlv = getTLV(mcp)
                 if mcp_tlv.E() < 20: continue
-                if abs(mcp_tlv.Eta())>2: continue
+                if abs(mcp_tlv.Eta())>2.4: continue
                 fillObjHists(hists[s], "mcp", mcp_tlv)
                 momentum = math.sqrt(mcp.getMomentum()[0]**2+mcp.getMomentum()[1]**2+mcp.getMomentum()[2]**2)
                 hists2d[s]["mcp_E_v_mcp_p"].Fill(mcp.getEnergy(), momentum)
