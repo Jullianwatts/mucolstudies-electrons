@@ -6,11 +6,12 @@ import pyLCIO
 from pyLCIO import EVENT, UTIL
 from ROOT import TH1F, TH2F, TFile, TLorentzVector, TMath, TCanvas
 import numpy as np
+import plotHelper
 
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1
+max_events = 10
 import os
 
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
@@ -208,7 +209,8 @@ def get_profile_discrepancy(energy_by_layer, total_energy, energy=None,
             max_discrepancy = discrepancy
             max_discrepancy_layer = l
     return max_discrepancy_layer, max_discrepancy
-def plotHistograms(hist_dict, output_path, x_title, y_title):
+
+def plotHistogramsSimple(hist_dict, output_path, x_title, y_title):
     """Plot multiple histograms on same canvas"""
     if not hist_dict:
         return
@@ -552,11 +554,11 @@ for s in hists:
         cluster_hists_r[s] = hists[s]["cluster_r"]
 
 if cluster_hists_nhits:
-    plotHistograms(cluster_hists_nhits, "plots/cluster_nhits.png", "Number of Hits per Cluster", "Entries")
+    plotHistogramsSimple(cluster_hists_nhits, "plots/cluster_nhits.png", "Number of Hits per Cluster", "Entries")
 if cluster_hists_r:
-    plotHistograms(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
+    plotHistogramsSimple(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 
-# Plot LCElectronId parameter histograms
+# Plot LCElectronId parameter histograms using plotHelper
 lcelectronid_hists = {}
 for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "cluster_cone_energy"]:
     lcelectronid_hists[param] = {}
@@ -565,8 +567,12 @@ for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "c
             lcelectronid_hists[param][s] = hists[s][f"electron_{param}"]
 
     if lcelectronid_hists[param]:
-        plotHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
-                      param.replace("_", " ").title(), "Entries")
+        if param == "shower_start_layer":
+            plotHelper.plotHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
+                                    "Shower Start Layer", "Entries", False, True, "", False)
+        else:
+            plotHistogramsSimple(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
+                          param.replace("_", " ").title(), "Entries")
 
 pfo_shower_hists = {}
 for s in hists:
@@ -574,7 +580,8 @@ for s in hists:
         pfo_shower_hists[s] = hists[s]["pfo_shower_start_layer"]
 
 if pfo_shower_hists:
-    plotHistograms(pfo_shower_hists, "plots/pfo_shower_start_layer.png", "PFO Shower Start Layer", "Entries")
+    plotHelper.plotHistograms(pfo_shower_hists, "plots/pfo_shower_start_layer.png", 
+                            "PFO Shower Start Layer", "Entries", False, True, "", False)
     for s, hist in pfo_shower_hists.items():
         if hist.GetEntries() > 0:
             c = ROOT.TCanvas("can", "can", 800, 600)
@@ -602,10 +609,11 @@ for s in hists2d:
 
 print("Plots saved in plots/ directory")
 print("Key LCElectronId parameter plots:")
-print("- plots/lcelectronid_shower_start_layer.png (for m_maxProfileStart)")
+print("- plots/lcelectronid_shower_start_layer.png (for m_maxProfileStart) - MAIA STYLE")
 print("- plots/lcelectronid_max_cell_energy.png (for m_maxEnergy)")
 print("- plots/lcelectronid_profile_discrepancy.png (for m_maxProfileDiscrepancy)")
 print("- plots/lcelectronid_cluster_cone_energy.png (cluster energy in cone)")
+print("- plots/pfo_shower_start_layer.png - MAIA STYLE")
 print("Longitudinal profile plots:")
 for s in longitudinal_profile:
     if longitudinal_profile[s]:
