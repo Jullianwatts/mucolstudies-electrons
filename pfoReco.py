@@ -45,7 +45,7 @@ for s in files:
     hists[s]["reco_el_match_pt"] = ROOT.TH1F(f"{s}_reco_el_match_pt", s, 30, 0, 3000)
     
     # Missed electrons reconstructed as specific particles
-    particle_types = ["photon", "pion_charged", "pion_neutral", "neutron", "other"]
+    particle_types = ["photon", "pion_charged", "neutron", "other"]
     for ptype in particle_types:
         hists[s][f"missed_as_{ptype}_eta"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_eta", s, 20, -3, 3)
         hists[s][f"missed_as_{ptype}_E"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_E", s, 30, 0, 5000)
@@ -124,7 +124,7 @@ for s in files:
                 
                 mcp_tlv = getTLV(mcp)
                 if mcp_tlv.E() < 10: continue  # Energy cut
-                if abs(mcp_tlv.Eta()) > 2.5: continue  # Eta cut
+                if abs(mcp_tlv.Eta()) > 2.4: continue  # Eta cut
                 
                 mcp_electrons.append(mcp_tlv)
                 # Fill denominator histograms
@@ -140,7 +140,6 @@ for s in files:
                 "electron": [],
                 "photon": [],
                 "pion_charged": [],
-                "pion_neutral": [],
                 "neutron": [],
                 "other": []
             }
@@ -168,7 +167,7 @@ for s in files:
                     matched_category = None
                     
                     # Check each specific particle type in order of priority
-                    for category in ["photon", "pion_charged", "pion_neutral", "neutron", "other"]:
+                    for category in ["photon", "pion_charged", "neutron", "other"]:
                         if any(isMatched(mcp_el, reco_p) for reco_p in reco_particles[category]):
                             matched_category = category
                             break
@@ -204,7 +203,7 @@ for s in hists:
     eff_eta[label_map[s]] = eff
 
 plotEfficiencies(eff_eta, "plots/electron_efficiency_vs_eta.png",
-                xlabel="#eta", ylabel="Electron Reconstruction Efficiency")
+                xlabel="#eta", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
 # Efficiency vs energy
 eff_energy = {}
@@ -219,7 +218,7 @@ for s in hists:
     eff_energy[label_map[s]] = eff
 
 plotEfficiencies(eff_energy, "plots/electron_efficiency_vs_energy.png",
-                xlabel="Energy [GeV]", ylabel="Electron Reconstruction Efficiency")
+                xlabel="Energy [GeV]", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
 # Efficiency vs pt
 eff_pt = {}
@@ -234,49 +233,54 @@ for s in hists:
     eff_pt[label_map[s]] = eff
 
 plotEfficiencies(eff_pt, "plots/electron_efficiency_vs_pt.png",
-                xlabel="p_{T} [GeV]", ylabel="Electron Reconstruction Efficiency")
+                xlabel="p_{T} [GeV]", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
-# BREAKDOWN OF MISSED ELECTRONS
-print("\n=== CALCULATING BREAKDOWN OF MISSED ELECTRONS ===")
+# BREAKDOWN OF MISSED ELECTRONS - COMBINED ACROSS ALL pT SLICES
+print("\n=== CALCULATING BREAKDOWN OF MISSED ELECTRONS (COMBINED) ===")
 
-# What happens to missed electrons vs eta
-missed_breakdown_eta = {}
+# Combine all pT slices for each particle type
+categories = ["reco_el_match", "missed_as_photon", "missed_as_pion_charged", 
+             "missed_as_neutron", "missed_as_other", "missed_unrecognized"]
+
+# Create combined histograms for each category
+combined_hists = {}
+for category in categories:
+    combined_hists[f"{category}_eta"] = ROOT.TH1F(f"combined_{category}_eta", "Combined", 20, -3, 3)
+
+# Also create combined denominator (total MCP electrons)
+combined_hists["mcp_el_eta"] = ROOT.TH1F("combined_mcp_el_eta", "Combined", 20, -3, 3)
+
+# Add all pT slices together
 for s in hists:
-    # Total missed electrons
-    total_missed = (hists[s]["missed_as_photon_eta"].GetEntries() + 
-                   hists[s]["missed_as_pion_charged_eta"].GetEntries() +
-                   hists[s]["missed_as_pion_neutral_eta"].GetEntries() +
-                   hists[s]["missed_as_neutron_eta"].GetEntries() +
-                   hists[s]["missed_as_other_eta"].GetEntries() + 
-                   hists[s]["missed_unrecognized_eta"].GetEntries())
-    
-    if total_missed == 0:
-        continue
-    
-    # Create efficiency plots for each category
-    categories = ["missed_as_photon", "missed_as_pion_charged", "missed_as_pion_neutral", 
-                 "missed_as_neutron", "missed_as_other", "missed_unrecognized"]
-    
     for category in categories:
-        num = hists[s][f"{category}_eta"]
-        # Use total MCP electrons as denominator to show fraction of all electrons
-        denom = hists[s]["mcp_el_eta"]
-        eff = ROOT.TGraphAsymmErrors()
-        eff.BayesDivide(num, denom, "B")
-        
-        # Clean up category labels
-        if "pion_charged" in category:
-            category_label = "Charged Pion"
-        elif "pion_neutral" in category:
-            category_label = "Neutral Pion"
-        else:
-            category_label = category.replace("missed_as_", "").replace("missed_", "").replace("_", " ").title()
-        
-        key = f"{label_map[s]} - {category_label}"
-        missed_breakdown_eta[key] = eff
+        combined_hists[f"{category}_eta"].Add(hists[s][f"{category}_eta"])
+    combined_hists["mcp_el_eta"].Add(hists[s]["mcp_el_eta"])
 
-plotEfficiencies(missed_breakdown_eta, "plots/electron_breakdown_vs_eta.png",
-                xlabel="#eta", ylabel="Fraction of MC Electrons")
+# Create efficiency plots for each particle type (combined across all pT slices)
+missed_breakdown_eta = {}
+for category in categories:
+    if combined_hists[f"{category}_eta"].GetEntries() == 0:
+        continue
+        
+    num = combined_hists[f"{category}_eta"]
+    denom = combined_hists["mcp_el_eta"]
+    eff = ROOT.TGraphAsymmErrors()
+    eff.BayesDivide(num, denom, "B")
+    
+    # Clean up category labels
+    if category == "reco_el_match":
+        category_label = "Electron"
+    elif "pion_charged" in category:
+        category_label = "Charged Pion"
+    elif "pion_neutral" in category:
+        category_label = "Neutral Pion"
+    else:
+        category_label = category.replace("missed_as_", "").replace("missed_", "").replace("_", " ").title()
+    
+    missed_breakdown_eta[category_label] = eff
+
+plotEfficiencies(missed_breakdown_eta, "plots/electron_breakdown_vs_eta_combined.png",
+                xlabel="#eta", ylabel="Fraction of MC Electrons", with_bib=False)
 
 # Print summary
 print("\nElectron Reconstruction Efficiency Summary:")
@@ -287,7 +291,6 @@ for s in hists:
     
     missed_photon = hists[s]["missed_as_photon_eta"].GetEntries()
     missed_pion_charged = hists[s]["missed_as_pion_charged_eta"].GetEntries()
-    missed_pion_neutral = hists[s]["missed_as_pion_neutral_eta"].GetEntries()
     missed_neutron = hists[s]["missed_as_neutron_eta"].GetEntries()
     missed_other = hists[s]["missed_as_other_eta"].GetEntries()
     missed_unrecognized = hists[s]["missed_unrecognized_eta"].GetEntries()
@@ -298,7 +301,27 @@ for s in hists:
     print(f"  Missed electrons:")
     print(f"    → Reconstructed as photons: {int(missed_photon)} ({missed_photon/total:.3f} of total)")
     print(f"    → Reconstructed as charged pions: {int(missed_pion_charged)} ({missed_pion_charged/total:.3f} of total)")
-    print(f"    → Reconstructed as neutral pions: {int(missed_pion_neutral)} ({missed_pion_neutral/total:.3f} of total)")
     print(f"    → Reconstructed as neutrons: {int(missed_neutron)} ({missed_neutron/total:.3f} of total)")
     print(f"    → Reconstructed as other: {int(missed_other)} ({missed_other/total:.3f} of total)")
     print(f"    → Not reconstructed: {int(missed_unrecognized)} ({missed_unrecognized/total:.3f} of total)")
+
+# Print combined summary
+print("\n=== COMBINED SUMMARY (ALL pT SLICES) ===")
+total_combined = combined_hists["mcp_el_eta"].GetEntries()
+matched_combined = combined_hists["reco_el_match_eta"].GetEntries()
+efficiency_combined = matched_combined/total_combined if total_combined > 0 else 0
+
+missed_photon_combined = combined_hists["missed_as_photon_eta"].GetEntries()
+missed_pion_charged_combined = combined_hists["missed_as_pion_charged_eta"].GetEntries()
+missed_neutron_combined = combined_hists["missed_as_neutron_eta"].GetEntries()
+missed_other_combined = combined_hists["missed_as_other_eta"].GetEntries()
+missed_unrecognized_combined = combined_hists["missed_unrecognized_eta"].GetEntries()
+
+print(f"Total electrons: {int(total_combined)}")
+print(f"Reconstructed as electrons: {int(matched_combined)} ({efficiency_combined:.3f})")
+print(f"Missed electrons:")
+print(f"  → Reconstructed as photons: {int(missed_photon_combined)} ({missed_photon_combined/total_combined:.3f} of total)")
+print(f"  → Reconstructed as charged pions: {int(missed_pion_charged_combined)} ({missed_pion_charged_combined/total_combined:.3f} of total)")
+print(f"  → Reconstructed as neutrons: {int(missed_neutron_combined)} ({missed_neutron_combined/total_combined:.3f} of total)")
+print(f"  → Reconstructed as other: {int(missed_other_combined)} ({missed_other_combined/total_combined:.3f} of total)")
+print(f"  → Not reconstructed: {int(missed_unrecognized_combined)} ({missed_unrecognized_combined/total_combined:.3f} of total)")

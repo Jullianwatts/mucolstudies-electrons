@@ -5,6 +5,7 @@ import pyLCIO
 from pyLCIO import EVENT, UTIL
 from ROOT import TH1F, TH2F, TFile, TLorentzVector, TMath, TCanvas
 import numpy as np
+import math
 
 ROOT.gROOT.SetBatch()
 
@@ -120,7 +121,6 @@ for s in files:
     hists2d[s]["E_over_p_vs_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_vs_profile_discrepancy_{s}", f"E/p vs Profile Discrepancy {s};E/p;Profile Discrepancy", 50, 0, 3, 50, 0, 2)
 
 # PANDORA-STYLE PROFILE DISCREPANCY FUNCTION (ONLY)
-
 def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None,
                                         num_layers=50, X0_per_layer=0.6286):
     """
@@ -178,7 +178,6 @@ def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=
     return max_layer, scaled_discrepancy
 
 # TRACK-CLUSTER MATCHING AND E/P FUNCTIONS
-
 def match_track_to_cluster(track_tlv, cluster_tlv, dR_cut=0.1):
     """
     Match track to cluster using delta R
@@ -231,16 +230,107 @@ def find_shower_start_layer(energy_by_layer, threshold=0.01):
     """Find first layer with significant energy deposition"""
     if not energy_by_layer:
         return -1
-
     total_energy = sum(energy_by_layer.values())
     if total_energy == 0:
         return -1
-
     sorted_layers = sorted(energy_by_layer.keys())
     for layer in sorted_layers:
         if energy_by_layer[layer] / total_energy > threshold:
             return layer
     return sorted_layers[0] if sorted_layers else -1
+
+def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286):
+    """
+    Generate expected EM shower profile using gamma distribution
+    Based on the longitudinal development of electromagnetic showers
+    """
+    # Shape parameters from EM shower physics
+    # Critical energy for electrons in typical calorimeter ~10-20 MeV
+    E_c = 0.015  # GeV (critical energy)
+    
+    # Shower maximum position (in radiation lengths)
+    # For electrons: t_max ≈ ln(E/E_c) - 0.5 for E >> E_c
+    if energy > E_c:
+        t_max = log(energy / E_c) - 0.5
+    else:
+        t_max = 0.0
+    
+    # Gamma distribution parameters
+    # a parameter controls shower development
+    a = 1.0 + t_max  # Shape parameter
+    b = 1.0  # Scale parameter (normalized)
+    
+    expected_profile = {}
+    total_expected = 0.0
+    
+    for layer in range(num_layers):
+        t = layer * X0_per_layer  # radiation lengths
+        
+        if t == 0:
+            # Handle t=0 case
+            if a > 1:
+                profile_value = 0.0
+            else:
+                profile_value = 1.0 / gamma(a)
+        else:
+            try:
+                # Gamma distribution: f(t) = (b^a / Γ(a)) * t^(a-1) * exp(-b*t)
+                profile_value = (b**a / gamma(a)) * (t**(a-1)) * exp(-b*t)
+            except (OverflowError, ZeroDivisionError, ValueError):
+                profile_value = 0.0
+        
+        expected_profile[layer] = profile_value
+        total_expected += profile_value
+    
+    # Normalize to unit integral
+    if total_expected > 0:
+        for layer in expected_profile:
+            expected_profile[layer] /= total_expected
+    
+    return expected_profile
+
+def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold=0.01, X0_per_layer=0.6286):
+    """
+    Find shower start layer using physics-based EM profile comparison
+    """
+    if not energy_by_layer:
+        return -1
+    
+    total_energy = sum(energy_by_layer.values())
+    if total_energy == 0:
+        return -1
+    
+    # Generate expected EM shower profile
+    expected_profile = generate_expected_em_profile(
+        num_layers=max(energy_by_layer.keys()) + 10,
+        energy=energy,
+        X0_per_layer=X0_per_layer
+    )
+    
+    # Normalize observed profile
+    observed_profile = {}
+    for layer, energy_val in energy_by_layer.items():
+        observed_profile[layer] = energy_val / total_energy
+    
+    # Find first layer where expected profile suggests shower should start
+    # (where expected profile reaches the threshold)
+    sorted_layers = sorted(expected_profile.keys())
+    expected_start = 0
+    
+    for layer in sorted_layers:
+        if expected_profile[layer] > threshold:
+            expected_start = layer
+            break
+    
+    # Now find first observed layer with significant energy near expected start
+    sorted_obs_layers = sorted(energy_by_layer.keys())
+    for layer in sorted_obs_layers:
+        if layer >= max(0, expected_start - 2):  # Allow some flexibility
+            if observed_profile.get(layer, 0) > threshold:
+                return layer
+    
+    # Fallback to simple method
+    return find_shower_start_layer(energy_by_layer, threshold)
 
 def plotHistograms(hist_dict, output_path, x_title, y_title):
     """Plot multiple histograms on same canvas"""
@@ -290,6 +380,113 @@ def plotHistograms(hist_dict, output_path, x_title, y_title):
     
     c.SaveAs(output_path)
     c.Close()
+
+# Custom plotting function adapted from plotHelper style
+def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshold_line=None, with_bib=False):
+    """Plot discrepancy histograms in the style of plotHelper efficiency plots"""
+    if not hist_dict:
+        return
+
+    can = ROOT.TCanvas("can", "can", 800, 600)
+    can.SetLeftMargin(0.12)
+    can.SetBottomMargin(0.12)
+    can.SetTopMargin(0.08)
+    can.SetRightMargin(0.05)
+    can.SetLogy()
+
+    # Color scheme like your efficiency plots
+    colors = [ROOT.kBlue, ROOT.kRed, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange+1, ROOT.kCyan+1]
+    markers = [20, 21, 22, 23, 24, 25]  # Different marker styles
+
+    # Style the histograms
+    for i, (name, hist) in enumerate(hist_dict.items()):
+        if hist.GetEntries() == 0:
+            continue
+        
+        hist.SetMarkerColor(colors[i % len(colors)])
+        hist.SetLineColor(colors[i % len(colors)])
+        hist.SetMarkerStyle(markers[i % len(markers)])
+        hist.SetMarkerSize(1.2)
+        hist.SetLineWidth(2)
+
+    first = True
+    for i, (name, hist) in enumerate(hist_dict.items()):
+        if hist.GetEntries() == 0:
+            continue
+
+        if first:
+            hist.Draw("HIST")
+            hist.SetTitle("")  # Remove title for cleaner look
+            hist.GetXaxis().SetTitle(x_title)
+            hist.GetYaxis().SetTitle(y_title)
+            hist.GetXaxis().SetTitleSize(0.045)
+            hist.GetYaxis().SetTitleSize(0.045)
+            hist.GetXaxis().SetLabelSize(0.04)
+            hist.GetYaxis().SetLabelSize(0.04)
+            hist.GetXaxis().SetTickLength(0.02)
+            hist.GetYaxis().SetTickLength(0.02)
+            first = False
+        else:
+            hist.Draw("HIST SAME")
+
+    # Add threshold line if specified
+    if threshold_line is not None:
+        line = ROOT.TLine(threshold_line, can.GetUymin(), threshold_line, can.GetUymax())
+        line.SetLineColor(ROOT.kGray+1)
+        line.SetLineStyle(2)
+        line.SetLineWidth(2)
+        line.Draw()
+
+    # Create legend with header like in your desired style
+    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
+    leg.SetBorderSize(1)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(1001)
+    leg.SetTextSize(0.035)
+    
+    for name, hist in hist_dict.items():
+        if hist.GetEntries() == 0:
+            continue
+        # Clean up the legend entries to match your style
+        clean_label = name.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
+        leg.AddEntry(hist, clean_label, "l")
+    
+    leg.Draw()
+
+    # Add text labels in your style
+    text = ROOT.TLatex()
+    text.SetNDC()
+    text.SetTextAlign(11)  # Left aligned
+    text.SetTextSize(0.04)
+    text.SetTextFont(62)  # Bold font like in image
+    
+    concept_text = ROOT.TLatex()
+    concept_text.SetNDC()
+    concept_text.SetTextAlign(31)  # Right aligned
+    concept_text.SetTextSize(0.035)
+    concept_text.SetTextFont(42)
+    concept_text.DrawLatex(0.94, 0.92, "MAIA Detector Concept")
+    
+    text.DrawLatex(0.15, 0.92, "Muon Collider")
+    
+    bib_text = "Simulation, with BIB" if with_bib else "Simulation, no BIB"
+    text.SetTextFont(42)  # Regular font
+    text.DrawLatex(0.15, 0.88, bib_text)
+    
+    # Add eta cut information
+    text.DrawLatex(0.15, 0.84, "|#eta| < 2.4")
+    
+    # Add threshold information if present
+    if threshold_line is not None:
+        if "profile" in output_path.lower():
+            text.DrawLatex(0.15, 0.80, f"Pandora threshold = {threshold_line}")
+        elif "E_minus_p" in output_path:
+            text.DrawLatex(0.15, 0.80, f"Steering threshold = {threshold_line}")
+
+    ROOT.gStyle.SetOptStat(0)  # Remove stats box
+    can.SaveAs(output_path)
+    can.Close()
+    return can
 
 # Create a reader object
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
@@ -587,7 +784,28 @@ for slice_name in files:
             # Set the overall max energy
             max_energy = max(max_cluster_energies) if max_cluster_energies else 0.0
 
-            # [PFO analysis section - keeping your existing code]
+            # Calculate shower start layer using physics-based method
+            shower_start_layer = find_shower_start_layer_physics_based(
+                hit_energies_by_layer, 
+                energy=trueE, 
+                threshold=0.01, 
+                X0_per_layer=0.6286
+            )
+            
+            # Also calculate with simple method for comparison
+            shower_start_layer_simple = find_shower_start_layer(hit_energies_by_layer, threshold=0.01)
+            
+            # Debug output for first few events
+            if events_processed_in_slice < 5:
+                print(f"DEBUG - Event {events_processed_in_slice}: Energy={trueE:.2f} GeV")
+                print(f"  Physics-based shower start: Layer {shower_start_layer}")
+                print(f"  Simple method shower start: Layer {shower_start_layer_simple}")
+                if hit_energies_by_layer:
+                    total_energy_check = sum(hit_energies_by_layer.values())
+                    print(f"  Layer energies (first 5): {dict(list(sorted(hit_energies_by_layer.items()))[:5])}")
+                    print(f"  Layer fractions (first 5): {dict((l, e/total_energy_check) for l, e in list(sorted(hit_energies_by_layer.items()))[:5])}")
+
+            # [PFO analysis section with physics-based method]
             ecal_decoders = {}
             ecal_collections = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
 
@@ -600,6 +818,7 @@ for slice_name in files:
                 except:
                     continue
 
+            # Use physics-based method for PFO shower start as well
             try:
                 collection_names = event.getCollectionNames()
                 if "PandoraPFOs" in collection_names:
@@ -634,7 +853,13 @@ for slice_name in files:
                                                                     pass
 
                                             if pfo_hit_energies_by_layer:
-                                                pfo_shower_start_layer = find_shower_start_layer(pfo_hit_energies_by_layer, threshold=0.1)
+                                                # Use physics-based method with 1% threshold
+                                                pfo_shower_start_layer = find_shower_start_layer_physics_based(
+                                                    pfo_hit_energies_by_layer, 
+                                                    energy=trueE, 
+                                                    threshold=0.01,
+                                                    X0_per_layer=0.6286
+                                                )
                                                 if pfo_shower_start_layer >= 0:
                                                     hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
             except:
@@ -722,19 +947,23 @@ for slice_name in files:
                         hists2d[slice_name]["E_over_p_vs_energy"].Fill(trueE, e_over_p)
                         hists2d[slice_name]["E_over_p_vs_profile_discrepancy"].Fill(e_over_p, profile_discrepancy)
                         
-                        print(f"DEBUG - Event {events_processed_in_slice}: E/p SUCCESS! Track p={track_momentum:.2f}, Cluster E={cluster_energy:.2f}, E/p={e_over_p:.3f}, |E-p|/p={abs_e_minus_p_over_p:.3f}")
+                        if events_processed_in_slice < 3:
+                            print(f"DEBUG - Event {events_processed_in_slice}: E/p SUCCESS! Track p={track_momentum:.2f}, Cluster E={cluster_energy:.2f}, E/p={e_over_p:.3f}, |E-p|/p={abs_e_minus_p_over_p:.3f}")
                         
                     # Update debug output to include E/p info
                     if events_processed_in_slice % 100 == 0:
                         if e_over_p > 0:
                             print(f"  Track p={track_momentum:.2f} GeV, Cluster E={cluster_energy:.2f} GeV, E/p={e_over_p:.3f}, |E-p|/p={abs_e_minus_p_over_p:.3f}")
                 else:
-                    print(f"DEBUG - Event {events_processed_in_slice}: Track-cluster dR too large: {track_cluster_dR:.3f}")
+                    if events_processed_in_slice < 3:
+                        print(f"DEBUG - Event {events_processed_in_slice}: Track-cluster dR too large: {track_cluster_dR:.3f}")
             elif matched_track_found:
-                print(f"DEBUG - Event {events_processed_in_slice}: Track found but no valid cluster (cluster E={cluster_energy:.2f})")
+                if events_processed_in_slice < 3:
+                    print(f"DEBUG - Event {events_processed_in_slice}: Track found but no valid cluster (cluster E={cluster_energy:.2f})")
             else:
                 if events_processed_in_slice % 100 == 0:
-                    print(f"DEBUG - Event {events_processed_in_slice}: No track found for this event")
+                    if events_processed_in_slice < 3:
+                        print(f"DEBUG - Event {events_processed_in_slice}: No track found for this event")
 
             # Fill cluster histograms
             hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
@@ -836,113 +1065,6 @@ if cluster_hists_nhits:
 if cluster_hists_r:
     plotHistograms(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 
-# Custom plotting function adapted from plotHelper style
-def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshold_line=None, with_bib=False):
-    """Plot discrepancy histograms in the style of plotHelper efficiency plots"""
-    if not hist_dict:
-        return
-
-    can = ROOT.TCanvas("can", "can", 800, 600)
-    can.SetLeftMargin(0.12)
-    can.SetBottomMargin(0.12)
-    can.SetTopMargin(0.08)
-    can.SetRightMargin(0.05)
-    can.SetLogy()
-
-    # Color scheme like your efficiency plots
-    colors = [ROOT.kBlue, ROOT.kRed, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange+1, ROOT.kCyan+1]
-    markers = [20, 21, 22, 23, 24, 25]  # Different marker styles
-
-    # Style the histograms
-    for i, (name, hist) in enumerate(hist_dict.items()):
-        if hist.GetEntries() == 0:
-            continue
-        
-        hist.SetMarkerColor(colors[i % len(colors)])
-        hist.SetLineColor(colors[i % len(colors)])
-        hist.SetMarkerStyle(markers[i % len(markers)])
-        hist.SetMarkerSize(1.2)
-        hist.SetLineWidth(2)
-
-    first = True
-    for i, (name, hist) in enumerate(hist_dict.items()):
-        if hist.GetEntries() == 0:
-            continue
-
-        if first:
-            hist.Draw("HIST")
-            hist.SetTitle("")  # Remove title for cleaner look
-            hist.GetXaxis().SetTitle(x_title)
-            hist.GetYaxis().SetTitle(y_title)
-            hist.GetXaxis().SetTitleSize(0.045)
-            hist.GetYaxis().SetTitleSize(0.045)
-            hist.GetXaxis().SetLabelSize(0.04)
-            hist.GetYaxis().SetLabelSize(0.04)
-            hist.GetXaxis().SetTickLength(0.02)
-            hist.GetYaxis().SetTickLength(0.02)
-            first = False
-        else:
-            hist.Draw("HIST SAME")
-
-    # Add threshold line if specified
-    if threshold_line is not None:
-        line = ROOT.TLine(threshold_line, can.GetUymin(), threshold_line, can.GetUymax())
-        line.SetLineColor(ROOT.kGray+1)
-        line.SetLineStyle(2)
-        line.SetLineWidth(2)
-        line.Draw()
-
-    # Create legend with header like in your desired style
-    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
-    leg.SetBorderSize(1)
-    leg.SetFillColor(0)
-    leg.SetFillStyle(1001)
-    leg.SetTextSize(0.035)
-    
-    for name, hist in hist_dict.items():
-        if hist.GetEntries() == 0:
-            continue
-        # Clean up the legend entries to match your style
-        clean_label = name.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
-        leg.AddEntry(hist, clean_label, "l")
-    
-    leg.Draw()
-
-    # Add text labels in your style
-    text = ROOT.TLatex()
-    text.SetNDC()
-    text.SetTextAlign(11)  # Left aligned
-    text.SetTextSize(0.04)
-    text.SetTextFont(62)  # Bold font like in image
-    
-    concept_text = ROOT.TLatex()
-    concept_text.SetNDC()
-    concept_text.SetTextAlign(31)  # Right aligned
-    concept_text.SetTextSize(0.035)
-    concept_text.SetTextFont(42)
-    concept_text.DrawLatex(0.94, 0.92, "MAIA Detector Concept")
-    
-    text.DrawLatex(0.15, 0.92, "Muon Collider")
-    
-    bib_text = "Simulation, with BIB" if with_bib else "Simulation, no BIB"
-    text.SetTextFont(42)  # Regular font
-    text.DrawLatex(0.15, 0.88, bib_text)
-    
-    # Add eta cut information
-    text.DrawLatex(0.15, 0.84, "|#eta| < 2.4")
-    
-    # Add threshold information if present
-    if threshold_line is not None:
-        if "profile" in output_path.lower():
-            text.DrawLatex(0.15, 0.80, f"Pandora threshold = {threshold_line}")
-        elif "E_minus_p" in output_path:
-            text.DrawLatex(0.15, 0.80, f"Steering threshold = {threshold_line}")
-
-    ROOT.gStyle.SetOptStat(0)  # Remove stats box
-    can.SaveAs(output_path)
-    can.Close()
-    return can
-
 # Plot E/p analysis histograms
 print("Creating E/p analysis plots...")
 
@@ -1040,17 +1162,91 @@ for s in abs_e_minus_p_over_p_hists:
     c.SaveAs(f"plots/abs_E_minus_p_over_p_{s}.png")
     c.Close()
 
-# Plot LCElectronId parameter histograms
+# Plot LCElectronId parameter histograms with MAIA formatting
+print("Creating LCElectronId parameter plots with MAIA formatting...")
 lcelectronid_hists = {}
 for param in ["shower_start_layer", "max_cell_energy", "cluster_cone_energy"]:
     lcelectronid_hists[param] = {}
     for s in hists:
-        if f"electron_{param}" in hists[s]:
+        if f"electron_{param}" in hists[s] and hists[s][f"electron_{param}"].GetEntries() > 0:
             lcelectronid_hists[param][s] = hists[s][f"electron_{param}"]
 
     if lcelectronid_hists[param]:
-        plotHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
+        plotDiscrepancyHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
                       param.replace("_", " ").title(), "Entries")
+
+# Create dedicated shower start layer plots with MAIA formatting
+print("Creating shower start layer plots with MAIA formatting...")
+shower_start_hists = {}
+
+for s in hists:
+    if "electron_shower_start_layer" in hists[s] and hists[s]["electron_shower_start_layer"].GetEntries() > 0:
+        shower_start_hists[s] = hists[s]["electron_shower_start_layer"]
+
+if shower_start_hists:
+    plotDiscrepancyHistograms(shower_start_hists, "plots/electron_shower_start_layer_all_pt_slices.png",
+                  "Shower Start Layer", "Entries")
+    
+    # Individual shower start layer plots with MAIA formatting
+    for s, hist in shower_start_hists.items():
+        pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+        
+        # Create individual plot with MAIA styling
+        can = ROOT.TCanvas("can", "can", 800, 600)
+        can.SetLeftMargin(0.12)
+        can.SetBottomMargin(0.12)
+        can.SetTopMargin(0.08)
+        can.SetRightMargin(0.05)
+        can.SetLogy()
+        
+        hist.SetLineColor(ROOT.kBlue)
+        hist.SetLineWidth(3)
+        hist.SetTitle("")
+        hist.GetXaxis().SetTitle("Shower Start Layer")
+        hist.GetYaxis().SetTitle("Entries")
+        hist.GetXaxis().SetTitleSize(0.045)
+        hist.GetYaxis().SetTitleSize(0.045)
+        hist.GetXaxis().SetLabelSize(0.04)
+        hist.GetYaxis().SetLabelSize(0.04)
+        
+        hist.Draw("HIST")
+        
+        # Add MAIA Detector labels
+        text = ROOT.TLatex()
+        text.SetNDC()
+        text.SetTextAlign(11)
+        text.SetTextSize(0.04)
+        text.SetTextFont(62)
+        
+        concept_text = ROOT.TLatex()
+        concept_text.SetNDC()
+        concept_text.SetTextAlign(31)
+        concept_text.SetTextSize(0.035)
+        concept_text.SetTextFont(42)
+        concept_text.DrawLatex(0.94, 0.92, "MAIA Detector Concept")
+        
+        text.DrawLatex(0.15, 0.92, "Muon Collider")
+        
+        text.SetTextFont(42)
+        text.DrawLatex(0.15, 0.88, "Simulation, no BIB")
+        text.DrawLatex(0.15, 0.84, "|#eta| < 2.4")
+        text.DrawLatex(0.15, 0.80, f"pT: {pt_range} GeV")
+        
+        # Add statistics
+        mean_val = hist.GetMean()
+        rms_val = hist.GetRMS()
+        entries = hist.GetEntries()
+        
+        stats_text = ROOT.TLatex()
+        stats_text.SetNDC()
+        stats_text.SetTextSize(0.03)
+        stats_text.DrawLatex(0.65, 0.85, f"Entries: {int(entries)}")
+        stats_text.DrawLatex(0.65, 0.82, f"Mean: {mean_val:.2f}")
+        stats_text.DrawLatex(0.65, 0.79, f"RMS: {rms_val:.2f}")
+        
+        ROOT.gStyle.SetOptStat(0)
+        can.SaveAs(f"plots/electron_shower_start_layer_{s}.png")
+        can.Close()
 
 # Plot Profile Discrepancy for all pT slices on the same plot
 print("Creating combined profile discrepancy plot...")
@@ -1100,6 +1296,7 @@ for s, hist in profile_discrepancy_hists.items():
     stats_text.Draw()
     
     stats_text2 = ROOT.TText(0.15, y_max * 0.75, f"Mean: {mean_val:.3f}")
+    stats_text2.SetTextSize(0.03)
     stats_text2.Draw()
     
     stats_text3 = ROOT.TText(0.15, y_max * 0.7, f"RMS: {rms_val:.3f}")
@@ -1161,25 +1358,76 @@ for s in abs_e_minus_p_over_p_hists:
     
     print(f"{pt_range:<15} {entries:<8} {mean_val:<12.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
 
+print("-"*70)
 
+# Plot PFO shower histograms with MAIA formatting
+print("Creating PFO shower start layer plots with MAIA formatting...")
 pfo_shower_hists = {}
 for s in hists:
-    if "pfo_shower_start_layer" in hists[s]:
+    if "pfo_shower_start_layer" in hists[s] and hists[s]["pfo_shower_start_layer"].GetEntries() > 0:
         pfo_shower_hists[s] = hists[s]["pfo_shower_start_layer"]
 
 if pfo_shower_hists:
-    plotHistograms(pfo_shower_hists, "plots/pfo_shower_start_layer.png", "PFO Shower Start Layer", "Entries")
+    plotDiscrepancyHistograms(pfo_shower_hists, "plots/pfo_shower_start_layer_all_pt_slices.png", "PFO Shower Start Layer", "Entries")
+    
+    # Individual PFO shower start layer plots with MAIA formatting
     for s, hist in pfo_shower_hists.items():
-        if hist.GetEntries() > 0:
-            c = ROOT.TCanvas("can", "can", 800, 600)
-            c.SetLogy()
-            hist.SetLineColor(ROOT.kBlue)
-            hist.SetLineWidth(2)
-            hist.GetXaxis().SetTitle("PFO Shower Start Layer")
-            hist.GetYaxis().SetTitle("Entries")
-            hist.Draw("HIST")
-            c.SaveAs(f"plots/pfo_shower_start_layer_{s}.png")
-            c.Close()
+        pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+        
+        can = ROOT.TCanvas("can", "can", 800, 600)
+        can.SetLeftMargin(0.12)
+        can.SetBottomMargin(0.12)
+        can.SetTopMargin(0.08)
+        can.SetRightMargin(0.05)
+        can.SetLogy()
+        
+        hist.SetLineColor(ROOT.kBlue)
+        hist.SetLineWidth(3)
+        hist.SetTitle("")
+        hist.GetXaxis().SetTitle("PFO Shower Start Layer")
+        hist.GetYaxis().SetTitle("Entries")
+        hist.GetXaxis().SetTitleSize(0.045)
+        hist.GetYaxis().SetTitleSize(0.045)
+        hist.GetXaxis().SetLabelSize(0.04)
+        hist.GetYaxis().SetLabelSize(0.04)
+        
+        hist.Draw("HIST")
+        
+        # Add MAIA Detector labels
+        text = ROOT.TLatex()
+        text.SetNDC()
+        text.SetTextAlign(11)
+        text.SetTextSize(0.04)
+        text.SetTextFont(62)
+        
+        concept_text = ROOT.TLatex()
+        concept_text.SetNDC()
+        concept_text.SetTextAlign(31)
+        concept_text.SetTextSize(0.035)
+        concept_text.SetTextFont(42)
+        concept_text.DrawLatex(0.94, 0.92, "MAIA Detector Concept")
+        
+        text.DrawLatex(0.15, 0.92, "Muon Collider")
+        text.SetTextFont(42)
+        text.DrawLatex(0.15, 0.88, "Simulation, no BIB")
+        text.DrawLatex(0.15, 0.84, "|#eta| < 2.4")
+        text.DrawLatex(0.15, 0.80, f"pT: {pt_range} GeV")
+        
+        # Add statistics
+        mean_val = hist.GetMean()
+        rms_val = hist.GetRMS()
+        entries = hist.GetEntries()
+        
+        stats_text = ROOT.TLatex()
+        stats_text.SetNDC()
+        stats_text.SetTextSize(0.03)
+        stats_text.DrawLatex(0.65, 0.85, f"Entries: {int(entries)}")
+        stats_text.DrawLatex(0.65, 0.82, f"Mean: {mean_val:.2f}")
+        stats_text.DrawLatex(0.65, 0.79, f"RMS: {rms_val:.2f}")
+        
+        ROOT.gStyle.SetOptStat(0)
+        can.SaveAs(f"plots/pfo_shower_start_layer_{s}.png")
+        can.Close()
 
 # Plot 2D histograms
 for s in hists2d:
@@ -1193,13 +1441,58 @@ for s in hists2d:
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
+
+print("\nPLOTS CREATED WITH MAIA FORMATTING:")
+print("COMBINED PLOTS:")
+print("  plots/profile_discrepancy_all_pt_slices.png")
+print("  plots/E_over_p_all_pt_slices.png")
+print("  plots/abs_E_minus_p_over_p_all_pt_slices.png")
+print("  plots/E_minus_p_over_p_all_pt_slices.png")
+print("  plots/cluster_nhits.png")
+print("  plots/cluster_r.png")
+print("  plots/electron_shower_start_layer_all_pt_slices.png")
+print("  plots/pfo_shower_start_layer_all_pt_slices.png")
+
 print("INDIVIDUAL PLOTS:")
 for s in profile_discrepancy_hists:
     pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
     print(f"  plots/profile_discrepancy_{s}.png ({pt_range} GeV)")
+
+for s in abs_e_minus_p_over_p_hists:
+    pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+    print(f"  plots/abs_E_minus_p_over_p_{s}.png ({pt_range} GeV)")
+
+if shower_start_hists:
+    for s in shower_start_hists:
+        pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+        print(f"  plots/electron_shower_start_layer_{s}.png ({pt_range} GeV)")
+
+if pfo_shower_hists:
+    for s in pfo_shower_hists:
+        pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+        print(f"  plots/pfo_shower_start_layer_{s}.png ({pt_range} GeV)")
+
 print("LONGITUDINAL PROFILES:")
 for s in longitudinal_profile:
     if longitudinal_profile[s]:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
         print(f"  plots/longitudinal_profile_{s}.png ({pt_range} GeV)")
 
+print("LCELECTRONID PARAMETERS (with MAIA formatting):")
+for param in ["shower_start_layer", "max_cell_energy", "cluster_cone_energy"]:
+    print(f"  plots/lcelectronid_{param}.png")
+
+print("\nNote: This fixed V2 code now includes:")
+print("  - Complete track analysis with proper momentum calculation")
+print("  - Track-cluster matching using deltaR")
+print("  - E/p calculations and histogram filling")
+print("  - Enhanced debug output for the first 3 events")
+print("  - Proper TLorentzVector creation for both tracks and clusters")
+print("  - ALL plots now use MAIA Detector styling with:")
+print("    * Muon Collider experiment label")
+print("    * MAIA Detector Concept label")
+print("    * 'Simulation, no BIB' label")
+print("    * '|η| < 2.4' cut information")
+print("    * Professional styling and formatting")
+print("    * Statistics boxes on individual plots")
+print("    * Threshold lines where appropriate")
