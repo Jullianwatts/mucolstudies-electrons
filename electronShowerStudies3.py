@@ -10,7 +10,7 @@ import math
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = -1
+max_events = 50
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
@@ -292,10 +292,7 @@ def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286)
     
     return expected_profile
 """
-def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold=0.01, X0_per_layer=0.6286):
-    """
-    #Find shower start layer using physics-based EM profile comparison
-    """
+""def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold=0.01, X0_per_layer=0.6286):
     if not energy_by_layer:
         return -1
     
@@ -309,8 +306,7 @@ def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold
         energy=energy,
         X0_per_layer=X0_per_layer
     )
-    
-    # Normalize observed profile
+       # Normalize observed profile
     observed_profile = {}
     for layer, energy_val in energy_by_layer.items():
         observed_profile[layer] = energy_val / total_energy
@@ -333,10 +329,8 @@ def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold
                 return layer
     
     # Fallback to simple method
-    return find_shower_start_layer(energy_by_layer, threshold)
-"""
+    return find_shower_start_layer(energy_by_layer, threshold) """
 def plotHistograms(hist_dict, output_path, x_title, y_title):
-    """Plot multiple histograms on same canvas"""
     if not hist_dict:
         return
 
@@ -384,7 +378,6 @@ def plotHistograms(hist_dict, output_path, x_title, y_title):
     c.SaveAs(output_path)
     c.Close()
 
-# Custom plotting function adapted from plotHelper style
 def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshold_line=None, with_bib=False):
     """Plot discrepancy histograms in the style of plotHelper efficiency plots"""
     if not hist_dict:
@@ -745,59 +738,135 @@ for slice_name in files:
             ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
             max_cluster_energies = []
 
-            for coll in ecal_coll:
-                try:
-                    ECALhitCollection = event.getCollection(coll)
-                    if ECALhitCollection is None:
+            # Use PandoraClusters instead of raw ECAL hits
+            try:
+                clusterCollection = event.getCollection('PandoraClusters')
+                
+        
+        # Find cluster that best matches truth electron
+                best_cluster = None
+                best_dR = 999.0
+        
+                for i in range(clusterCollection.getNumberOfElements()):
+                    cluster = clusterCollection.getElementAt(i)
+                    if cluster is None:
                         continue
-                        
-                    encoding = ECALhitCollection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
-                    decoder = UTIL.BitField64(encoding)
-                    cluster_hit_energies_local = []
+                
+                    cluster_pos = cluster.getPosition()
+                    cluster_E = cluster.getEnergy()
+            
+                    if cluster_E > 1.0:  # Minimum energy threshold
+                # Create cluster 4-vector for matching
+                        cluster_tlv = TLorentzVector()
+                        cluster_tlv.SetPxPyPzE(cluster_pos[0], cluster_pos[1], cluster_pos[2], cluster_E)
+                
+                # Match to truth electron
+                        dR = cluster_tlv.DeltaR(tlv_truth)
+                        if dR < best_dR and dR < 0.3:  # Increased matching radius
+                            best_cluster = cluster
+                            best_dR = dR
                     
-                    for hit in ECALhitCollection:
-                        if hit is None:
-                            continue
-                        hit_energy = hit.getEnergy()
-                        if hit_energy > 0:
-                            cluster_hit_energies_local.append(hit_energy)
-                            
-                            # Get layer information
-                            cellID = int(hit.getCellID0())
-                            decoder.setValue(cellID)
-                            layer = decoder["layer"].value()
-                            
-                            if layer not in hit_energies_by_layer:
-                                hit_energies_by_layer[layer] = 0.0
-                            hit_energies_by_layer[layer] += hit_energy
-                            cluster_energy += hit_energy
+                            if events_processed_in_slice < 3:
+                                print(f"DEBUG - Cluster {i}: E={cluster_E:.2f} GeV, dR={dR:.3f}")
+        
+                if best_cluster:
+            # Use calibrated cluster energy
+                    cluster_energy = best_cluster.getEnergy()
+            
+                    if events_processed_in_slice < 3:
+                        print(f"DEBUG - Selected PandoraCluster: E={cluster_energy:.2f} GeV (vs truth {trueE:.2f} GeV), dR={best_dR:.3f}")
+            
+            # Get layer-by-layer energy from cluster's constituent hits
+                    hits = best_cluster.getCalorimeterHits()
+                    if hits:
+                        if events_processed_in_slice < 3:
+                            print(f"DEBUG - Cluster has {hits.size()} constituent hits")
+                
+                # Set up decoders for layer extraction
+                        ecal_decoders = {}
+                        ecal_collections = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
+                
+                        for coll_name in ecal_collections:
+                            try:
+                                temp_collection = event.getCollection(coll_name)
+                                if temp_collection:
+                                    encoding = temp_collection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
+                                    decoder = UTIL.BitField64(encoding)
+                                    ecal_decoders[coll_name] = decoder
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Decoder for {coll_name}: {encoding}")
+                            except:
+                                continue
+                
+                # Process each hit in the cluster
+                        for j in range(hits.size()):
+                            hit = hits[j]
+                            if hit and hit.getEnergy() > 0:
+                                hit_energy = hit.getEnergy()
+                        
+                        # Extract layer information
+                                cellID = int(hit.getCellID0())
+                                layer = -1
+                        
+                        # Try each decoder to find the right one
+                                for coll_name, decoder in ecal_decoders.items():
+                                    try:
+                                        decoder.setValue(cellID)
+                                        layer = decoder["layer"].value()
+                                        break
+                                    except:
+                                        continue
+                        
+                                if layer >= 0:
+                                    if layer not in hit_energies_by_layer:
+                                        hit_energies_by_layer[layer] = 0.0
+                                    hit_energies_by_layer[layer] += hit_energy
                             
                             # Get position for RMS calculation
-                            pos = hit.getPosition()
-                            cluster_hit_positions.append([pos[0], pos[1], pos[2]])
-                            cluster_hit_energies.append(hit_energy)
+                                    pos = hit.getPosition()
+                                    cluster_hit_positions.append([pos[0], pos[1], pos[2]])
+                                    cluster_hit_energies.append(hit_energy)
                             
-                    if cluster_hit_energies_local:
-                        max_energy_local = max(cluster_hit_energies_local)
-                        max_cluster_energies.append(max_energy_local)
+                                    if events_processed_in_slice < 3 and j < 5:  # Debug first 5 hits
+                                        print(f"DEBUG - Hit {j}: layer={layer}, energy={hit_energy:.4f}")
                         
-                except Exception as e:
-                    continue
-                    
-            # Set the overall max energy
+                # Calculate max cell energy from this cluster
+                        if cluster_hit_energies:
+                            max_energy = max(cluster_hit_energies)
+                            max_cluster_energies = [max_energy]  # Single cluster approach
+                        else:
+                            if events_processed_in_slice < 3:
+                                print(f"DEBUG - No matching PandoraCluster found (best dR was {best_dR:.3f})")
+                
+                    if events_processed_in_slice < 3:
+                        print(f"DEBUG - PandoraClusters failed: {e}")
+                        pass
+    # Fallback to your original method if PandoraClusters fail
+    #ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
+    #for coll in ecal_coll:
+        #try:
+            #ECALhitCollection = event.getCollection(coll)
+            #if ECALhitCollection is None:
+                #continue
+            # ... [keep your original code as fallback] ...
+        #except:
+            #continue
+
+# Set the overall max energy
+            except Exception as e:
+                if events_processed_in_slice < 3:
+                    print(f"DEBUG PANDORA CLUSTER FAIL: {e}")
             max_energy = max(max_cluster_energies) if max_cluster_energies else 0.0
 
             # Calculate shower start layer using physics-based method
-            shower_start_layer = find_shower_start_layer_physics_based(
+            shower_start_layer = find_shower_start_layer(
                 hit_energies_by_layer, 
-                energy=trueE, 
                 threshold=0.01, 
-                X0_per_layer=0.6286
             )
             
             # Also calculate with simple method for comparison
             shower_start_layer_simple = find_shower_start_layer(hit_energies_by_layer, threshold=0.01)
-            
+           
             # Debug output for first few events
             if events_processed_in_slice < 5:
                 print(f"DEBUG - Event {events_processed_in_slice}: Energy={trueE:.2f} GeV")
@@ -896,7 +965,25 @@ for slice_name in files:
                     # Create proper TLorentzVector for cluster
                     tlv_cluster.SetPxPyPzE(center_x, center_y, center_z, cluster_energy)
 
+            
             # Calculate shower start layer
+            if events_processed_in_slice < 3:
+                total_energy_check = sum(hit_energies_by_layer.values())
+                print(f"\nDEBUG - Before shower start calculation:")
+                print(f"  Total cluster energy: {total_energy_check:.4f} GeV")
+                print(f"  True electron energy: {trueE:.4f} GeV")
+                print(f"  Number of layers with energy: {len(hit_energies_by_layer)}")
+    
+    # Show first few layers and their fractions
+                sorted_layers = sorted(hit_energies_by_layer.keys())
+                print(f"  First 5 layers with energy:")
+                for i, layer in enumerate(sorted_layers[:5]):
+                    energy = hit_energies_by_layer[layer]
+                    fraction = energy / total_energy_check if total_energy_check > 0 else 0
+                    above_threshold = "✓" if fraction >= 0.01 else "✗"
+                    print(f"    Layer {layer}: {energy:.4f} GeV ({fraction:.4f} = {fraction*100:.2f}%) {above_threshold}")
+
+
             shower_start_layer = find_shower_start_layer(hit_energies_by_layer, threshold=0.01)
 
             # Find shower maximum layer
