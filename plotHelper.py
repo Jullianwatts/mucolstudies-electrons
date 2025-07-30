@@ -73,7 +73,7 @@ def colorHists(hists):
 
 def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, logy=False, atltext="", with_bib=False):
     can = ROOT.TCanvas("can", "can", 800, 600)
-    can.SetGrid(1, 1)  # Add grid
+    #can.SetGrid(1, 1)  # Add grid
     can.SetLeftMargin(0.12)
     can.SetBottomMargin(0.12)
     can.SetTopMargin(0.12)  # Increase top margin for header text
@@ -123,21 +123,28 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
         clean_label = k.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
         leg.AddEntry(h_map[k], clean_label, "l")
     leg.Draw()
-
-
-    if interactive: 
-        input("Press Enter to continue...")  # Updated for Python 3
-
-    # Handle old atltext parameter if needed
     if atltext != "":
         text = ROOT.TLatex()
         text.SetNDC()
         text.SetTextSize(0.04)
         if isinstance(atltext, list):
-            for i, t in enumerate(atltext):
-                text.DrawLatex(0.2, 0.85-0.07*i, t)
+            # First line (Muon Collider) - top left, bold
+            text.SetTextFont(62)  # Bold font
+            text.DrawLatex(0.15, 0.88, atltext[0])  # "Muon Collider"
+            text.SetTextFont(42)  # Regular font
+            text.DrawLatex(0.15, 0.83, atltext[1])  # "Simulation, no BIB" - moved down
+        
+        # Third line (|eta| < 2.4) - under Simulation text
+            if len(atltext) > 2:
+                text.DrawLatex(0.15, 0.78, atltext[2])  # "|eta| < 2.4" - moved to left side
+        
+        # Last item (MAIA Detector Concept) - top right
+            if len(atltext) > 3:
+                text.DrawLatex(0.30, 0.88, atltext[-1])  # Keep this at the top right
         else:
-            text.DrawLatex(0.2, 0.85, atltext)
+            text.DrawLatex(0.15, 0.85, atltext)
+    if interactive: 
+        input("Press Enter to continue...")  # Updated for Python 3
 
     ROOT.gStyle.SetOptStat(0)
     can.SaveAs(save_name)

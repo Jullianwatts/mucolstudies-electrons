@@ -543,7 +543,7 @@ for s in longitudinal_profile:
 
 print("Creating plots...")
 
-# Plot cluster histograms
+# Plot custer histograms
 cluster_hists_nhits = {}
 cluster_hists_r = {}
 
@@ -568,8 +568,17 @@ for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "c
 
     if lcelectronid_hists[param]:
         if param == "shower_start_layer":
-            plotHelper.plotHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
-                                    "Shower Start Layer", "Entries", False, True, "", False)
+            plotHelper.plotHistograms( 
+                lcelectronid_hists[param],
+                f"plots/lcelectronid_{param}.png",
+                "Shower Start Layer",
+                "Fraction of MC Electrons",
+                False,
+                True,
+                ["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4"],
+                False,
+            )   
+
         else:
             plotHistogramsSimple(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
                           param.replace("_", " ").title(), "Entries")
