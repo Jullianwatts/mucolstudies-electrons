@@ -235,10 +235,13 @@ def find_shower_start_layer(energy_by_layer, threshold=0.01):
         return -1
     sorted_layers = sorted(energy_by_layer.keys())
     for layer in sorted_layers:
-        if energy_by_layer[layer] / total_energy > threshold:
+        fraction = energy_by_layer[layer] / total_energy
+        if fraction >= threshold:
             return layer
-    return sorted_layers[0] if sorted_layers else -1
-
+    for layer in sorted_layers:
+        if energy_by_layer[layer] > 0:
+            return layer
+    return -1
 def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286):
     """
     Generate expected EM shower profile using gamma distribution
@@ -288,10 +291,10 @@ def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286)
             expected_profile[layer] /= total_expected
     
     return expected_profile
-
+"""
 def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold=0.01, X0_per_layer=0.6286):
     """
-    Find shower start layer using physics-based EM profile comparison
+    #Find shower start layer using physics-based EM profile comparison
     """
     if not energy_by_layer:
         return -1
@@ -331,7 +334,7 @@ def find_shower_start_layer_physics_based(energy_by_layer, energy=1.0, threshold
     
     # Fallback to simple method
     return find_shower_start_layer(energy_by_layer, threshold)
-
+"""
 def plotHistograms(hist_dict, output_path, x_title, y_title):
     """Plot multiple histograms on same canvas"""
     if not hist_dict:
