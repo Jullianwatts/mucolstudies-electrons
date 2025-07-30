@@ -44,15 +44,12 @@ for s in files:
     hists[s]["reco_el_match_E"] = ROOT.TH1F(f"{s}_reco_el_match_E", s, 30, 0, 5000)
     hists[s]["reco_el_match_pt"] = ROOT.TH1F(f"{s}_reco_el_match_pt", s, 30, 0, 3000)
     
-    # Missed electrons reconstructed as photons
-    hists[s]["missed_as_photon_eta"] = ROOT.TH1F(f"{s}_missed_as_photon_eta", s, 20, -3, 3)
-    hists[s]["missed_as_photon_E"] = ROOT.TH1F(f"{s}_missed_as_photon_E", s, 30, 0, 5000)
-    hists[s]["missed_as_photon_pt"] = ROOT.TH1F(f"{s}_missed_as_photon_pt", s, 30, 0, 3000)
-    
-    # Missed electrons reconstructed as other
-    hists[s]["missed_as_other_eta"] = ROOT.TH1F(f"{s}_missed_as_other_eta", s, 20, -3, 3)
-    hists[s]["missed_as_other_E"] = ROOT.TH1F(f"{s}_missed_as_other_E", s, 30, 0, 5000)
-    hists[s]["missed_as_other_pt"] = ROOT.TH1F(f"{s}_missed_as_other_pt", s, 30, 0, 3000)
+    # Missed electrons reconstructed as specific particles
+    particle_types = ["photon", "pion_charged", "pion_neutral", "neutron", "other"]
+    for ptype in particle_types:
+        hists[s][f"missed_as_{ptype}_eta"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_eta", s, 20, -3, 3)
+        hists[s][f"missed_as_{ptype}_E"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_E", s, 30, 0, 5000)
+        hists[s][f"missed_as_{ptype}_pt"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_pt", s, 30, 0, 3000)
     
     # Completely unrecognized
     hists[s]["missed_unrecognized_eta"] = ROOT.TH1F(f"{s}_missed_unrecognized_eta", s, 20, -3, 3)
@@ -64,6 +61,27 @@ def isMatched(tlv1, tlv2):
     if tlv1.DeltaR(tlv2) < 0.1:
         return True
     return False
+
+# Function to classify reconstructed particles by PDG ID
+def classifyParticle(pfo_type):
+    """
+    Classify PFO particles based on PDG ID
+    Returns: particle category string (only electron, photon, pion, neutron, other)
+    """
+    abs_type = abs(pfo_type)
+    
+    if abs_type == 11:  # Electron/positron
+        return "electron"
+    elif abs_type == 22:  # Photon
+        return "photon"
+    elif abs_type == 211:  # Charged pion
+        return "pion_charged"
+    elif abs_type == 111:  # Neutral pion
+        return "pion_neutral"
+    elif abs_type == 2112:  # Neutron
+        return "neutron"
+    else:
+        return "other"
 
 # Create a reader object
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
@@ -118,26 +136,27 @@ for s in files:
             if len(mcp_electrons) == 0: continue
 
             # Collect reconstructed particles by type
-            reco_electrons = []
-            reco_photons = []
-            reco_others = []
+            reco_particles = {
+                "electron": [],
+                "photon": [],
+                "pion_charged": [],
+                "pion_neutral": [],
+                "neutron": [],
+                "other": []
+            }
             
             for pfo in pfos:
                 pfo_tlv = getTLV(pfo)
                 if pfo_tlv.E() < 5: continue  # Low energy cut
                 
                 pfo_type = pfo.getType()
-                if abs(pfo_type) == 11:  # Electron
-                    reco_electrons.append(pfo_tlv)
-                elif abs(pfo_type) == 22:  # Photon
-                    reco_photons.append(pfo_tlv)
-                else:
-                    reco_others.append(pfo_tlv)
+                particle_class = classifyParticle(pfo_type)
+                reco_particles[particle_class].append(pfo_tlv)
 
             # One-to-one matching for each MCP electron
             for mcp_el in mcp_electrons:
                 # Check if matched to any reconstructed electron
-                matched_as_electron = any(isMatched(mcp_el, reco_e) for reco_e in reco_electrons)
+                matched_as_electron = any(isMatched(mcp_el, reco_e) for reco_e in reco_particles["electron"])
                 
                 if matched_as_electron:
                     # Successfully reconstructed as electron
@@ -146,19 +165,19 @@ for s in files:
                     hists[s]["reco_el_match_pt"].Fill(mcp_el.Perp())
                 else:
                     # Not reconstructed as electron - check what happened
-                    matched_as_photon = any(isMatched(mcp_el, reco_p) for reco_p in reco_photons)
-                    matched_as_other = any(isMatched(mcp_el, reco_o) for reco_o in reco_others)
+                    matched_category = None
                     
-                    if matched_as_photon:
-                        # Reconstructed as photon
-                        hists[s]["missed_as_photon_eta"].Fill(mcp_el.Eta())
-                        hists[s]["missed_as_photon_E"].Fill(mcp_el.E())
-                        hists[s]["missed_as_photon_pt"].Fill(mcp_el.Perp())
-                    elif matched_as_other:
-                        # Reconstructed as something else
-                        hists[s]["missed_as_other_eta"].Fill(mcp_el.Eta())
-                        hists[s]["missed_as_other_E"].Fill(mcp_el.E())
-                        hists[s]["missed_as_other_pt"].Fill(mcp_el.Perp())
+                    # Check each specific particle type in order of priority
+                    for category in ["photon", "pion_charged", "pion_neutral", "neutron", "other"]:
+                        if any(isMatched(mcp_el, reco_p) for reco_p in reco_particles[category]):
+                            matched_category = category
+                            break
+                    
+                    if matched_category:
+                        # Fill the appropriate histogram
+                        hists[s][f"missed_as_{matched_category}_eta"].Fill(mcp_el.Eta())
+                        hists[s][f"missed_as_{matched_category}_E"].Fill(mcp_el.E())
+                        hists[s][f"missed_as_{matched_category}_pt"].Fill(mcp_el.Perp())
                     else:
                         # Not reconstructed at all
                         hists[s]["missed_unrecognized_eta"].Fill(mcp_el.Eta())
@@ -225,6 +244,9 @@ missed_breakdown_eta = {}
 for s in hists:
     # Total missed electrons
     total_missed = (hists[s]["missed_as_photon_eta"].GetEntries() + 
+                   hists[s]["missed_as_pion_charged_eta"].GetEntries() +
+                   hists[s]["missed_as_pion_neutral_eta"].GetEntries() +
+                   hists[s]["missed_as_neutron_eta"].GetEntries() +
                    hists[s]["missed_as_other_eta"].GetEntries() + 
                    hists[s]["missed_unrecognized_eta"].GetEntries())
     
@@ -232,14 +254,24 @@ for s in hists:
         continue
     
     # Create efficiency plots for each category
-    for category in ["missed_as_photon", "missed_as_other", "missed_unrecognized"]:
+    categories = ["missed_as_photon", "missed_as_pion_charged", "missed_as_pion_neutral", 
+                 "missed_as_neutron", "missed_as_other", "missed_unrecognized"]
+    
+    for category in categories:
         num = hists[s][f"{category}_eta"]
         # Use total MCP electrons as denominator to show fraction of all electrons
         denom = hists[s]["mcp_el_eta"]
         eff = ROOT.TGraphAsymmErrors()
         eff.BayesDivide(num, denom, "B")
         
-        category_label = category.replace("missed_as_", "").replace("_", " ").title()
+        # Clean up category labels
+        if "pion_charged" in category:
+            category_label = "Charged Pion"
+        elif "pion_neutral" in category:
+            category_label = "Neutral Pion"
+        else:
+            category_label = category.replace("missed_as_", "").replace("missed_", "").replace("_", " ").title()
+        
         key = f"{label_map[s]} - {category_label}"
         missed_breakdown_eta[key] = eff
 
@@ -254,7 +286,10 @@ for s in hists:
     efficiency = matched/total if total > 0 else 0
     
     missed_photon = hists[s]["missed_as_photon_eta"].GetEntries()
-    missed_other = hists[s]["missed_as_other_eta"].GetEntries() 
+    missed_pion_charged = hists[s]["missed_as_pion_charged_eta"].GetEntries()
+    missed_pion_neutral = hists[s]["missed_as_pion_neutral_eta"].GetEntries()
+    missed_neutron = hists[s]["missed_as_neutron_eta"].GetEntries()
+    missed_other = hists[s]["missed_as_other_eta"].GetEntries()
     missed_unrecognized = hists[s]["missed_unrecognized_eta"].GetEntries()
     
     print(f"\n{label_map.get(s, s)}:")
@@ -262,5 +297,8 @@ for s in hists:
     print(f"  Reconstructed as electrons: {int(matched)} ({efficiency:.3f})")
     print(f"  Missed electrons:")
     print(f"    → Reconstructed as photons: {int(missed_photon)} ({missed_photon/total:.3f} of total)")
+    print(f"    → Reconstructed as charged pions: {int(missed_pion_charged)} ({missed_pion_charged/total:.3f} of total)")
+    print(f"    → Reconstructed as neutral pions: {int(missed_pion_neutral)} ({missed_pion_neutral/total:.3f} of total)")
+    print(f"    → Reconstructed as neutrons: {int(missed_neutron)} ({missed_neutron/total:.3f} of total)")
     print(f"    → Reconstructed as other: {int(missed_other)} ({missed_other/total:.3f} of total)")
     print(f"    → Not reconstructed: {int(missed_unrecognized)} ({missed_unrecognized/total:.3f} of total)")

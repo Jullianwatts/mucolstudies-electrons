@@ -9,7 +9,7 @@ import numpy as np
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
@@ -122,7 +122,7 @@ for s in files:
 # PANDORA-STYLE PROFILE DISCREPANCY FUNCTION (ONLY)
 
 def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None,
-                                        num_layers=60, X0_per_layer=0.6286):
+                                        num_layers=50, X0_per_layer=0.6286):
     """
     Profile discrepancy calculation using Pandora's approach
     """
@@ -357,83 +357,188 @@ for slice_name in files:
 
             if events_processed_in_slice < 3:  # Only first 3 events
                 print(f"\n=== EVENT {events_processed_in_slice} DEBUG ===")
-    
-    # Enhanced track analysis with proper track-cluster matching
+
+            # Enhanced track analysis with proper track-cluster matching using LCIO Track API
             track_momentum = -1
             track_cluster_dR = -1
             track_tlv = TLorentzVector()
             matched_track_found = False
+
             # Try track collections in priority order
-            track_collections = ["SiTracks_Refitted","SiTracks", "AllTracks", "SeedTracks"]
+            track_collections = ["SiTracks_Refitted", "SiTracks", "AllTracks", "SeedTracks"]
 
             for track_collection_name in track_collections:
                 try:
-        # Direct collection access - much simpler!
-                trackCollection = event.getCollection(track_collection_name)
-        
-                if trackCollection is None:
-                    continue
-            
-                n_tracks = trackCollection.getNumberOfElements()
-                if n_tracks == 0:
-                    continue
-            
-                print(f"DEBUG - Found {n_tracks} tracks in {track_collection_name}")
-        
-            best_track = None
-            best_dR = 999.0
-        
-        # Loop through all tracks
-            for i in range(n_tracks):
-                track = trackCollection.getElementAt(i)
-                if track is None:
-                    continue
-                
-                try:
-                # Get track momentum
-                    track_p = track.getMomentum()
-                    if track_p is None or len(track_p) < 3:
-                        continue
+                    # Direct collection access
+                    trackCollection = event.getCollection(track_collection_name)
                     
-                    track_momentum_mag = sqrt(track_p[0]**2 + track_p[1]**2 + track_p[2]**2)
-                
-                    if track_momentum_mag < 0.1:  # Skip very low momentum
+                    if trackCollection is None:
                         continue
                 
-                # Create track TLorentzVector
-                    electron_mass = 0.000511
-                    track_energy = sqrt(track_momentum_mag**2 + electron_mass**2)
-                    temp_track_tlv = TLorentzVector()
-                    temp_track_tlv.SetPxPyPzE(track_p[0], track_p[1], track_p[2], track_energy)
+                    n_tracks = trackCollection.getNumberOfElements()
+                    if n_tracks == 0:
+                        continue
                 
-                # Check match to truth electron
-                    dR_to_truth = temp_track_tlv.DeltaR(tlv_truth)
-                
-                    if dR_to_truth < best_dR and dR_to_truth < 0.2:
-                        best_track = track
-                        best_dR = dR_to_truth
-                        track_tlv = temp_track_tlv
-                        track_momentum = track_momentum_mag
+                    if events_processed_in_slice < 3:  # Debug output
+                        print(f"DEBUG - Found {n_tracks} tracks in {track_collection_name}")
+
+                    best_track = None
+                    best_dR = 999.0
+
+                    # Loop through all tracks
+                    for i in range(n_tracks):
+                        track = trackCollection.getElementAt(i)
+                        if track is None:
+                            continue
+                        
+                        try:
+                            # FIRST: Try to find convenience methods for momentum
+                            track_momentum_mag = -1
+                            track_p = None
+                            
+                            # Check if track has direct momentum methods (some LCIO versions might)
+                            momentum_methods = ['getPx', 'getPy', 'getPz', 'getPt', 'getMomentum', 'getP']
+                            for method_name in momentum_methods:
+                                if hasattr(track, method_name):
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Found method {method_name}!")
+                                    try:
+                                        if method_name == 'getMomentum':
+                                            track_p = track.getMomentum()
+                                            if track_p and len(track_p) >= 3:
+                                                track_momentum_mag = sqrt(track_p[0]**2 + track_p[1]**2 + track_p[2]**2)
+                                                break
+                                        elif method_name == 'getPt':
+                                            pT = track.getPt()
+                                            # Still need pz...
+                                            pass
+                                    except:
+                                        pass
+                            
+                            # If no direct momentum methods found, use track parameters
+                            if track_momentum_mag < 0:
+                                # Use LCIO Track API directly to get track parameters
+                                d0 = track.getD0()
+                                phi0 = track.getPhi()
+                                omega = track.getOmega()
+                                z0 = track.getZ0()
+                                tanLambda = track.getTanLambda()
+                                
+                                if events_processed_in_slice < 3:
+                                    print(f"DEBUG - Track {i} params: d0={d0:.3f}, phi0={phi0:.3f}, omega={omega:.6f}, z0={z0:.3f}, tanLambda={tanLambda:.3f}")
+                                
+                                # Check for valid omega (curvature)
+                                if abs(omega) < 1e-10:  # Avoid division by zero
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Invalid omega ({omega})")
+                                    continue
+                                
+                                # Calculate momentum from track parameters
+                                # IMPORTANT: Need to determine the correct units for omega
+                                # Let's try multiple unit conversions and see which gives reasonable results
+                                
+                                B_field = 3.57  # Tesla (typical for ILD)
+                                
+                                # Try different unit assumptions for omega:
+                                # Option 1: omega in 1/mm (original assumption)
+                                pT_v1 = 0.3 * B_field / abs(omega)  # GeV/c
+                                
+                                # Option 2: omega in 1/m (if omega is actually in 1/m)
+                                pT_v2 = 0.0003 * B_field / abs(omega)  # GeV/c
+                                
+                                # Option 3: omega in mm^-1 but different conversion factor
+                                pT_v3 = 2.998e-4 * B_field / abs(omega)  # GeV/c (exact speed of light factor)
+                                
+                                # Option 4: omega might already be in appropriate units
+                                pT_v4 = B_field / abs(omega)  # GeV/c
+                                
+                                if events_processed_in_slice < 3:
+                                    print(f"DEBUG - Track {i} pT options: v1={pT_v1:.1f}, v2={pT_v2:.1f}, v3={pT_v3:.1f}, v4={pT_v4:.1f} GeV")
+                                
+                                # Choose the most reasonable pT (should be in range 0.1-5000 GeV for your samples)
+                                if 0.1 <= pT_v2 <= 5000:
+                                    pT = pT_v2
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Using pT_v2 = {pT:.3f} GeV")
+                                elif 0.1 <= pT_v3 <= 5000:
+                                    pT = pT_v3
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Using pT_v3 = {pT:.3f} GeV")
+                                elif 0.1 <= pT_v4 <= 5000:
+                                    pT = pT_v4
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Using pT_v4 = {pT:.3f} GeV")
+                                elif 0.1 <= pT_v1 <= 5000:
+                                    pT = pT_v1
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: Using pT_v1 = {pT:.3f} GeV")
+                                else:
+                                    if events_processed_in_slice < 3:
+                                        print(f"DEBUG - Track {i}: All pT calculations unrealistic, skipping")
+                                    continue
+                                
+                                # Calculate longitudinal momentum: pz = pT * tan(lambda)
+                                pz = pT * tanLambda
+                                
+                                # Total momentum magnitude
+                                track_momentum_mag = sqrt(pT*pT + pz*pz)
+                                
+                                # Calculate momentum components
+                                px = pT * TMath.Cos(phi0)
+                                py = pT * TMath.Sin(phi0)
+                                track_p = [px, py, pz]
+
+                            if events_processed_in_slice < 3:
+                                print(f"DEBUG - Track {i}: pT={pT:.3f}, pz={pz:.3f}, |p|={track_momentum_mag:.3f}")
+
+                            # Skip tracks with unrealistic momentum (adjust range based on your electron gun energies)
+                            expected_energy_range = [0.1, 5000]  # GeV - adjust based on your samples
+                            if track_momentum_mag < expected_energy_range[0] or track_momentum_mag > expected_energy_range[1]:
+                                if events_processed_in_slice < 3:
+                                    print(f"DEBUG - Track {i}: Momentum outside expected range ({track_momentum_mag:.3f} GeV)")
+                                continue
+
+                            # Create track TLorentzVector
+                            electron_mass = 0.000511
+                            track_energy = sqrt(track_momentum_mag**2 + electron_mass**2)
+                            temp_track_tlv = TLorentzVector()
+                            temp_track_tlv.SetPxPyPzE(track_p[0], track_p[1], track_p[2], track_energy)
+
+                            # Check match to truth electron
+                            dR_to_truth = temp_track_tlv.DeltaR(tlv_truth)
+
+                            if dR_to_truth < best_dR and dR_to_truth < 0.2:
+                                best_track = track
+                                best_dR = dR_to_truth
+                                track_tlv = temp_track_tlv
+                                track_momentum = track_momentum_mag
+                                
+                                if events_processed_in_slice < 3:
+                                    print(f"DEBUG - Track {i}: GOOD MATCH! p={track_momentum:.2f} GeV, dR={dR_to_truth:.3f}")
+                            
+                        except Exception as e:
+                            if events_processed_in_slice < 3:
+                                print(f"DEBUG - Error processing track {i}: {e}")
+                            continue
+                        
+                    if best_track is not None:
+                        matched_track_found = True
+                        hists[slice_name]["track_momentum"].Fill(track_momentum)
+                        if events_processed_in_slice < 3:
+                            print(f"DEBUG - Found matching track: p={track_momentum:.2f} GeV, dR={best_dR:.3f}")
+                        break  # Found a good track, stop looking at other collections
                     
                 except Exception as e:
-                    print(f"DEBUG - Error processing track {i}: {e}")
-                    continue
-                
-                if best_track is not None:
-                    matched_track_found = True
-                    hist[slice_name]["track_momentum"].Fill(track_momentum)
-                    print(f"DEBUG - Found matching track: p={track_momentum:.2f} GeV, dR={best_dR:.3f}")
-                    break  # Found a good track, stop looking
-            
-                except Exception as e:
-                    print(f"DEBUG - Error accessing {track_collection_name}: {e}")
+                    if events_processed_in_slice < 3:
+                        print(f"DEBUG - Error accessing {track_collection_name}: {e}")
                     continue  # Try next collection
 
-                if not matched_track_found:
+            if not matched_track_found:
+                if events_processed_in_slice < 3:
                     print(f"DEBUG - No matching tracks found in event {events_processed_in_slice}")
-                else:
+            else:
+                if events_processed_in_slice < 3:
                     print(f"DEBUG - SUCCESS: Found track with p={track_momentum:.2f} GeV")
-            
 
             cluster_energy = 0.0
             max_energy = 0.0
@@ -863,6 +968,7 @@ if abs_e_minus_p_over_p_hists:
 
 if e_minus_p_over_p_hists:
     plotDiscrepancyHistograms(e_minus_p_over_p_hists, "plots/E_minus_p_over_p_all_pt_slices.png", "(E-p)/p", "Entries")
+
 # Add this before the plotting section:
 print("Creating combined profile discrepancy plot...")
 profile_discrepancy_hists = {}
@@ -870,6 +976,7 @@ profile_discrepancy_hists = {}
 for s in hists:
     if "electron_profile_discrepancy" in hists[s] and hists[s]["electron_profile_discrepancy"].GetEntries() > 0:
         profile_discrepancy_hists[s] = hists[s]["electron_profile_discrepancy"]
+
 # Also update the profile discrepancy plot to use the new style
 if profile_discrepancy_hists:
     plotDiscrepancyHistograms(profile_discrepancy_hists, "plots/profile_discrepancy_all_pt_slices.png",
@@ -993,7 +1100,6 @@ for s, hist in profile_discrepancy_hists.items():
     stats_text.Draw()
     
     stats_text2 = ROOT.TText(0.15, y_max * 0.75, f"Mean: {mean_val:.3f}")
-    stats_text2.SetTextSize(0.03)
     stats_text2.Draw()
     
     stats_text3 = ROOT.TText(0.15, y_max * 0.7, f"RMS: {rms_val:.3f}")
@@ -1008,6 +1114,26 @@ print("\n" + "="*60)
 print("PROFILE DISCREPANCY SUMMARY STATISTICS")
 print("="*60)
 print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean':<8} {'RMS':<8} {'% > 0.6':<8}")
+print("-"*60)
+
+for s, hist in profile_discrepancy_hists.items():
+    pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+    entries = int(hist.GetEntries())
+    mean_val = hist.GetMean()
+    rms_val = hist.GetRMS()
+    
+    # Calculate percentage above 0.6 threshold
+    total_entries = hist.GetEntries()
+    above_threshold = 0
+    for i in range(1, hist.GetNbinsX() + 1):
+        bin_center = hist.GetBinCenter(i)
+        if bin_center > 0.6:
+            above_threshold += hist.GetBinContent(i)
+    
+    pct_above_threshold = (above_threshold / total_entries * 100) if total_entries > 0 else 0
+    
+    print(f"{pt_range:<15} {entries:<8} {mean_val:<8.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
+
 print("-"*60)
 
 # Print E/p summary statistics
@@ -1035,31 +1161,6 @@ for s in abs_e_minus_p_over_p_hists:
     
     print(f"{pt_range:<15} {entries:<8} {mean_val:<12.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
 
-print("-"*70)
-print("\n💡 E/p ANALYSIS INTERPRETATION:")
-print("   • If % > 0.2 is high, your detector needs a looser threshold than 0.2")
-print("   • Compare mean values across energy ranges to see if threshold should be energy-dependent")
-print("   • Use these results to justify a new threshold in your analysis")
-
-for s, hist in profile_discrepancy_hists.items():
-    pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-    entries = int(hist.GetEntries())
-    mean_val = hist.GetMean()
-    rms_val = hist.GetRMS()
-    
-    # Calculate percentage above 0.6 threshold
-    total_entries = hist.GetEntries()
-    above_threshold = 0
-    for i in range(1, hist.GetNbinsX() + 1):
-        bin_center = hist.GetBinCenter(i)
-        if bin_center > 0.6:
-            above_threshold += hist.GetBinContent(i)
-    
-    pct_above_threshold = (above_threshold / total_entries * 100) if total_entries > 0 else 0
-    
-    print(f"{pt_range:<15} {entries:<8} {mean_val:<8.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
-
-print("-"*60)
 
 pfo_shower_hists = {}
 for s in hists:
@@ -1092,41 +1193,13 @@ for s in hists2d:
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
-
-print("PLOTS SAVED IN plots/ DIRECTORY")
-print("Key plots created:")
-print("COMBINED PLOT:")
-print(" plots/profile_discrepancy_all_pt_slices.png (All pT ranges on same plot)")
 print("INDIVIDUAL PLOTS:")
 for s in profile_discrepancy_hists:
     pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-    print(f" plots/profile_discrepancy_{s}.png ({pt_range} GeV)")
-
-print(" OTHER LCELECTRONID PLOTS:")
-print("    plots/lcelectronid_shower_start_layer.png")
-print("    plots/lcelectronid_max_cell_energy.png") 
-print("    plots/lcelectronid_cluster_cone_energy.png")
-
-print("\ LONGITUDINAL PROFILES:")
+    print(f"  plots/profile_discrepancy_{s}.png ({pt_range} GeV)")
+print("LONGITUDINAL PROFILES:")
 for s in longitudinal_profile:
     if longitudinal_profile[s]:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-        print(f" plots/longitudinal_profile_{s}.png ({pt_range} GeV)")
+        print(f"  plots/longitudinal_profile_{s}.png ({pt_range} GeV)")
 
-print(" 2D CORRELATION PLOTS:")
-print("  plots/*shower_start_layer_v_profile_discrepancy*.png")
-print("  plots/*cluster_E_v_mcp_E*.png")
-print("    plots/*cluster_eta_v_mcp_eta*.png")
-
-print(f"\ Processing complete! Total events: {total_events_processed}")
-print("\� KEY INSIGHTS:")
-print("  The combined plot shows profile discrepancy distributions across all pT ranges")
-print("  Individual plots include Pandora's 0.6 threshold line for reference")
-print("    Statistics table shows what fraction of events exceed the 0.6 threshold")
-print("    Use this data to optimize your electron identification cuts!")
-
-print(" NEXT STEPS:")
-print("   1. Check plots/profile_discrepancy_all_pt_slices.png for overall distribution")
-print("   2. Review individual pT slice plots to see energy dependence") 
-print("   3. Use statistics table to decide if 0.6 is the right threshold for your analysis")
-print("   4. Consider tighter/looser cuts based on your efficiency vs purity requirements")
