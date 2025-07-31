@@ -8,12 +8,12 @@ import numpy as np
 import math
 
 ROOT.gROOT.SetBatch()
-
+## not using shower start layer plots from here because theyre wrong
 # Set up some options
 max_events = -1
 import os
-
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/recoBIB/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices:
@@ -1414,9 +1414,7 @@ for s, hist in profile_discrepancy_hists.items():
 print("-"*60)
 
 # Print E/p summary statistics
-print("\n" + "="*70)
 print("E/p ANALYSIS SUMMARY STATISTICS")
-print("="*70)
 print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean |E-p|/p':<12} {'RMS':<8} {'% > 0.2':<8}")
 print("-"*70)
 
@@ -1441,9 +1439,6 @@ for s in abs_e_minus_p_over_p_hists:
 print("-"*70)
 
 # Print SHOWER START LAYER summary statistics with ABSOLUTE THRESHOLD method
-print("\n" + "="*80)
-print("SHOWER START LAYER SUMMARY STATISTICS (ABSOLUTE ENERGY THRESHOLD METHOD - FIXED!)")
-print("="*80)
 print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean Layer':<10} {'RMS':<8} {'% Layer 0-1':<12} {'Threshold Used':<15}")
 print("-"*80)
 
@@ -1557,8 +1552,6 @@ for s in hists2d:
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
 
-print("\n🔥 FIXED ANALYSIS COMPLETE! 🔥")
-print("\nMAJOR IMPROVEMENTS:")
 print("✅ ABSOLUTE ENERGY THRESHOLD instead of percentage!")
 print("✅ High-energy electrons now correctly find Layer 0 shower start!")
 print("✅ Energy-dependent thresholds: 0.5 GeV (low E), 1.0 GeV (med E), 2.0 GeV (high E)")
@@ -1580,10 +1573,6 @@ print("INDIVIDUAL PLOTS:")
 if shower_start_hists:
     for s in shower_start_hists:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-        print(f"  plots/electron_shower_start_layer_{s}_ABSOLUTE_THRESHOLD.png ({pt_range} GeV) <-- FIXED!")
-
 if pfo_shower_hists:
     for s in pfo_shower_hists:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
-        print(f"  plots/pfo_shower_start_layer_{s}_ABSOLUTE_THRESHOLD.png ({pt_range} GeV) <-- FIXED!")
-

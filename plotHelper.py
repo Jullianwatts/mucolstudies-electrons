@@ -140,7 +140,7 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
         
         # Last item (MAIA Detector Concept) - top right
             if len(atltext) > 3:
-                text.DrawLatex(0.30, 0.88, atltext[-1])  # Keep this at the top right
+                text.DrawLatex(0.67, 0.88, atltext[-1])  # Keep this at the top right
         else:
             text.DrawLatex(0.15, 0.85, atltext)
     if interactive: 

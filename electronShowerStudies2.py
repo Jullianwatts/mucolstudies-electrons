@@ -11,7 +11,7 @@ import plotHelper
 ROOT.gROOT.SetBatch()
 
 # Set up some options
-max_events = 10
+max_events = -1
 import os
 
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
@@ -575,7 +575,7 @@ for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "c
                 "Fraction of MC Electrons",
                 False,
                 True,
-                ["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4"],
+                ["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Conecpt"],
                 False,
             )   
 
