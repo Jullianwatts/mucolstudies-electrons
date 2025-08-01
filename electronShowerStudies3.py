@@ -877,17 +877,7 @@ for slice_name in files:
                         pct_check = "✓" if fraction >= 0.01 else "✗"
                         print(f"    Layer {layer}: {energy:.4f} GeV ({fraction:.4f} = {fraction*100:.2f}%) - Abs:{abs_check} Pct:{pct_check}")
                 
-                print(f"Results:")
-                print(f"  Absolute method (≥{abs_threshold:.1f} GeV): Layer {shower_start_layer_absolute}")
-                print(f"  Percentage method (≥1%): Layer {shower_start_layer_percentage}")
-                
-                # Highlight the difference
-                if shower_start_layer_absolute != shower_start_layer_percentage:
-                    print(f"  🔥 METHODS DISAGREE! Absolute found Layer {shower_start_layer_absolute}, Percentage found Layer {shower_start_layer_percentage}")
-                else:
-                    print(f"  ✅ Both methods agree: Layer {shower_start_layer_absolute}")
-
-            # Use the absolute method as the primary result
+                     # Use the absolute method as the primary result
             shower_start_layer = shower_start_layer_absolute
 
             # [Continue with PFO analysis using absolute method]
