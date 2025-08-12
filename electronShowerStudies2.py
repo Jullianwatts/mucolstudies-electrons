@@ -10,16 +10,9 @@ import plotHelper
 
 ROOT.gROOT.SetBatch()
 
-# Set up some options
 max_events = -1
 import os
 
-#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/reco/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/reco/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4rotated/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v4/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/v0/reco/electronGun*")
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
@@ -32,12 +25,8 @@ for s in samples:
         continue
     files[sname] = glob.glob(f"{s}/*.slcio")
 
-print("Found files:")
-
-# Initialize longitudinal profile dictionary
 longitudinal_profile = {slice_name: {} for slice_name in files}
 
-# Define histogram variables for LCElectronId parameters
 variables = {
     "electron": {
         "E": {"nbins": 50, "xmin": 0, "xmax": 1000},
@@ -60,14 +49,12 @@ variables = {
     }
 }
 
-# Set up histograms
 hists = {}
 for s in files:
     if not files[s]:  # Skip empty slices
         continue
     hists[s] = {}
 
-    # Truth and reconstructed electron histograms
     for obj in ["mcp", "mcp_el", "electron", "electron_match"]:
         for var in variables["electron"]:
             hists[s][f"{obj}_{var}"] = ROOT.TH1F(f"{s}_{obj}_{var}", f"{s}_{obj}_{var}",
@@ -93,11 +80,6 @@ for s in files:
         continue
     hists2d[s] = {}
 
-    # Track vs truth comparisons - COMMENTED OUT
-    # hists2d[s]["track_eta_v_mcp_eta"] = ROOT.TH2F(f"track_eta_v_mcp_eta_{s}", f"track_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
-    # hists2d[s]["track_pt_v_mcp_pt"] = ROOT.TH2F(f"track_pt_v_mcp_pt_{s}", f"track_pt_v_mcp_pt_{s}", 30, 0, 3000, 30, 0, 3000)
-    # hists2d[s]["track_phi_v_mcp_phi"] = ROOT.TH2F(f"track_phi_v_mcp_phi_{s}", f"track_phi_v_mcp_phi_{s}", 30, -3, 3, 30, -3, 3)
-
     # Cluster vs truth comparisons
     hists2d[s]["cluster_E_v_mcp_E"] = ROOT.TH2F(f"cluster_E_v_mcp_E_{s}", f"cluster_E_v_mcp_E_{s}", 30, 0, 1000, 30, 0, 1000)
     hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
@@ -121,13 +103,11 @@ for s in files:
 
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
-    """Check if two TLorentzVectors are matched"""
     if tlv1.DeltaR(tlv2) < dR_cut:
         return True
     return False
 
 def calculate_rms_width(hit_positions, hit_energies, center):
-    """Calculate RMS width of cluster"""
     if len(hit_positions) == 0:
         return 0.0
 
@@ -143,7 +123,6 @@ def calculate_rms_width(hit_positions, hit_energies, center):
     return math.sqrt(weighted_r_squared / total_energy)
 
 def find_shower_start_layer(energy_by_layer, threshold=0.01):
-    """Find first layer with significant energy deposition"""
     if not energy_by_layer:
         return -1
 
@@ -156,9 +135,7 @@ def find_shower_start_layer(energy_by_layer, threshold=0.01):
         if energy_by_layer[layer] / total_energy > threshold:
             return layer
     return sorted_layers[0] if sorted_layers else -1
-###NEED TO CHECK
 def generate_expected_em_profile(num_layers=60, energy=None, X0_scale=0.6286):
-    # Shape parameters (approximate) from EM shower physics
     a = 1.0 + 0.5 * math.log(energy / 0.01)  # energy in GeV
     b = 0.5  # shower decay rate
 
@@ -211,7 +188,6 @@ def get_profile_discrepancy(energy_by_layer, total_energy, energy=None,
     return max_discrepancy_layer, max_discrepancy
 
 def plotHistogramsSimple(hist_dict, output_path, x_title, y_title):
-    """Plot multiple histograms on same canvas"""
     if not hist_dict:
         return
 
@@ -260,58 +236,47 @@ for slice_name in files:
     file_count = 0
     events_processed_in_slice = 0  # Initialize counter for this slice
 
-    # Loop over the files in a sample
     for f in files[slice_name]:
         if max_events > 0 and file_count >= max_events:
             break
-
         try:
             reader.open(f)
         except Exception as e:
             print(f"  Error opening file {f}: {e}")
             continue
             
-        # Loop over events in this file
         for ievt, event in enumerate(reader):
 
-            # Reset variables for this event
             hit_energies_by_layer = {}
             cluster_hit_positions = []
             cluster_hit_energies = []
 
-            # Get truth particle
             try:
                 mcpCollection = event.getCollection('MCParticle')
                 trueElectron = mcpCollection[0]
             except:
                 continue
 
-            # Check if it's actually an electron
             if abs(trueElectron.getPDG()) != 11:
                 continue
 
-            # Get truth energy and momentum
             trueE = trueElectron.getEnergy()
             dp3 = trueElectron.getMomentum()
             tlv_truth = TLorentzVector()
             tlv_truth.SetPxPyPzE(dp3[0], dp3[1], dp3[2], trueE)
 
-            # Apply eta cut - only analyze electrons within |eta| < 2.4
             if abs(tlv_truth.Eta()) > 2.4:
                 continue
 
-            # Fill truth histograms
             hists[slice_name]["mcp_E"].Fill(trueE)
             hists[slice_name]["mcp_pt"].Fill(tlv_truth.Perp())
             hists[slice_name]["mcp_eta"].Fill(tlv_truth.Eta())
             hists[slice_name]["mcp_phi"].Fill(tlv_truth.Phi())
             hists[slice_name]["mcp_theta"].Fill(tlv_truth.Theta())
 
-            # Try to get track information - COMMENTED OUT
             track_momentum = -1
             track_cluster_dR = -1
 
-            # ECAL hit analysis
             cluster_energy = 0.0
             max_energy = 0.0  # Initialize max_energy
             ecal_coll = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']   #also changed these from Sel to Rec
@@ -461,22 +426,6 @@ for slice_name in files:
             if cluster_energy > 0:
                 hists[slice_name]["electron_E"].Fill(cluster_energy)
                 hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
-
-                # Calculate E/p ratio - COMMENTED OUT since we're not using tracks
-                # E_over_p = -1
-                # residual_E_over_p = -1
-                # if track_momentum > 0:
-                #     E_over_p = cluster_energy / track_momentum
-                #     residual_E_over_p = abs(E_over_p - 1.0)
-                #     
-                #     hists[slice_name]["electron_E_over_p"].Fill(E_over_p)
-                #     hists[slice_name]["electron_residual_E_over_p"].Fill(residual_E_over_p)
-                #     hists[slice_name]["lcelectronid_max_residual_e_over_p"].Fill(residual_E_over_p)
-                #     
-                #     # Fill 2D correlations
-                #     hists2d[slice_name]["E_over_p_v_profile_discrepancy"].Fill(E_over_p, profile_discrepancy)
-
-                # Energy-weighted average angles
                 if cluster_hit_positions and cluster_hit_energies:
                     total_energy = sum(cluster_hit_energies)
                     avg_theta = sum(np.arctan2(np.sqrt(pos[0]**2 + pos[1]**2), pos[2]) * energy
@@ -515,17 +464,13 @@ for slice_name in files:
 
 print(f"Total events processed: {total_events_processed}")
 
-# Create longitudinal profile plots
-print("Creating longitudinal profile plots...")
 for s in longitudinal_profile:
     if not longitudinal_profile[s]:
         continue
 
-    # Sort layers
     layers = sorted(longitudinal_profile[s].keys())
     energy_vals = [longitudinal_profile[s][l] for l in layers]
 
-    # Normalize if you want average per event
     if total_events_processed > 0:
         energy_vals = [e / total_events_processed for e in energy_vals]
 
@@ -541,9 +486,6 @@ for s in longitudinal_profile:
     c.SaveAs(f"plots/longitudinal_profile_{s}.png")
     c.Close()
 
-print("Creating plots...")
-
-# Plot custer histograms
 cluster_hists_nhits = {}
 cluster_hists_r = {}
 
@@ -558,7 +500,6 @@ if cluster_hists_nhits:
 if cluster_hists_r:
     plotHistogramsSimple(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 
-# Plot LCElectronId parameter histograms using plotHelper
 lcelectronid_hists = {}
 for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "cluster_cone_energy"]:
     lcelectronid_hists[param] = {}
@@ -603,7 +544,6 @@ if pfo_shower_hists:
             c.SaveAs(f"plots/pfo_shower_start_layer_{s}.png")
             c.Close()
 
-# Plot 2D histograms
 for s in hists2d:
     for h in hists2d[s]:
         if hists2d[s][h].GetEntries() == 0:
@@ -615,15 +555,3 @@ for s in hists2d:
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
-
-print("Plots saved in plots/ directory")
-print("Key LCElectronId parameter plots:")
-print("- plots/lcelectronid_shower_start_layer.png (for m_maxProfileStart) - MAIA STYLE")
-print("- plots/lcelectronid_max_cell_energy.png (for m_maxEnergy)")
-print("- plots/lcelectronid_profile_discrepancy.png (for m_maxProfileDiscrepancy)")
-print("- plots/lcelectronid_cluster_cone_energy.png (cluster energy in cone)")
-print("- plots/pfo_shower_start_layer.png - MAIA STYLE")
-print("Longitudinal profile plots:")
-for s in longitudinal_profile:
-    if longitudinal_profile[s]:
-        print(f"- plots/longitudinal_profile_{s}.png")

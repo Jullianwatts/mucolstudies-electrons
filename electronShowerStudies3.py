@@ -12,8 +12,8 @@ ROOT.gROOT.SetBatch()
 # Set up some options
 max_events = -1
 import os
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/recoBIB/electronGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/recoBIB/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices:
@@ -121,11 +121,7 @@ for s in files:
     hists2d[s]["E_over_p_vs_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_vs_profile_discrepancy_{s}", f"E/p vs Profile Discrepancy {s};E/p;Profile Discrepancy", 50, 0, 3, 50, 0, 2)
 
 # PANDORA-STYLE PROFILE DISCREPANCY FUNCTION (ONLY)
-def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None,
-                                        num_layers=50, X0_per_layer=0.6286):
-    """
-    Profile discrepancy calculation using Pandora's approach
-    """
+def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None, num_layers=50, X0_per_layer=0.6286):
     if total_energy == 0 or len(energy_by_layer) < 3:
         return -1, 0.0
     
@@ -150,13 +146,13 @@ def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=
         if layer in energy_by_layer:
             f_obs = energy_by_layer[layer] / total_energy
             
-            # Simple expected profile based on distance from maximum
+            # expected profile based on distance from maximum
             distance_from_max = abs(layer - max_layer)
             if distance_from_max == 0:
                 f_exp = max_energy_fraction
             else:
                 # Exponential decay from maximum
-                decay_constant = 3.0  # Tunable parameter
+                decay_constant = 3.0  # Tunable
                 f_exp = max_energy_fraction * exp(-distance_from_max / decay_constant)
             
             # Relative discrepancy
@@ -178,11 +174,7 @@ def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=
     return max_layer, scaled_discrepancy
 
 # TRACK-CLUSTER MATCHING AND E/P FUNCTIONS
-def match_track_to_cluster(track_tlv, cluster_tlv, dR_cut=0.1):
-    """
-    Match track to cluster using delta R
-    Returns True if matched, False otherwise
-    """
+def match_track_to_cluster(track_tlv, cluster_tlv, dR_cut=0.1): 
     if track_tlv.E() <= 0 or cluster_tlv.E() <= 0:
         return False
     
@@ -190,10 +182,6 @@ def match_track_to_cluster(track_tlv, cluster_tlv, dR_cut=0.1):
     return dR < dR_cut
 
 def calculate_e_over_p_metrics(cluster_energy, track_momentum):
-    """
-    Calculate E/p related metrics
-    Returns: E/p, (E-p)/p, |E-p|/p
-    """
     if track_momentum <= 0:
         return -1, -999, -1
         
@@ -205,13 +193,11 @@ def calculate_e_over_p_metrics(cluster_energy, track_momentum):
 
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
-    """Check if two TLorentzVectors are matched"""
     if tlv1.DeltaR(tlv2) < dR_cut:
         return True
     return False
 
 def calculate_rms_width(hit_positions, hit_energies, center):
-    """Calculate RMS width of cluster"""
     if len(hit_positions) == 0:
         return 0.0
 
@@ -227,17 +213,6 @@ def calculate_rms_width(hit_positions, hit_energies, center):
     return sqrt(weighted_r_squared / total_energy)
 
 def find_shower_start_layer_absolute(energy_by_layer, absolute_threshold_gev=1.0):
-    """
-    Find first layer with energy above absolute threshold
-    FIXED: Uses absolute energy threshold instead of percentage!
-    
-    Args:
-        energy_by_layer: Dictionary of {layer: energy_in_gev}
-        absolute_threshold_gev: Minimum energy in GeV to count as shower start
-    
-    Returns:
-        First layer number with energy >= threshold, or -1 if none found
-    """
     if not energy_by_layer:
         return -1
     
@@ -257,11 +232,8 @@ def find_shower_start_layer_absolute(energy_by_layer, absolute_threshold_gev=1.0
     
     return -1
 
-# Keep the old function for comparison
+#  old function for comparison -- dont know if correct
 def find_shower_start_layer_percentage(energy_by_layer, threshold=0.01):
-    """Find first layer with significant energy deposition using percentage threshold"""
-    if not energy_by_layer:
-        return -1
     total_energy = sum(energy_by_layer.values())
     if total_energy == 0:
         return -1
@@ -276,16 +248,10 @@ def find_shower_start_layer_percentage(energy_by_layer, threshold=0.01):
     return -1
 
 def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286):
-    """
-    Generate expected EM shower profile using gamma distribution
-    Based on the longitudinal development of electromagnetic showers
-    """
-    # Shape parameters from EM shower physics
     # Critical energy for electrons in typical calorimeter ~10-20 MeV
     E_c = 0.015  # GeV (critical energy)
     
     # Shower maximum position (in radiation lengths)
-    # For electrons: t_max ≈ ln(E/E_c) - 0.5 for E >> E_c
     if energy > E_c:
         t_max = log(energy / E_c) - 0.5
     else:
@@ -310,7 +276,7 @@ def generate_expected_em_profile(num_layers=60, energy=1.0, X0_per_layer=0.6286)
                 profile_value = 1.0 / gamma(a)
         else:
             try:
-                # Gamma distribution: f(t) = (b^a / Γ(a)) * t^(a-1) * exp(-b*t)
+                # Gamma distribution: 
                 profile_value = (b**a / gamma(a)) * (t**(a-1)) * exp(-b*t)
             except (OverflowError, ZeroDivisionError, ValueError):
                 profile_value = 0.0
@@ -351,7 +317,6 @@ def plotHistograms(hist_dict, output_path, x_title, y_title):
         else:
             hist.Draw("HIST SAME")
 
-        # Clean up legend labels
         clean_name = name.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
         legend.AddEntry(hist, clean_name, "l")
 
@@ -374,9 +339,6 @@ def plotHistograms(hist_dict, output_path, x_title, y_title):
     c.Close()
 
 def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshold_line=None, with_bib=False):
-    """Plot discrepancy histograms in the style of plotHelper efficiency plots"""
-    if not hist_dict:
-        return
 
     can = ROOT.TCanvas("can", "can", 800, 600)
     can.SetLeftMargin(0.12)
@@ -481,7 +443,7 @@ def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshol
 
 # Create a reader object
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
-reader.setReadCollectionNames(["MCParticle", "SiTracks", "AllTracks", "PandoraPFOs", "SeedTracks", "PandoraClusters",
+reader.setReadCollectionNames(["MCParticle", "SiTracks", "AllTracks", "PandoraPFOs", "SiTracks_refitted", "PandoraClusters",
                               "EcalBarrelCollectionRec", "EcalEndcapCollectionRec"])
 
 total_events_processed = 0
@@ -489,6 +451,7 @@ total_events_processed = 0
 # Loop over the different samples
 for slice_name in files:
     if not files[slice_name]:  # Skip empty slices
+        print("no files")
         continue
 
     print(f"Working on sample {slice_name}")
@@ -531,8 +494,6 @@ for slice_name in files:
             dp3 = trueElectron.getMomentum()
             tlv_truth = TLorentzVector()
             tlv_truth.SetPxPyPzE(dp3[0], dp3[1], dp3[2], trueE)
-
-            # Apply eta cut - only analyze electrons within |eta| < 2.4
             if abs(tlv_truth.Eta()) > 2.4:
                 continue
 
@@ -546,18 +507,15 @@ for slice_name in files:
             if events_processed_in_slice < 3:  # Only first 3 events
                 print(f"\n=== EVENT {events_processed_in_slice} DEBUG ===")
 
-            # Enhanced track analysis with proper track-cluster matching using LCIO Track API
             track_momentum = -1
             track_cluster_dR = -1
             track_tlv = TLorentzVector()
             matched_track_found = False
 
-            # Try track collections in priority order
             track_collections = ["SiTracks_Refitted", "SiTracks", "AllTracks", "SeedTracks"]
 
             for track_collection_name in track_collections:
                 try:
-                    # Direct collection access
                     trackCollection = event.getCollection(track_collection_name)
                     
                     if trackCollection is None:
@@ -567,9 +525,6 @@ for slice_name in files:
                     if n_tracks == 0:
                         continue
                 
-                    if events_processed_in_slice < 3:  # Debug output
-                        print(f"DEBUG - Found {n_tracks} tracks in {track_collection_name}")
-
                     best_track = None
                     best_dR = 999.0
 
@@ -580,7 +535,6 @@ for slice_name in files:
                             continue
                         
                         try:
-                            # FIRST: Try to find convenience methods for momentum
                             track_momentum_mag = -1
                             track_p = None
                             
@@ -612,60 +566,6 @@ for slice_name in files:
                                 z0 = track.getZ0()
                                 tanLambda = track.getTanLambda()
                                 
-                                if events_processed_in_slice < 3:
-                                    print(f"DEBUG - Track {i} params: d0={d0:.3f}, phi0={phi0:.3f}, omega={omega:.6f}, z0={z0:.3f}, tanLambda={tanLambda:.3f}")
-                                
-                                # Check for valid omega (curvature)
-                                if abs(omega) < 1e-10:  # Avoid division by zero
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: Invalid omega ({omega})")
-                                    continue
-                                
-                                # Calculate momentum from track parameters
-                                # IMPORTANT: Need to determine the correct units for omega
-                                # Let's try multiple unit conversions and see which gives reasonable results
-                                
-                                B_field = 3.57  # Tesla (typical for ILD)
-                                
-                                # Try different unit assumptions for omega:
-                                # Option 1: omega in 1/mm (original assumption)
-                                pT_v1 = 0.3 * B_field / abs(omega)  # GeV/c
-                                
-                                # Option 2: omega in 1/m (if omega is actually in 1/m)
-                                pT_v2 = 0.0003 * B_field / abs(omega)  # GeV/c
-                                
-                                # Option 3: omega in mm^-1 but different conversion factor
-                                pT_v3 = 2.998e-4 * B_field / abs(omega)  # GeV/c (exact speed of light factor)
-                                
-                                # Option 4: omega might already be in appropriate units
-                                pT_v4 = B_field / abs(omega)  # GeV/c
-                                
-                                if events_processed_in_slice < 3:
-                                    print(f"DEBUG - Track {i} pT options: v1={pT_v1:.1f}, v2={pT_v2:.1f}, v3={pT_v3:.1f}, v4={pT_v4:.1f} GeV")
-                                
-                                # Choose the most reasonable pT (should be in range 0.1-5000 GeV for your samples)
-                                if 0.1 <= pT_v2 <= 5000:
-                                    pT = pT_v2
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: Using pT_v2 = {pT:.3f} GeV")
-                                elif 0.1 <= pT_v3 <= 5000:
-                                    pT = pT_v3
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: Using pT_v3 = {pT:.3f} GeV")
-                                elif 0.1 <= pT_v4 <= 5000:
-                                    pT = pT_v4
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: Using pT_v4 = {pT:.3f} GeV")
-                                elif 0.1 <= pT_v1 <= 5000:
-                                    pT = pT_v1
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: Using pT_v1 = {pT:.3f} GeV")
-                                else:
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Track {i}: All pT calculations unrealistic, skipping")
-                                    continue
-                                
-                                # Calculate longitudinal momentum: pz = pT * tan(lambda)
                                 pz = pT * tanLambda
                                 
                                 # Total momentum magnitude
@@ -676,10 +576,7 @@ for slice_name in files:
                                 py = pT * TMath.Sin(phi0)
                                 track_p = [px, py, pz]
 
-                            if events_processed_in_slice < 3:
-                                print(f"DEBUG - Track {i}: pT={pT:.3f}, pz={pz:.3f}, |p|={track_momentum_mag:.3f}")
 
-                            # Skip tracks with unrealistic momentum (adjust range based on your electron gun energies)
                             expected_energy_range = [0.1, 5000]  # GeV - adjust based on your samples
                             if track_momentum_mag < expected_energy_range[0] or track_momentum_mag > expected_energy_range[1]:
                                 if events_processed_in_slice < 3:
@@ -695,38 +592,24 @@ for slice_name in files:
                             # Check match to truth electron
                             dR_to_truth = temp_track_tlv.DeltaR(tlv_truth)
 
-                            if dR_to_truth < best_dR and dR_to_truth < 0.2:
+                            if dR_to_truth < best_dR and dR_to_truth < 0.1:
                                 best_track = track
                                 best_dR = dR_to_truth
                                 track_tlv = temp_track_tlv
                                 track_momentum = track_momentum_mag
                                 
-                                if events_processed_in_slice < 3:
-                                    print(f"DEBUG - Track {i}: GOOD MATCH! p={track_momentum:.2f} GeV, dR={dR_to_truth:.3f}")
                             
                         except Exception as e:
-                            if events_processed_in_slice < 3:
-                                print(f"DEBUG - Error processing track {i}: {e}")
                             continue
                         
                     if best_track is not None:
                         matched_track_found = True
                         hists[slice_name]["track_momentum"].Fill(track_momentum)
-                        if events_processed_in_slice < 3:
-                            print(f"DEBUG - Found matching track: p={track_momentum:.2f} GeV, dR={best_dR:.3f}")
                         break  # Found a good track, stop looking at other collections
                     
                 except Exception as e:
-                    if events_processed_in_slice < 3:
-                        print(f"DEBUG - Error accessing {track_collection_name}: {e}")
                     continue  # Try next collection
 
-            if not matched_track_found:
-                if events_processed_in_slice < 3:
-                    print(f"DEBUG - No matching tracks found in event {events_processed_in_slice}")
-            else:
-                if events_processed_in_slice < 3:
-                    print(f"DEBUG - SUCCESS: Found track with p={track_momentum:.2f} GeV")
 
             cluster_energy = 0.0
             max_energy = 0.0
@@ -750,33 +633,19 @@ for slice_name in files:
                     cluster_E = cluster.getEnergy()
             
                     if cluster_E > 1.0:  # Minimum energy threshold
-                        # Create cluster 4-vector for matching
                         cluster_tlv = TLorentzVector()
                         cluster_tlv.SetPxPyPzE(cluster_pos[0], cluster_pos[1], cluster_pos[2], cluster_E)
                 
                         # Match to truth electron
                         dR = cluster_tlv.DeltaR(tlv_truth)
-                        if dR < best_dR and dR < 0.3:  # Increased matching radius
+                        if dR < best_dR and dR < 0.1:
                             best_cluster = cluster
                             best_dR = dR
                     
-                            if events_processed_in_slice < 3:
-                                print(f"DEBUG - Cluster {i}: E={cluster_E:.2f} GeV, dR={dR:.3f}")
-        
                 if best_cluster:
-                    # Use calibrated cluster energy
                     cluster_energy = best_cluster.getEnergy()
-            
-                    if events_processed_in_slice < 3:
-                        print(f"DEBUG - Selected PandoraCluster: E={cluster_energy:.2f} GeV (vs truth {trueE:.2f} GeV), dR={best_dR:.3f}")
-            
-                    # Get layer-by-layer energy from cluster's constituent hits
                     hits = best_cluster.getCalorimeterHits()
                     if hits:
-                        if events_processed_in_slice < 3:
-                            print(f"DEBUG - Cluster has {hits.size()} constituent hits")
-                
-                        # Set up decoders for layer extraction
                         ecal_decoders = {}
                         ecal_collections = ['EcalBarrelCollectionRec', 'EcalEndcapCollectionRec']
                 
@@ -787,22 +656,17 @@ for slice_name in files:
                                     encoding = temp_collection.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding)
                                     decoder = UTIL.BitField64(encoding)
                                     ecal_decoders[coll_name] = decoder
-                                    if events_processed_in_slice < 3:
-                                        print(f"DEBUG - Decoder for {coll_name}: {encoding}")
                             except:
                                 continue
                 
-                        # Process each hit in the cluster
                         for j in range(hits.size()):
                             hit = hits[j]
                             if hit and hit.getEnergy() > 0:
                                 hit_energy = hit.getEnergy()
                         
-                                # Extract layer information
                                 cellID = int(hit.getCellID0())
                                 layer = -1
                         
-                                # Try each decoder to find the right one
                                 for coll_name, decoder in ecal_decoders.items():
                                     try:
                                         decoder.setValue(cellID)
@@ -820,18 +684,10 @@ for slice_name in files:
                                     pos = hit.getPosition()
                                     cluster_hit_positions.append([pos[0], pos[1], pos[2]])
                                     cluster_hit_energies.append(hit_energy)
-                            
-                                    if events_processed_in_slice < 3 and j < 5:  # Debug first 5 hits
-                                        print(f"DEBUG - Hit {j}: layer={layer}, energy={hit_energy:.4f}")
                         
-                        # Calculate max cell energy from this cluster
                         if cluster_hit_energies:
                             max_energy = max(cluster_hit_energies)
                             max_cluster_energies = [max_energy]  # Single cluster approach
-                else:
-                    if events_processed_in_slice < 3:
-                        print(f"DEBUG - No matching PandoraCluster found (best dR was {best_dR:.3f})")
-                
             except Exception as e:
                 if events_processed_in_slice < 3:
                     print(f"DEBUG - PandoraClusters failed: {e}")
@@ -839,7 +695,6 @@ for slice_name in files:
             # Set the overall max energy
             max_energy = max(max_cluster_energies) if max_cluster_energies else 0.0
 
-            # FIXED: Calculate shower start layer using ABSOLUTE energy threshold
             # Determine appropriate threshold based on energy range
             if trueE > 1000:  # High energy: use 2 GeV threshold
                 abs_threshold = 2.0
@@ -856,16 +711,7 @@ for slice_name in files:
             # Also calculate with old percentage method for comparison
             shower_start_layer_percentage = find_shower_start_layer_percentage(hit_energies_by_layer, threshold=0.01)
            
-            # Enhanced debug output for first few events
-            if events_processed_in_slice < 5:
-                print(f"\n=== SHOWER START ANALYSIS DEBUG - Event {events_processed_in_slice} ===")
-                print(f"True electron energy: {trueE:.2f} GeV")
-                print(f"Absolute threshold used: {abs_threshold:.1f} GeV")
                 
-                if hit_energies_by_layer:
-                    total_energy_check = sum(hit_energies_by_layer.values())
-                    print(f"Total cluster energy: {total_energy_check:.4f} GeV")
-                    print(f"Number of layers with energy: {len(hit_energies_by_layer)}")
     
                     # Show first few layers and their energies
                     sorted_layers = sorted(hit_energies_by_layer.keys())
@@ -893,62 +739,17 @@ for slice_name in files:
                 except:
                     continue
 
-            # Use absolute method for PFO shower start as well
-            try:
-                collection_names = event.getCollectionNames()
-                if "PandoraPFOs" in collection_names:
-                    pfoCollection = event.getCollection('PandoraPFOs')
-                    if pfoCollection is not None:
-                        for i in range(pfoCollection.getNumberOfElements()):
-                            pfo = pfoCollection.getElementAt(i)
-                            if pfo is not None and abs(pfo.getCharge()) > 0.5:
-                                pfo_clusters = pfo.getClusters()
-                                if pfo_clusters is not None:
-                                    for j in range(pfo_clusters.size()):
-                                        cluster = pfo_clusters[j]
-                                        if cluster is not None:
-                                            pfo_hit_energies_by_layer = {}
-                                            hits = cluster.getCalorimeterHits()
-                                            if hits is not None:
-                                                for k in range(hits.size()):
-                                                    hit = hits[k]
-                                                    if hit is not None:
-                                                        hit_energy = hit.getEnergy()
-                                                        if hit_energy > 0:
-                                                            cellID = int(hit.getCellID0())
-                                                            for coll_name, decoder in ecal_decoders.items():
-                                                                try:
-                                                                    decoder.setValue(cellID)
-                                                                    layer = decoder["layer"].value()
-                                                                    if layer not in pfo_hit_energies_by_layer:
-                                                                        pfo_hit_energies_by_layer[layer] = 0.0
-                                                                    pfo_hit_energies_by_layer[layer] += hit_energy
-                                                                    break
-                                                                except:
-                                                                    pass
-
-                                            if pfo_hit_energies_by_layer:
-                                                # Use absolute method with same threshold
-                                                pfo_shower_start_layer = find_shower_start_layer_absolute(
-                                                    pfo_hit_energies_by_layer, 
-                                                    absolute_threshold_gev=abs_threshold
-                                                )
-                                                if pfo_shower_start_layer >= 0:
-                                                    hists[slice_name]["pfo_shower_start_layer"].Fill(pfo_shower_start_layer)
-            except:
-                pass
-                
+   ## deleted shower start code.... so wrong so will prob throw error.... need to fix            
             # Store longitudinal profile information
             for layer, energy in hit_energies_by_layer.items():
                 if layer not in longitudinal_profile[slice_name]:
                     longitudinal_profile[slice_name][layer] = 0.0
                 longitudinal_profile[slice_name][layer] += energy
 
-            # Calculate cluster properties and create cluster TLorentzVector
             n_hits_in_cluster = len(cluster_hit_energies)
             n_layers_with_energy = len(hit_energies_by_layer)
             cluster_rms_width = -1
-            tlv_cluster = TLorentzVector()  # Initialize outside the if block
+            tlv_cluster = TLorentzVector()  
             
             if cluster_hit_positions and cluster_hit_energies:
                 total_energy_check = sum(cluster_hit_energies)
@@ -963,7 +764,6 @@ for slice_name in files:
                     cluster_r = sqrt(center_x**2 + center_y**2)
                     hists[slice_name]["cluster_r"].Fill(cluster_r)
                     
-                    # Create proper TLorentzVector for cluster
                     tlv_cluster.SetPxPyPzE(center_x, center_y, center_z, cluster_energy)
 
             # Find shower maximum layer
@@ -971,10 +771,8 @@ for slice_name in files:
             if hit_energies_by_layer:
                 shower_max_layer = max(hit_energies_by_layer.keys(), key=lambda k: hit_energies_by_layer[k])
 
-            # PANDORA-STYLE PROFILE DISCREPANCY CALCULATION (ONLY)
             total_energy = sum(hit_energies_by_layer.values())
             
-            # Pandora-style method only
             profile_discrepancy_layer, profile_discrepancy = get_profile_discrepancy_pandora_style(
                 hit_energies_by_layer, 
                 total_energy, 
@@ -983,7 +781,6 @@ for slice_name in files:
                 num_layers=50
             )
 
-            # Debug output every 100 events (simplified)
             if events_processed_in_slice % 100 == 0 and hit_energies_by_layer:
                 print(f"Event {events_processed_in_slice}: Energy={trueE:.2f} GeV, Profile Discrepancy: {profile_discrepancy:.4f}, Shower Start: Layer {shower_start_layer} (abs method)")
 
@@ -993,11 +790,9 @@ for slice_name in files:
             abs_e_minus_p_over_p = -1
             
             if matched_track_found and tlv_cluster.E() > 0:
-                # Check if track matches cluster
                 track_cluster_dR = track_tlv.DeltaR(tlv_cluster)
                 
                 if match_track_to_cluster(track_tlv, tlv_cluster, dR_cut=0.2):  # Increased from 0.1 to 0.2
-                    # We have a matched track-cluster pair!
                     
                     # Fill matching histograms
                     hists[slice_name]["track_cluster_dR"].Fill(track_cluster_dR)
@@ -1007,33 +802,15 @@ for slice_name in files:
                     e_over_p, e_minus_p_over_p, abs_e_minus_p_over_p = calculate_e_over_p_metrics(cluster_energy, track_momentum)
                     
                     if e_over_p > 0:  # Valid E/p calculation
-                        # Fill E/p histograms
                         hists[slice_name]["electron_E_over_p"].Fill(e_over_p)
                         hists[slice_name]["electron_E_minus_p_over_p"].Fill(e_minus_p_over_p)
                         hists[slice_name]["electron_abs_E_minus_p_over_p"].Fill(abs_e_minus_p_over_p)
                         
-                        # Fill 2D correlations
                         hists2d[slice_name]["E_vs_p"].Fill(track_momentum, cluster_energy)
                         hists2d[slice_name]["E_over_p_vs_energy"].Fill(trueE, e_over_p)
                         hists2d[slice_name]["E_over_p_vs_profile_discrepancy"].Fill(e_over_p, profile_discrepancy)
                         
-                        if events_processed_in_slice < 3:
-                            print(f"DEBUG - Event {events_processed_in_slice}: E/p SUCCESS! Track p={track_momentum:.2f}, Cluster E={cluster_energy:.2f}, E/p={e_over_p:.3f}, |E-p|/p={abs_e_minus_p_over_p:.3f}")
-                        
-                    # Update debug output to include E/p info
                     if events_processed_in_slice % 100 == 0:
-                        if e_over_p > 0:
-                            print(f"  Track p={track_momentum:.2f} GeV, Cluster E={cluster_energy:.2f} GeV, E/p={e_over_p:.3f}, |E-p|/p={abs_e_minus_p_over_p:.3f}")
-                else:
-                    if events_processed_in_slice < 3:
-                        print(f"DEBUG - Event {events_processed_in_slice}: Track-cluster dR too large: {track_cluster_dR:.3f}")
-            elif matched_track_found:
-                if events_processed_in_slice < 3:
-                    print(f"DEBUG - Event {events_processed_in_slice}: Track found but no valid cluster (cluster E={cluster_energy:.2f})")
-            else:
-                if events_processed_in_slice % 100 == 0:
-                    if events_processed_in_slice < 3:
-                        print(f"DEBUG - Event {events_processed_in_slice}: No track found for this event")
 
             # Fill cluster histograms
             hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
@@ -1098,11 +875,9 @@ for s in longitudinal_profile:
     if not longitudinal_profile[s]:
         continue
 
-    # Sort layers
     layers = sorted(longitudinal_profile[s].keys())
     energy_vals = [longitudinal_profile[s][l] for l in layers]
 
-    # Normalize if you want average per event
     if total_events_processed > 0:
         energy_vals = [e / total_events_processed for e in energy_vals]
 
@@ -1120,7 +895,6 @@ for s in longitudinal_profile:
 
 print("Creating plots...")
 
-# Plot cluster histograms
 cluster_hists_nhits = {}
 cluster_hists_r = {}
 
@@ -1135,8 +909,6 @@ if cluster_hists_nhits:
 if cluster_hists_r:
     plotHistograms(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 
-# Plot E/p analysis histograms
-print("Creating E/p analysis plots...")
 
 # E/p distributions for all pT slices
 e_over_p_hists = {}
@@ -1161,20 +933,13 @@ if abs_e_minus_p_over_p_hists:
 if e_minus_p_over_p_hists:
     plotDiscrepancyHistograms(e_minus_p_over_p_hists, "plots/E_minus_p_over_p_all_pt_slices.png", "(E-p)/p", "Entries")
 
-# Add this before the plotting section:
-print("Creating combined profile discrepancy plot...")
 profile_discrepancy_hists = {}
 
 for s in hists:
     if "electron_profile_discrepancy" in hists[s] and hists[s]["electron_profile_discrepancy"].GetEntries() > 0:
         profile_discrepancy_hists[s] = hists[s]["electron_profile_discrepancy"]
 
-# Also update the profile discrepancy plot to use the new style
-if profile_discrepancy_hists:
-    plotDiscrepancyHistograms(profile_discrepancy_hists, "plots/profile_discrepancy_all_pt_slices.png",
-                  "Max Profile Discrepancy", "Entries", threshold_line=0.6)
 
-# Individual plots for each energy range with detailed statistics
 for s in abs_e_minus_p_over_p_hists:
     hist = abs_e_minus_p_over_p_hists[s]
     
@@ -1188,7 +953,6 @@ for s in abs_e_minus_p_over_p_hists:
     hist.SetTitle(f"|E-p|/p Distribution - {s.replace('electronGun_pT_', '').replace('_', '-')} GeV")
     hist.Draw("HIST")
     
-    # Add steering file threshold line at 0.2
     y_max = hist.GetMaximum()
     line = ROOT.TLine(0.2, 1, 0.2, y_max)
     line.SetLineColor(ROOT.kRed)
@@ -1196,12 +960,10 @@ for s in abs_e_minus_p_over_p_hists:
     line.SetLineWidth(2)
     line.Draw()
     
-    # Add statistics and threshold info
     mean_val = hist.GetMean()
     rms_val = hist.GetRMS()
     entries = hist.GetEntries()
     
-    # Calculate percentage above 0.2 threshold
     above_threshold = 0
     for i in range(1, hist.GetNbinsX() + 1):
         bin_center = hist.GetBinCenter(i)
@@ -1210,7 +972,6 @@ for s in abs_e_minus_p_over_p_hists:
     
     pct_above_threshold = (above_threshold / entries * 100) if entries > 0 else 0
     
-    # Add text annotations
     text1 = ROOT.TText(0.5, y_max * 0.8, f"Entries: {int(entries)}")
     text1.SetTextSize(0.03)
     text1.Draw()
@@ -1232,8 +993,6 @@ for s in abs_e_minus_p_over_p_hists:
     c.SaveAs(f"plots/abs_E_minus_p_over_p_{s}.png")
     c.Close()
 
-# Plot LCElectronId parameter histograms with MAIA formatting
-print("Creating LCElectronId parameter plots with MAIA formatting...")
 lcelectronid_hists = {}
 for param in ["shower_start_layer", "max_cell_energy", "cluster_cone_energy"]:
     lcelectronid_hists[param] = {}
@@ -1245,8 +1004,6 @@ for param in ["shower_start_layer", "max_cell_energy", "cluster_cone_energy"]:
         plotDiscrepancyHistograms(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
                       param.replace("_", " ").title(), "Entries")
 
-# Create dedicated shower start layer plots with MAIA formatting
-print("Creating shower start layer plots with MAIA formatting (NOW WITH ABSOLUTE THRESHOLD METHOD)...")
 shower_start_hists = {}
 
 for s in hists:
@@ -1320,7 +1077,6 @@ if shower_start_hists:
         can.Close()
 
 # Plot Profile Discrepancy for all pT slices on the same plot
-print("Creating combined profile discrepancy plot...")
 profile_discrepancy_hists = {}
 
 for s in hists:
@@ -1376,20 +1132,12 @@ for s, hist in profile_discrepancy_hists.items():
     c.SaveAs(f"plots/profile_discrepancy_{s}.png")
     c.Close()
 
-# Create summary statistics table
-print("\n" + "="*60)
-print("PROFILE DISCREPANCY SUMMARY STATISTICS")
-print("="*60)
-print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean':<8} {'RMS':<8} {'% > 0.6':<8}")
-print("-"*60)
-
 for s, hist in profile_discrepancy_hists.items():
     pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
     entries = int(hist.GetEntries())
     mean_val = hist.GetMean()
     rms_val = hist.GetRMS()
     
-    # Calculate percentage above 0.6 threshold
     total_entries = hist.GetEntries()
     above_threshold = 0
     for i in range(1, hist.GetNbinsX() + 1):
@@ -1399,14 +1147,7 @@ for s, hist in profile_discrepancy_hists.items():
     
     pct_above_threshold = (above_threshold / total_entries * 100) if total_entries > 0 else 0
     
-    print(f"{pt_range:<15} {entries:<8} {mean_val:<8.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
 
-print("-"*60)
-
-# Print E/p summary statistics
-print("E/p ANALYSIS SUMMARY STATISTICS")
-print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean |E-p|/p':<12} {'RMS':<8} {'% > 0.2':<8}")
-print("-"*70)
 
 for s in abs_e_minus_p_over_p_hists:
     hist = abs_e_minus_p_over_p_hists[s]
@@ -1415,7 +1156,6 @@ for s in abs_e_minus_p_over_p_hists:
     mean_val = hist.GetMean()
     rms_val = hist.GetRMS()
     
-    # Calculate percentage above 0.2 threshold
     above_threshold = 0
     for i in range(1, hist.GetNbinsX() + 1):
         bin_center = hist.GetBinCenter(i)
@@ -1424,13 +1164,6 @@ for s in abs_e_minus_p_over_p_hists:
     
     pct_above_threshold = (above_threshold / entries * 100) if entries > 0 else 0
     
-    print(f"{pt_range:<15} {entries:<8} {mean_val:<12.3f} {rms_val:<8.3f} {pct_above_threshold:<8.1f}")
-
-print("-"*70)
-
-# Print SHOWER START LAYER summary statistics with ABSOLUTE THRESHOLD method
-print(f"{'pT Range (GeV)':<15} {'Entries':<8} {'Mean Layer':<10} {'RMS':<8} {'% Layer 0-1':<12} {'Threshold Used':<15}")
-print("-"*80)
 
 for s, hist in shower_start_hists.items():
     pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
@@ -1455,12 +1188,6 @@ for s, hist in shower_start_hists.items():
     else:
         threshold_used = "0.5 GeV"
     
-    print(f"{pt_range:<15} {entries:<8} {mean_val:<10.2f} {rms_val:<8.2f} {pct_layer_0_1:<12.1f} {threshold_used:<15}")
-
-print("-"*80)
-
-# Plot PFO shower histograms with MAIA formatting
-print("Creating PFO shower start layer plots with MAIA formatting (ABSOLUTE THRESHOLD)...")
 pfo_shower_hists = {}
 for s in hists:
     if "pfo_shower_start_layer" in hists[s] and hists[s]["pfo_shower_start_layer"].GetEntries() > 0:
@@ -1541,25 +1268,6 @@ for s in hists2d:
         hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
         c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
         c.Close()
-
-print("✅ ABSOLUTE ENERGY THRESHOLD instead of percentage!")
-print("✅ High-energy electrons now correctly find Layer 0 shower start!")
-print("✅ Energy-dependent thresholds: 0.5 GeV (low E), 1.0 GeV (med E), 2.0 GeV (high E)")
-print("✅ Enhanced debug output showing method comparison")
-print("✅ All plots clearly labeled with 'ABSOLUTE_THRESHOLD' and 'FIXED' annotations")
-
-print("\nPLOTS CREATED WITH ABSOLUTE THRESHOLD METHOD:")
-print("COMBINED PLOTS:")
-print("  plots/profile_discrepancy_all_pt_slices.png")
-print("  plots/E_over_p_all_pt_slices.png")
-print("  plots/abs_E_minus_p_over_p_all_pt_slices.png")
-print("  plots/E_minus_p_over_p_all_pt_slices.png")
-print("  plots/cluster_nhits.png")
-print("  plots/cluster_r.png")
-print("  plots/electron_shower_start_layer_all_pt_slices_ABSOLUTE_THRESHOLD.png  <-- FIXED!")
-print("  plots/pfo_shower_start_layer_all_pt_slices_ABSOLUTE_THRESHOLD.png  <-- FIXED!")
-
-print("INDIVIDUAL PLOTS:")
 if shower_start_hists:
     for s in shower_start_hists:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
