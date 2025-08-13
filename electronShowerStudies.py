@@ -5,9 +5,7 @@ import pyLCIO
 
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
-#ROOT.gROOT.Reset()
 
-# Set up some options
 max_events = -1
 
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v3/electronGun*")
@@ -424,4 +422,3 @@ for hist_name in hist_names_to_plot:
         plotHistograms(hists_to_plot, "plots/"+hist_name+".png", xlabel, "Entries")
         print(f"Created plot: plots/{hist_name}.png")
 
-print("Analysis complete!")

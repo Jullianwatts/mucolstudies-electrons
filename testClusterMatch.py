@@ -1,7 +1,7 @@
 from pyLCIO import IOIMPL
 import glob
 import math
-
+## potential file for electron reco algorithim
 files = glob.glob("electronGun_pT_1000_5000*.slcio")
 
 total_mcps = 0
@@ -46,5 +46,4 @@ for f in files:
     reader.close()
 
 print(f"\nTotal MCParticles: {total_mcps}")
-print(f"Filtered electrons (PDG=±11, |η|≤2, status=1): {total_el}")
 

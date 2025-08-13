@@ -85,15 +85,12 @@ for s in files:
     hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
 
     # LCElectronId parameter correlations
-    hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy",
-    20, 0, 20,       # 20 bins from layer 0 to 20
-    100, 0, 2        # 100 bins from discrepancy 0 to 2 (adjust range if needed)
-)
+    hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy", 20, 0, 20,  100, 0, 2        
 
     hists2d[s]["E_over_p_v_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_v_profile_discrepancy_{s}", f"E_over_p_v_profile_discrepancy_{s}", 50, 0, 2, 50, 0, 1)
     max_y = 10  # default
     if "1000_5000" in s:
-        max_y = 100  # or 200 depending on what you're seeing
+        max_y = 100 
     elif "250_1000" in s:
         max_y = 50
     elif "50_250" in s:

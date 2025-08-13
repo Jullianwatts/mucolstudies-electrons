@@ -6,10 +6,8 @@ import pyLCIO
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-# Set up some options
 max_events = -1
 
-# File paths - adjust as needed
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 
 files = {}
@@ -22,7 +20,6 @@ for s in samples:
     if sname not in files: continue
     files[sname] = glob.glob(f"{s}/*.slcio")
 
-# Helper for display names
 label_map = {
     "electronGun_pT_0_50": "0-50 GeV",
     "electronGun_pT_50_250": "50-250 GeV",
@@ -32,7 +29,6 @@ label_map = {
 
 def getSubdetectorEnergyFractions(pfo):
     try:
-        # Get clusters associated with this PFO
         clusters = pfo.getClusters()
         if not clusters or len(clusters) == 0:
             return None, None, None, None, {"total_clusters": 0, "ecal_energy": 0, "hcal_energy": 0}
@@ -43,7 +39,6 @@ def getSubdetectorEnergyFractions(pfo):
         
         for cluster in clusters:
             try:
-                # Get subdetector energies - first element is ECAL, second is HCAL
                 subdet_energies = cluster.getSubdetectorEnergies()
                 if not subdet_energies or len(subdet_energies) < 2:
                     continue
@@ -51,7 +46,6 @@ def getSubdetectorEnergyFractions(pfo):
                 ecal_energy = subdet_energies[0]
                 hcal_energy = subdet_energies[1]
                 
-                # Check for valid energies
                 if ecal_energy is None or hcal_energy is None:
                     continue
                 if math.isnan(ecal_energy) or math.isnan(hcal_energy):
@@ -66,7 +60,6 @@ def getSubdetectorEnergyFractions(pfo):
             except Exception as e:
                 continue
 
-        # Calculate total energy and fractions
         total_subdet_energy = total_ecal_energy + total_hcal_energy
         if total_subdet_energy <= 0:
             return None, None, None, None, {"total_clusters": len(clusters), "ecal_energy": total_ecal_energy, "hcal_energy": total_hcal_energy}
@@ -91,32 +84,23 @@ def getSubdetectorEnergyFractions(pfo):
         return None, None, None, None, {"total_clusters": 0, "ecal_energy": 0, "hcal_energy": 0}
 
 
-
-# Set up histograms for efficiency calculation
 hists = {}
 for s in files:
     hists[s] = {}
-    # MCP electrons (denominator)
     hists[s]["mcp_el_eta"] = ROOT.TH1F(f"{s}_mcp_el_eta", s, 20, -3, 3)
     hists[s]["mcp_el_E"] = ROOT.TH1F(f"{s}_mcp_el_E", s, 30, 0, 5000)
     hists[s]["mcp_el_pt"] = ROOT.TH1F(f"{s}_mcp_el_pt", s, 30, 0, 3000)
 
-    # Successfully reconstructed as electrons (numerator)
     hists[s]["reco_el_match_eta"] = ROOT.TH1F(f"{s}_reco_el_match_eta", s, 20, -3, 3)
     hists[s]["reco_el_match_E"] = ROOT.TH1F(f"{s}_reco_el_match_E", s, 30, 0, 5000)
     hists[s]["reco_el_match_pt"] = ROOT.TH1F(f"{s}_reco_el_match_pt", s, 30, 0, 3000)
 
-    # HCAL/ECAL ratio histograms (using subdetector energies)
-    # For particles reconstructed as electrons
     hists[s]["reco_el_hcal_ecal_ratio"] = ROOT.TH1F(f"{s}_reco_el_hcal_ecal_ratio", s, 50, 0, 5)
 
-    # For particles reconstructed as charged pions
     hists[s]["reco_pion_hcal_ecal_ratio"] = ROOT.TH1F(f"{s}_reco_pion_hcal_ecal_ratio", s, 50, 0, 5)
 
-    # For particles reconstructed as photons
     hists[s]["reco_photon_hcal_ecal_ratio"] = ROOT.TH1F(f"{s}_reco_photon_hcal_ecal_ratio", s, 50, 0, 5)
 
-    # Missed electrons reconstructed as specific particles
     particle_types = ["photon", "pion_charged", "neutron", "other"]
     for ptype in particle_types:
         hists[s][f"missed_as_{ptype}_eta"] = ROOT.TH1F(f"{s}_missed_as_{ptype}_eta", s, 20, -3, 3)
@@ -134,14 +118,8 @@ def isMatched(tlv1, tlv2):
         return True
     return False
 
-# Function to classify reconstructed particles by PDG ID
 def classifyParticle(pfo_type):
-    """
-    Classify PFO particles based on PDG ID
-    Returns: particle category string (only electron, photon, pion, neutron, other)
-    """
     abs_type = abs(pfo_type)
-
     if abs_type == 11:  # Electron/positron
         return "electron"
     elif abs_type == 22:  # Photon
@@ -159,30 +137,24 @@ def classifyParticle(pfo_type):
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
 reader.setReadCollectionNames(["MCParticle", "PandoraPFOs", "PandoraClusters"])
 
-# Global statistics for subdetector energy analysis
 global_subdet_stats = {
     "pfos_processed": 0,
     "pfos_with_clusters": 0,
     "pfos_with_valid_fractions": 0,
     "total_clusters_processed": 0
 }
-
-# Loop over the different samples
 for s in files:
     print("Working on sample", s)
     i = 0
 
-    # Loop over the files in a sample
     for f in files[s]:
         if max_events > 0 and i >= max_events: break
         reader.open(f)
 
-        # Loop over events in each file
         for event in reader:
             if max_events > 0 and i >= max_events: break
             if i % 100 == 0: print("\tProcessing event:", i)
 
-            # Get the collections we care about
             try:
                 mcps = event.getCollection("MCParticle")
             except:
@@ -203,7 +175,6 @@ for s in files:
                 print("No PandoraClusters")
                 continue
 
-            # Collect MCP electrons
             mcp_electrons = []
             for mcp in mcps:
                 if not mcp.getGeneratorStatus() == 1: continue
@@ -219,10 +190,8 @@ for s in files:
                 hists[s]["mcp_el_E"].Fill(mcp_tlv.E())
                 hists[s]["mcp_el_pt"].Fill(mcp_tlv.Perp())
 
-            # Only process events that had at least one electron in fiducial region
             if len(mcp_electrons) == 0: continue
 
-            # Collect reconstructed particles by type WITH PFO objects for calorimeter analysis
             reco_particles = {
                 "electron": [],
                 "photon": [],
@@ -231,7 +200,6 @@ for s in files:
                 "other": []
             }
 
-            # Store PFO objects for calorimeter analysis
             reco_pfos = {
                 "electron": [],
                 "photon": [],
@@ -249,7 +217,6 @@ for s in files:
                 reco_particles[particle_class].append(pfo_tlv)
                 reco_pfos[particle_class].append(pfo)  # Store PFO for calo analysis
 
-            # Fill calorimeter fraction histograms using subdetector energies
             subdet_stats = {"total_pfos": 0, "pfos_with_clusters": 0, "valid_fractions": 0}
 
             for particle_type in ["electron", "photon", "pion_charged"]:
@@ -257,10 +224,8 @@ for s in files:
                     subdet_stats["total_pfos"] += 1
                     global_subdet_stats["pfos_processed"] += 1
 
-                    # Get subdetector energy fractions and ratio
                     ecal_frac, hcal_frac, hcal_ecal_ratio, total_energy, energy_stats = getSubdetectorEnergyFractions(pfo)
                     
-                    # Update global statistics
                     if energy_stats["total_clusters"] > 0:
                         global_subdet_stats["pfos_with_clusters"] += 1
                         global_subdet_stats["total_clusters_processed"] += energy_stats["total_clusters"]
@@ -277,38 +242,30 @@ for s in files:
                         elif particle_type == "pion_charged":
                             hists[s]["reco_pion_hcal_ecal_ratio"].Fill(hcal_ecal_ratio)
 
-            # Print subdetector energy statistics every 100 events
             if i % 100 == 0 and subdet_stats["total_pfos"] > 0:
                 print(f"\t  PFO subdetector analysis: {subdet_stats['pfos_with_clusters']}/{subdet_stats['total_pfos']} PFOs with clusters")
                 print(f"\t  Valid energy fractions: {subdet_stats['valid_fractions']}")
 
-            # One-to-one matching for each MCP electron (unchanged)
             for mcp_el in mcp_electrons:
-                # Check if matched to any reconstructed electron
                 matched_as_electron = any(isMatched(mcp_el, reco_e) for reco_e in reco_particles["electron"])
 
                 if matched_as_electron:
-                    # Successfully reconstructed as electron
                     hists[s]["reco_el_match_eta"].Fill(mcp_el.Eta())
                     hists[s]["reco_el_match_E"].Fill(mcp_el.E())
                     hists[s]["reco_el_match_pt"].Fill(mcp_el.Perp())
                 else:
-                    # Not reconstructed as electron - check what happened
                     matched_category = None
 
-                    # Check each specific particle type in order of priority
                     for category in ["photon", "pion_charged", "neutron", "other"]:
                         if any(isMatched(mcp_el, reco_p) for reco_p in reco_particles[category]):
                             matched_category = category
                             break
 
                     if matched_category:
-                        # Fill the appropriate histogram
                         hists[s][f"missed_as_{matched_category}_eta"].Fill(mcp_el.Eta())
                         hists[s][f"missed_as_{matched_category}_E"].Fill(mcp_el.E())
                         hists[s][f"missed_as_{matched_category}_pt"].Fill(mcp_el.Perp())
                     else:
-                        # Not reconstructed at all
                         hists[s]["missed_unrecognized_eta"].Fill(mcp_el.Eta())
                         hists[s]["missed_unrecognized_E"].Fill(mcp_el.E())
                         hists[s]["missed_unrecognized_pt"].Fill(mcp_el.Perp())
@@ -317,7 +274,6 @@ for s in files:
 
         reader.close()
 
-# Print global subdetector energy statistics
 print("\n=== SUBDETECTOR ENERGY ANALYSIS STATISTICS ===")
 print(f"Total PFOs processed: {global_subdet_stats['pfos_processed']}")
 print(f"PFOs with clusters: {global_subdet_stats['pfos_with_clusters']}")
@@ -330,10 +286,6 @@ if global_subdet_stats['pfos_processed'] > 0:
         fraction_success = global_subdet_stats['pfos_with_valid_fractions'] / global_subdet_stats['pfos_with_clusters']
         print(f"Energy fraction calculation success rate: {fraction_success:.3f}")
 
-# ELECTRON EFFICIENCY CALCULATION (unchanged)
-print("\n=== CALCULATING ELECTRON EFFICIENCY ===")
-
-# Efficiency vs eta
 eff_eta = {}
 for s in hists:
     if hists[s]["mcp_el_eta"].GetEntries() == 0:
@@ -348,7 +300,6 @@ for s in hists:
 plotEfficiencies(eff_eta, "plots/electron_efficiency_vs_eta.png",
                 xlabel="#eta", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
-# Efficiency vs energy
 eff_energy = {}
 for s in hists:
     if hists[s]["mcp_el_E"].GetEntries() == 0:
@@ -363,7 +314,6 @@ for s in hists:
 plotEfficiencies(eff_energy, "plots/electron_efficiency_vs_energy.png",
                 xlabel="Energy [GeV]", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
-# Efficiency vs pt
 eff_pt = {}
 for s in hists:
     if hists[s]["mcp_el_pt"].GetEntries() == 0:
@@ -378,14 +328,10 @@ for s in hists:
 plotEfficiencies(eff_pt, "plots/electron_efficiency_vs_pt.png",
                 xlabel="p_{T} [GeV]", ylabel="Electron Reconstruction Efficiency", with_bib=False)
 
-# HCAL/ECAL RATIO ANALYSIS
-print("\n=== HCAL/ECAL RATIO ANALYSIS ===")
 
-# Create plots for HCAL/ECAL ratios for each particle type
 particle_types_ratio = ["electron", "photon", "pion_charged"]
 
 for ptype in particle_types_ratio:
-    # Create comparison plot for this particle type across different pT slices
     ratio_hists = {}
     
     for s in hists:
@@ -397,8 +343,6 @@ for ptype in particle_types_ratio:
         plotEfficiencies(ratio_hists, f"plots/{ptype}_hcal_ecal_ratio_vs_pt.png",
                         xlabel="HCAL/ECAL Energy Ratio", ylabel="Normalized Entries", with_bib=False)
 
-# Print HCAL/ECAL ratio summary
-print("\nHCAL/ECAL Ratio Summary by pT slice:")
 for s in hists:
     print(f"\n{label_map.get(s, s)}:")
     for ptype in ["electron", "photon", "pion_charged"]:
@@ -409,28 +353,20 @@ for s in hists:
             rms_ratio = hist.GetRMS()
             print(f"  {ptype.replace('_', ' ').title()} HCAL/ECAL ratio: {mean_ratio:.3f} ± {rms_ratio:.3f} (entries: {int(hist.GetEntries())})")
 
-# BREAKDOWN OF MISSED ELECTRONS (unchanged)
-print("\n=== CALCULATING BREAKDOWN OF MISSED ELECTRONS (COMBINED) ===")
-
-# Combine all pT slices for each category
 categories = ["reco_el_match", "missed_as_photon", "missed_as_pion_charged",
             "missed_as_neutron", "missed_as_other", "missed_unrecognized"]
 
-# Create combined histograms for each category
 combined_hists = {}
 for category in categories:
     combined_hists[f"{category}_eta"] = ROOT.TH1F(f"combined_{category}_eta", "Combined", 20, -3, 3)
 
-# Also create combined denominator (total MCP electrons)
 combined_hists["mcp_el_eta"] = ROOT.TH1F("combined_mcp_el_eta", "Combined", 20, -3, 3)
 
-# Add all pT slices together
 for s in hists:
     for category in categories:
         combined_hists[f"{category}_eta"].Add(hists[s][f"{category}_eta"])
     combined_hists["mcp_el_eta"].Add(hists[s]["mcp_el_eta"])
 
-# Create efficiency plots for each particle type (combined across all pT slices)
 missed_breakdown_eta = {}
 for category in categories:
     if combined_hists[f"{category}_eta"].GetEntries() == 0:
@@ -441,7 +377,6 @@ for category in categories:
     eff = ROOT.TGraphAsymmErrors()
     eff.BayesDivide(num, denom, "B")
 
-    # Clean up category labels
     if category == "reco_el_match":
         category_label = "Electron"
     elif "pion_charged" in category:
@@ -456,8 +391,6 @@ for category in categories:
 plotEfficiencies(missed_breakdown_eta, "plots/electron_breakdown_vs_eta_combined.png",
                 xlabel="#eta", ylabel="Fraction of MC Electrons", with_bib=False)
 
-# Print summary
-print("\nElectron Reconstruction Efficiency Summary:")
 for s in hists:
     matched = hists[s]["reco_el_match_eta"].GetEntries()
     total = hists[s]["mcp_el_eta"].GetEntries()
@@ -469,18 +402,6 @@ for s in hists:
     missed_other = hists[s]["missed_as_other_eta"].GetEntries()
     missed_unrecognized = hists[s]["missed_unrecognized_eta"].GetEntries()
 
-    print(f"\n{label_map.get(s, s)}:")
-    print(f"  Total electrons: {int(total)}")
-    print(f"  Reconstructed as electrons: {int(matched)} ({efficiency:.3f})")
-    print(f"  Missed electrons:")
-    print(f"    → Reconstructed as photons: {int(missed_photon)} ({missed_photon/total:.3f} of total)")
-    print(f"    → Reconstructed as charged pions: {int(missed_pion_charged)} ({missed_pion_charged/total:.3f} of total)")
-    print(f"    → Reconstructed as neutrons: {int(missed_neutron)} ({missed_neutron/total:.3f} of total)")
-    print(f"    → Reconstructed as other: {int(missed_other)} ({missed_other/total:.3f} of total)")
-    print(f"    → Not reconstructed: {int(missed_unrecognized)} ({missed_unrecognized/total:.3f} of total)")
-
-# Print combined summary
-print("\n=== COMBINED SUMMARY (ALL pT SLICES) ===")
 total_combined = combined_hists["mcp_el_eta"].GetEntries()
 matched_combined = combined_hists["reco_el_match_eta"].GetEntries()
 efficiency_combined = matched_combined/total_combined if total_combined > 0 else 0
@@ -491,21 +412,4 @@ missed_neutron_combined = combined_hists["missed_as_neutron_eta"].GetEntries()
 missed_other_combined = combined_hists["missed_as_other_eta"].GetEntries()
 missed_unrecognized_combined = combined_hists["missed_unrecognized_eta"].GetEntries()
 
-print(f"Total electrons: {int(total_combined)}")
-print(f"Reconstructed as electrons: {int(matched_combined)} ({efficiency_combined:.3f})")
-print(f"Missed electrons:")
-print(f"  → Reconstructed as photons: {int(missed_photon_combined)} ({missed_photon_combined/total_combined:.3f} of total)")
-print(f"  → Reconstructed as charged pions: {int(missed_pion_charged_combined)} ({missed_pion_charged_combined/total_combined:.3f} of total)")
-print(f"  → Reconstructed as neutrons: {int(missed_neutron_combined)} ({missed_neutron_combined/total_combined:.3f} of total)")
-print(f"  → Reconstructed as other: {int(missed_other_combined)} ({missed_other_combined/total_combined:.3f} of total)")
-print(f"  → Not reconstructed: {int(missed_unrecognized_combined)} ({missed_unrecognized_combined/total_combined:.3f} of total)")
 
-print("\n=== ANALYSIS COMPLETE ===")
-print("Plots saved:")
-print("  - plots/electron_efficiency_vs_eta.png")
-print("  - plots/electron_efficiency_vs_energy.png") 
-print("  - plots/electron_efficiency_vs_pt.png")
-print("  - plots/electron_hcal_ecal_ratio_vs_pt.png")
-print("  - plots/photon_hcal_ecal_ratio_vs_pt.png")
-print("  - plots/pion_charged_hcal_ecal_ratio_vs_pt.png")
-print("  - plots/electron_breakdown_vs_eta_combined.png")
