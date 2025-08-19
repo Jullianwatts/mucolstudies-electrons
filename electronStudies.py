@@ -1,21 +1,14 @@
-# Note: This script was to test out opening k4hep files with ROOT. An actual example can be found here:
-# https://gitlab.desy.de/ftx-sft-key4hep/tutorials/-/blob/main/edm4hep_analysis/edm4hep_python.ipynb
-
 # Before running this script be sure to run the commands needed to access the software:
 # apptainer build k4toroid.sif docker://madbaron/k4test-ubuntu:latest
 # apptainer run --no-home -B /collab/project/snowmass21/data/muonc:/data -B /home/$USER k4toroid.sif
-# source /setup.sh
 import math
 import glob
 import ROOT
-#from ROOT import edm4hep
-#from podio.root_io import Reader
 import pyLCIO
 
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-# Set up some options
 max_events = -1
 # Open the edm4hep files with ROOT
 #samples = glob.glob("/data/fmeloni/DataMuC_MuColl10_v0A/k4reco/electronGun*")
@@ -30,12 +23,6 @@ max_events = -1
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v2/reco/electronGun*")
 files = {}
-print("=== FILE DEBUG ===")
-for s in files:
-    print(f"Sample {s}: {len(files[s])} files found")
-    if len(files[s]) > 0:
-        print(f"  First file: {files[s][0]}")
-print("==================")
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices: files[f"electronGun_pT_{s}"] = []
 for s in samples:

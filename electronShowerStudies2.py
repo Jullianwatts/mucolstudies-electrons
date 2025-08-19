@@ -10,7 +10,7 @@ import plotHelper
 
 ROOT.gROOT.SetBatch()
 
-max_events = -1
+max_events = 10
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
@@ -72,31 +72,6 @@ for s in files:
     hists[s]["lcelectronid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
     hists[s]["lcelectronid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_discrepancy", f"{s}_lcelectronid_max_profile_discrepancy", 100, 0, 2)
     hists[s]["lcelectronid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
-
-# Set up 2D histograms
-hists2d = {}
-for s in files:
-    if not files[s]:  # Skip empty slices
-        continue
-    hists2d[s] = {}
-
-    # Cluster vs truth comparisons
-    hists2d[s]["cluster_E_v_mcp_E"] = ROOT.TH2F(f"cluster_E_v_mcp_E_{s}", f"cluster_E_v_mcp_E_{s}", 30, 0, 1000, 30, 0, 1000)
-    hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
-
-    # LCElectronId parameter correlations
-    hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy", 20, 0, 20,  100, 0, 2        
-
-    hists2d[s]["E_over_p_v_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_v_profile_discrepancy_{s}", f"E_over_p_v_profile_discrepancy_{s}", 50, 0, 2, 50, 0, 1)
-    max_y = 10  # default
-    if "1000_5000" in s:
-        max_y = 100 
-    elif "250_1000" in s:
-        max_y = 50
-    elif "50_250" in s:
-        max_y = 20
-    hists2d[s]["shower_start_layer_v_max_cell_energy"] = ROOT.TH2F(f"shower_start_layer_v_max_cell_energy_{s}", f"shower_start_layer_v_max_cell_energy_{s}", 20, 0, 20, 50, 0, 10)
-    hists2d[s]["cluster_rms_width_v_n_hits"] = ROOT.TH2F(f"cluster_rms_width_v_n_hits_{s}", f"cluster_rms_width_v_n_hits_{s}", 50, 0, 200, 50, 0, 100)
 
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
@@ -434,15 +409,6 @@ for slice_name in files:
                     hists[slice_name]["electron_phi"].Fill(avg_phi)
                     hists[slice_name]["electron_eta"].Fill(-np.log(np.tan(avg_theta / 2.0)) if avg_theta > 0 else 0)
                     hists[slice_name]["electron_pt"].Fill(cluster_energy * np.sin(avg_theta))
-
-                    # Fill 2D cluster vs truth
-                    hists2d[slice_name]["cluster_E_v_mcp_E"].Fill(cluster_energy, trueE)
-                    hists2d[slice_name]["cluster_eta_v_mcp_eta"].Fill(-np.log(np.tan(avg_theta / 2.0)) if avg_theta > 0 else 0, tlv_truth.Eta())
-
-                # Fill 2D parameter correlations
-                hists2d[slice_name]["shower_start_layer_v_max_cell_energy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, max_energy)
-                hists2d[slice_name]["cluster_rms_width_v_n_hits"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0, n_hits_in_cluster)
-                hists2d[slice_name]["shower_start_layer_v_profile_discrepancy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, profile_discrepancy)
 
                 # Check if this is a matched electron
                 if isMatched(tlv_truth, TLorentzVector()) or cluster_energy > 0:  # Simple matching criteria
