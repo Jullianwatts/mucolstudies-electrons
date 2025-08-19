@@ -173,23 +173,6 @@ def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=
     
     return max_layer, scaled_discrepancy
 
-# TRACK-CLUSTER MATCHING AND E/P FUNCTIONS
-def match_track_to_cluster(track_tlv, cluster_tlv, dR_cut=0.1): 
-    if track_tlv.E() <= 0 or cluster_tlv.E() <= 0:
-        return False
-    
-    dR = track_tlv.DeltaR(cluster_tlv)
-    return dR < dR_cut
-
-def calculate_e_over_p_metrics(cluster_energy, track_momentum):
-    if track_momentum <= 0:
-        return -1, -999, -1
-        
-    e_over_p = cluster_energy / track_momentum
-    e_minus_p_over_p = (cluster_energy - track_momentum) / track_momentum
-    abs_e_minus_p_over_p = abs(e_minus_p_over_p)
-    
-    return e_over_p, e_minus_p_over_p, abs_e_minus_p_over_p
 
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
@@ -504,8 +487,6 @@ for slice_name in files:
             hists[slice_name]["mcp_phi"].Fill(tlv_truth.Phi())
             hists[slice_name]["mcp_theta"].Fill(tlv_truth.Theta())
 
-            if events_processed_in_slice < 3:  # Only first 3 events
-                print(f"\n=== EVENT {events_processed_in_slice} DEBUG ===")
 
             track_momentum = -1
             track_cluster_dR = -1
@@ -579,8 +560,6 @@ for slice_name in files:
 
                             expected_energy_range = [0.1, 5000]  # GeV - adjust based on your samples
                             if track_momentum_mag < expected_energy_range[0] or track_momentum_mag > expected_energy_range[1]:
-                                if events_processed_in_slice < 3:
-                                    print(f"DEBUG - Track {i}: Momentum outside expected range ({track_momentum_mag:.3f} GeV)")
                                 continue
 
                             # Create track TLorentzVector
