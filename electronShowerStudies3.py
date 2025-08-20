@@ -12,12 +12,13 @@ ROOT.gROOT.SetBatch()
 # Set up some options
 max_events = -1
 import os
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/recoBIB/electronGun*")
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
+#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices:
-    files[f"electronGun_pT_{s}"] = []
+    files[f"pionGun_pT_{s}"] = []
 
 for s in samples:
     sname = s.split("/")[-1]
@@ -32,7 +33,7 @@ longitudinal_profile = {slice_name: {} for slice_name in files}
 
 # Define histogram variables for LCElectronId parameters
 variables = {
-    "electron": {
+    "pion": {
         "E": {"nbins": 50, "xmin": 0, "xmax": 1000},
         "pt": {"nbins": 50, "xmin": 0, "xmax": 1000},
         "eta": {"nbins": 30, "xmin": -3, "xmax": 3},
@@ -61,12 +62,12 @@ for s in files:
     hists[s] = {}
 
     # Truth and reconstructed electron histograms
-    for obj in ["mcp", "mcp_el", "electron", "electron_match"]:
-        for var in variables["electron"]:
+    for obj in ["mcp", "mcp_pion", "pion", "pion_match"]:
+        for var in variables["pion"]:
             hists[s][f"{obj}_{var}"] = ROOT.TH1F(f"{s}_{obj}_{var}", f"{s}_{obj}_{var}",
-                                              variables["electron"][var]["nbins"],
-                                              variables["electron"][var]["xmin"],
-                                              variables["electron"][var]["xmax"])
+                                              variables["pion"][var]["nbins"],
+                                              variables["pion"][var]["xmin"],
+                                              variables["pion"][var]["xmax"])
 
     # Special cluster histograms
     hists[s]["cluster_nhits"] = ROOT.TH1F(f"{s}_cluster_nhits", f"{s}_cluster_nhits", 50, 0, 100)
@@ -74,11 +75,11 @@ for s in files:
     hists[s]["pfo_shower_start_layer"] = ROOT.TH1F(f"{s}_pfo_shower_start_layer", f"{s}_pfo_shower_start_layer", 20, 0, 20)
     
     # LCElectronId parameter histograms - only Pandora method
-    hists[s]["lcelectronid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
-    hists[s]["lcelectronid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
-    hists[s]["lcelectronid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
-    hists[s]["lcelectronid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_discrepancy", f"{s}_lcelectronid_max_profile_discrepancy", 100, 0, 2)
-    hists[s]["lcelectronid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
+    #hists[s]["lcelectronid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
+    #hists[s]["lcelectronid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
+    #hists[s]["lcelectronid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
+    #hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
+    #hists[s]["lcelectronid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
     
     # E/p analysis histograms
     hists[s]["electron_E_over_p"] = ROOT.TH1F(f"{s}_electron_E_over_p", f"E/p Distribution {s};E/p;Entries", 100, 0, 3)
@@ -464,17 +465,17 @@ for slice_name in files:
             # Get truth particle
             try:
                 mcpCollection = event.getCollection('MCParticle')
-                trueElectron = mcpCollection[0]
+                truePion = mcpCollection[0]
             except:
                 continue
 
             # Check if it's actually an electron
-            if abs(trueElectron.getPDG()) != 11:
+            if abs(truePion.getPDG()) != 211:
                 continue
 
             # Get truth energy and momentum
-            trueE = trueElectron.getEnergy()
-            dp3 = trueElectron.getMomentum()
+            trueE = truePion.getEnergy()
+            dp3 = truePion.getMomentum()
             tlv_truth = TLorentzVector()
             tlv_truth.SetPxPyPzE(dp3[0], dp3[1], dp3[2], trueE)
             if abs(tlv_truth.Eta()) > 2.4:
@@ -689,19 +690,7 @@ for slice_name in files:
             
             # Also calculate with old percentage method for comparison
             shower_start_layer_percentage = find_shower_start_layer_percentage(hit_energies_by_layer, threshold=0.01)
-           
-                
-    
-                    # Show first few layers and their energies
-                    sorted_layers = sorted(hit_energies_by_layer.keys())
-                    print(f"First 10 layers with energy:")
-                    for i, layer in enumerate(sorted_layers[:10]):
-                        energy = hit_energies_by_layer[layer]
-                        fraction = energy / total_energy_check if total_energy_check > 0 else 0
-                        abs_check = "✓" if energy >= abs_threshold else "✗"
-                        pct_check = "✓" if fraction >= 0.01 else "✗"
-                        print(f"    Layer {layer}: {energy:.4f} GeV ({fraction:.4f} = {fraction*100:.2f}%) - Abs:{abs_check} Pct:{pct_check}")
-                
+            
                      # Use the absolute method as the primary result
             shower_start_layer = shower_start_layer_absolute
 
@@ -789,42 +778,41 @@ for slice_name in files:
                         hists2d[slice_name]["E_over_p_vs_energy"].Fill(trueE, e_over_p)
                         hists2d[slice_name]["E_over_p_vs_profile_discrepancy"].Fill(e_over_p, profile_discrepancy)
                         
-                    if events_processed_in_slice % 100 == 0:
 
             # Fill cluster histograms
-            hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
-            hists[slice_name]["electron_n_hits_in_cluster"].Fill(n_hits_in_cluster)
-            hists[slice_name]["electron_n_layers_with_energy"].Fill(n_layers_with_energy)
-            hists[slice_name]["electron_cluster_rms_width"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0)
+           # hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
+            #hists[slice_name]["electron_n_hits_in_cluster"].Fill(n_hits_in_cluster)
+            #hists[slice_name]["electron_n_layers_with_energy"].Fill(n_layers_with_energy)
+            #hists[slice_name]["electron_cluster_rms_width"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0)
 
             # Fill LCElectronId parameter histograms
-            hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
-            hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
-            hists[slice_name]["electron_max_cell_energy"].Fill(max_energy)
-            hists[slice_name]["electron_profile_discrepancy"].Fill(profile_discrepancy)
-            hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
+            #hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
+            #hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
+            hists[slice_name]["pion_max_cell_energy"].Fill(max_energy)
+            hists[slice_name]["pion_profile_discrepancy"].Fill(profile_discrepancy)
+            hists[slice_name]["pion_cluster_cone_energy"].Fill(cluster_energy)
 
             # Fill LCElectronId specific histograms
-            hists[slice_name]["lcelectronid_max_profile_start"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
-            hists[slice_name]["lcelectronid_max_energy"].Fill(max_energy)
-            hists[slice_name]["lcelectronid_max_profile_discrepancy"].Fill(profile_discrepancy)
+            #hists[slice_name]["lcpionid_max_profile_start"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
+            #hists[slice_name]["lcpionid_max_energy"].Fill(max_energy)
+            #hists[slice_name]["lcpionid_max_profile_discrepancy"].Fill(profile_discrepancy)
 
             # Fill reconstructed quantities if we have a cluster
             if cluster_energy > 0:
-                hists[slice_name]["electron_E"].Fill(cluster_energy)
-                hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
+                hists[slice_name]["pion_E"].Fill(cluster_energy)
+                hists[slice_name]["pion_cluster_cone_energy"].Fill(cluster_energy)
 
                 # Create cluster TLorentzVector and fill kinematic variables
                 if tlv_cluster.E() > 0:  # Check if we have a valid cluster
                     # Use TLorentzVector methods directly
-                    hists[slice_name]["electron_theta"].Fill(tlv_cluster.Theta())
-                    hists[slice_name]["electron_phi"].Fill(tlv_cluster.Phi())
-                    hists[slice_name]["electron_eta"].Fill(tlv_cluster.Eta())
-                    hists[slice_name]["electron_pt"].Fill(tlv_cluster.Perp())
+                    hists[slice_name]["pion_theta"].Fill(tlv_cluster.Theta())
+                    hists[slice_name]["pion_phi"].Fill(tlv_cluster.Phi())
+                    hists[slice_name]["pion_eta"].Fill(tlv_cluster.Eta())
+                    hists[slice_name]["pion_pt"].Fill(tlv_cluster.Perp())
 
                     # Fill 2D cluster vs truth
-                    hists2d[slice_name]["cluster_E_v_mcp_E"].Fill(cluster_energy, trueE)
-                    hists2d[slice_name]["cluster_eta_v_mcp_eta"].Fill(tlv_cluster.Eta(), tlv_truth.Eta())
+                    #hists2d[slice_name]["cluster_E_v_mcp_E"].Fill(cluster_energy, trueE)
+                    #hists2d[slice_name]["cluster_eta_v_mcp_eta"].Fill(tlv_cluster.Eta(), tlv_truth.Eta())
 
                 # Fill 2D parameter correlations
                 hists2d[slice_name]["shower_start_layer_v_max_cell_energy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, max_energy)
@@ -832,9 +820,9 @@ for slice_name in files:
                 hists2d[slice_name]["shower_start_layer_v_profile_discrepancy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, profile_discrepancy)
 
                 # Check if this is a matched electron (using proper TLorentzVector matching)
-                if tlv_cluster.E() > 0 and isMatched(tlv_truth, tlv_cluster):
-                    hists[slice_name]["electron_match_E"].Fill(cluster_energy)
-                    hists[slice_name]["electron_match_pt"].Fill(tlv_cluster.Perp())
+                #if tlv_cluster.E() > 0 and isMatched(tlv_truth, tlv_cluster):
+                    #hists[slice_name]["electron_match_E"].Fill(cluster_energy)
+                    #hists[slice_name]["electron_match_pt"].Fill(tlv_cluster.Perp())
 
             events_processed_in_slice += 1
             total_events_processed += 1

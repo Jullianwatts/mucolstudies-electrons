@@ -13,11 +13,11 @@ ROOT.gROOT.SetBatch()
 max_events = 10
 import os
 
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices:
-    files[f"electronGun_pT_{s}"] = []
+    files[f"pionGun_pT_{s}"] = []
 
 for s in samples:
     sname = s.split("/")[-1]
@@ -28,7 +28,7 @@ for s in samples:
 longitudinal_profile = {slice_name: {} for slice_name in files}
 
 variables = {
-    "electron": {
+    "pion": {
         "E": {"nbins": 50, "xmin": 0, "xmax": 1000},
         "pt": {"nbins": 50, "xmin": 0, "xmax": 1000},
         "eta": {"nbins": 30, "xmin": -3, "xmax": 3},
@@ -55,23 +55,23 @@ for s in files:
         continue
     hists[s] = {}
 
-    for obj in ["mcp", "mcp_el", "electron", "electron_match"]:
-        for var in variables["electron"]:
+    for obj in ["mcp", "mcp_pion", "pion", "pion_match"]:
+        for var in variables["pion"]:
             hists[s][f"{obj}_{var}"] = ROOT.TH1F(f"{s}_{obj}_{var}", f"{s}_{obj}_{var}",
-                                              variables["electron"][var]["nbins"],
-                                              variables["electron"][var]["xmin"],
-                                              variables["electron"][var]["xmax"])
+                                              variables["pion"][var]["nbins"],
+                                              variables["pion"][var]["xmin"],
+                                              variables["pion"][var]["xmax"])
 
     # Special cluster histograms
     hists[s]["cluster_nhits"] = ROOT.TH1F(f"{s}_cluster_nhits", f"{s}_cluster_nhits", 50, 0, 100)
     hists[s]["cluster_r"] = ROOT.TH1F(f"{s}_cluster_r", f"{s}_cluster_r", 50, 0, 3000)
     hists[s]["pfo_shower_start_layer"] = ROOT.TH1F(f"{s}_pfo_shower_start_layer", f"{s}_pfo_shower_start_layer", 20, 0, 20)
     # LCElectronId parameter histograms
-    hists[s]["lcelectronid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
-    hists[s]["lcelectronid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
-    hists[s]["lcelectronid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
-    hists[s]["lcelectronid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_discrepancy", f"{s}_lcelectronid_max_profile_discrepancy", 100, 0, 2)
-    hists[s]["lcelectronid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
+    #hists[s]["lcpionid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
+    #hists[s]["lcpionid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
+    #hists[s]["lcpionid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
+    hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
+    #hists[s]["lcpionid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
 
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
@@ -225,15 +225,15 @@ for slice_name in files:
 
             try:
                 mcpCollection = event.getCollection('MCParticle')
-                trueElectron = mcpCollection[0]
+                truePion = mcpCollection[0]
             except:
                 continue
 
-            if abs(trueElectron.getPDG()) != 11:
+            if abs(truePion.getPDG()) != 211:
                 continue
 
-            trueE = trueElectron.getEnergy()
-            dp3 = trueElectron.getMomentum()
+            trueE = truePion.getEnergy()
+            dp3 = truePion.getMomentum()
             tlv_truth = TLorentzVector()
             tlv_truth.SetPxPyPzE(dp3[0], dp3[1], dp3[2], trueE)
 
@@ -377,27 +377,27 @@ for slice_name in files:
                     hists[slice_name]["cluster_r"].Fill(cluster_r)
 
             # Fill cluster histograms
-            hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
-            hists[slice_name]["electron_n_hits_in_cluster"].Fill(n_hits_in_cluster)
-            hists[slice_name]["electron_n_layers_with_energy"].Fill(n_layers_with_energy)
-            hists[slice_name]["electron_cluster_rms_width"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0)
+            #hists[slice_name]["cluster_nhits"].Fill(n_hits_in_cluster)
+            #hists[slice_name]["electron_n_hits_in_cluster"].Fill(n_hits_in_cluster)
+            #hists[slice_name]["electron_n_layers_with_energy"].Fill(n_layers_with_energy)
+            #hists[slice_name]["electron_cluster_rms_width"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0)
 
             # Fill LCElectronId parameter histograms
-            hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
-            hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
-            hists[slice_name]["electron_max_cell_energy"].Fill(max_energy)
-            hists[slice_name]["electron_profile_discrepancy"].Fill(profile_discrepancy)
-            hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
+            #hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
+            #hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
+            #hists[slice_name]["electron_max_cell_energy"].Fill(max_energy)
+            hists[slice_name]["pion_profile_discrepancy"].Fill(profile_discrepancy)
+            hists[slice_name]["pion_cluster_cone_energy"].Fill(cluster_energy)
 
             # Fill LCElectronId specific histograms
-            hists[slice_name]["lcelectronid_max_profile_start"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
-            hists[slice_name]["lcelectronid_max_energy"].Fill(max_energy)
-            hists[slice_name]["lcelectronid_max_profile_discrepancy"].Fill(profile_discrepancy)
-
+            #hists[slice_name]["lcelectronid_max_profile_start"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
+            #hists[slice_name]["lcelectronid_max_energy"].Fill(max_energy)
+            hists[slice_name]["lcpionid_max_profile_discrepancy"].Fill(profile_discrepancy)
+            print("made lcpionid plot")
             # Fill reconstructed quantities if we have a cluster
             if cluster_energy > 0:
-                hists[slice_name]["electron_E"].Fill(cluster_energy)
-                hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
+                #hists[slice_name]["electron_E"].Fill(cluster_energy)
+                #hists[slice_name]["electron_cluster_cone_energy"].Fill(cluster_energy)
                 if cluster_hit_positions and cluster_hit_energies:
                     total_energy = sum(cluster_hit_energies)
                     avg_theta = sum(np.arctan2(np.sqrt(pos[0]**2 + pos[1]**2), pos[2]) * energy
@@ -405,10 +405,10 @@ for slice_name in files:
                     avg_phi = sum(np.arctan2(pos[1], pos[0]) * energy
                                 for pos, energy in zip(cluster_hit_positions, cluster_hit_energies)) / total_energy
 
-                    hists[slice_name]["electron_theta"].Fill(avg_theta)
-                    hists[slice_name]["electron_phi"].Fill(avg_phi)
-                    hists[slice_name]["electron_eta"].Fill(-np.log(np.tan(avg_theta / 2.0)) if avg_theta > 0 else 0)
-                    hists[slice_name]["electron_pt"].Fill(cluster_energy * np.sin(avg_theta))
+                  #  hists[slice_name]["electron_theta"].Fill(avg_theta)
+                 #   hists[slice_name]["electron_phi"].Fill(avg_phi)
+                   # hists[slice_name]["electron_eta"].Fill(-np.log(np.tan(avg_theta / 2.0)) if avg_theta > 0 else 0)
+                    #hists[slice_name]["electron_pt"].Fill(cluster_energy * np.sin(avg_theta))
 
                 # Check if this is a matched electron
                 if isMatched(tlv_truth, TLorentzVector()) or cluster_energy > 0:  # Simple matching criteria
@@ -507,14 +507,14 @@ if pfo_shower_hists:
             c.SaveAs(f"plots/pfo_shower_start_layer_{s}.png")
             c.Close()
 
-for s in hists2d:
-    for h in hists2d[s]:
-        if hists2d[s][h].GetEntries() == 0:
-            continue
+#for s in hists2d:
+    #for h in hists2d[s]:
+        #if hists2d[s][h].GetEntries() == 0:
+            #continue
 
-        c = ROOT.TCanvas("can", "can", 800, 600)
-        hists2d[s][h].Draw("colz")
-        hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0].replace("_", " ").title())
-        hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
-        c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
-        c.Close()
+        #c = ROOT.TCanvas("can", "can", 800, 600)
+        #hists2d[s][h].Draw("colz")
+        #hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0].replace("_", " ").title())
+        #hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
+        #c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
+        #c.Close()
