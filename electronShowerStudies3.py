@@ -1,4 +1,4 @@
-from math import exp, gamma, log, sqrt
+from math import exp, gamma, log, sqrt 
 import glob
 import ROOT
 import pyLCIO
@@ -88,24 +88,10 @@ for s in files:
 # Set up 2D histograms
 #hists2d = {}
 #for s in files:
-    #if not files[s]:  # Skip empty slices
-        #continue
-    #hists2d[s] = {}
-
-    # Cluster vs truth comparisons
-    #hists2d[s]["cluster_E_v_mcp_E"] = ROOT.TH2F(f"cluster_E_v_mcp_E_{s}", f"cluster_E_v_mcp_E_{s}", 30, 0, 1000, 30, 0, 1000)
-    #hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
-
-    # LCElectronId parameter correlations
-    #hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy",20, 0, 20, 100, 0, 2)
-
-    #hists2d[s]["E_over_p_v_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_v_profile_discrepancy_{s}", f"E_over_p_v_profile_discrepancy_{s}", 50, 0, 2, 50, 0, 1)
-    
-   
-    # E/p analysis 2D histograms
-    #hists2d[s]["E_vs_p"] = ROOT.TH2F(f"E_vs_p_{s}", f"Cluster Energy vs Track Momentum {s};Track p [GeV];Cluster E [GeV]", 50, 0, 1000, 50, 0, 1000)
-    #hists2d[s]["E_over_p_vs_energy"] = ROOT.TH2F(f"E_over_p_vs_energy_{s}", f"E/p vs Energy {s};True Energy [GeV];E/p", 50, 0, 1000, 50, 0, 3)
-    #hists2d[s]["E_over_p_vs_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_vs_profile_discrepancy_{s}", f"E/p vs Profile Discrepancy {s};E/p;Profile Discrepancy", 50, 0, 3, 50, 0, 2)
+#    if not files[s]:  # Skip empty slices
+#        continue
+#    hists2d[s] = {}
+#    # (booking commented out intentionally)
 
 # PANDORA-STYLE PROFILE DISCREPANCY FUNCTION (ONLY)
 def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None, num_layers=50, X0_per_layer=0.6286):
@@ -272,7 +258,8 @@ def plotHistograms(hist_dict, output_path, x_title, y_title):
         else:
             hist.Draw("HIST SAME")
 
-        clean_name = name.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
+        # Make particle-agnostic pT label
+        clean_name = (name.split("_pT_")[-1]).replace("_", "-") + " GeV"
         legend.AddEntry(hist, clean_name, "l")
 
     legend.Draw()
@@ -356,7 +343,7 @@ def plotDiscrepancyHistograms(hist_dict, output_path, x_title, y_title, threshol
         if hist.GetEntries() == 0:
             continue
         # Clean up the legend entries to match your style
-        clean_label = name.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
+        clean_label = (name.split("_pT_")[-1]).replace("_", "-") + " GeV"
         leg.AddEntry(hist, clean_label, "l")
     
     leg.Draw()
@@ -418,6 +405,8 @@ for slice_name in files:
     for f in files[slice_name]:
         if max_events > 0 and file_count >= max_events:
             break
+
+        reader.open(f)  # <<< OPEN THE FILE BEFORE ITERATING
 
         for ievt, event in enumerate(reader):
 
@@ -483,6 +472,7 @@ for slice_name in files:
                         try:
                             track_momentum_mag = -1
                             track_p = None
+                            pT = None  # ensure defined
                             
                             # Check if track has direct momentum methods (some LCIO versions might)
                             momentum_methods = ['getPx', 'getPy', 'getPz', 'getPt', 'getMomentum', 'getP']
@@ -499,7 +489,6 @@ for slice_name in files:
                                         elif method_name == 'getPt':
                                             pT = track.getPt()
                                             # Still need pz...
-                                            pass
                                     except:
                                         pass
                             
@@ -511,6 +500,13 @@ for slice_name in files:
                                 omega = track.getOmega()
                                 z0 = track.getZ0()
                                 tanLambda = track.getTanLambda()
+                                
+                                # derive pT from omega if needed (omega ~ q/pt)
+                                if pT is None:
+                                    if abs(omega) > 0:
+                                        pT = abs(1.0/omega)  # check LCIO units in your setup
+                                    else:
+                                        continue
                                 
                                 pz = pT * tanLambda
                                 
@@ -691,7 +687,8 @@ for slice_name in files:
                     center_z = sum(pos[2] * energy for pos, energy in zip(cluster_hit_positions, cluster_hit_energies)) / total_energy_check
                     cluster_center = [center_x, center_y, center_z]
 
-                    cluster_rms_width = calculate_rms_width(cluster_hit_positions, cluster_hit_energies, cluster_center)
+                    # assumes calculate_rms_width exists in your environment
+                    #cluster_rms_width = calculate_rms_width(cluster_hit_positions, cluster_hit_energies, cluster_center)
 
                     cluster_r = sqrt(center_x**2 + center_y**2)
                     hists[slice_name]["cluster_r"].Fill(cluster_r)
@@ -724,23 +721,25 @@ for slice_name in files:
             if matched_track_found and tlv_cluster.E() > 0:
                 track_cluster_dR = track_tlv.DeltaR(tlv_cluster)
                 
-                if match_track_to_cluster(track_tlv, tlv_cluster, dR_cut=0.2):  # Increased from 0.1 to 0.2
+                # assumes match_track_to_cluster exists in your environment
+                #if match_track_to_cluster(track_tlv, tlv_cluster, dR_cut=0.2):  # Increased from 0.1 to 0.2
                     
                     # Fill matching histograms
-                    hists[slice_name]["track_cluster_dR"].Fill(track_cluster_dR)
-                    hists[slice_name]["matched_cluster_energy"].Fill(cluster_energy)
+                    #hists[slice_name]["track_cluster_dR"].Fill(track_cluster_dR)
+                    #hists[slice_name]["matched_cluster_energy"].Fill(cluster_energy)
                     
-                    # Calculate E/p metrics
-                    e_over_p, e_minus_p_over_p, abs_e_minus_p_over_p = calculate_e_over_p_metrics(cluster_energy, track_momentum)
+                    # assumes calculate_e_over_p_metrics exists in your environment
+                    #e_over_p, e_minus_p_over_p, abs_e_minus_p_over_p = calculate_e_over_p_metrics(cluster_energy, track_momentum)
                     
-                    if e_over_p > 0:  # Valid E/p calculation
-                        hists[slice_name]["electron_E_over_p"].Fill(e_over_p)
-                        hists[slice_name]["electron_E_minus_p_over_p"].Fill(e_minus_p_over_p)
-                        hists[slice_name]["electron_abs_E_minus_p_over_p"].Fill(abs_e_minus_p_over_p)
+                    #if e_over_p > 0:  # Valid E/p calculation
+                        #hists[slice_name]["electron_E_over_p"].Fill(e_over_p)
+                        #hists[slice_name]["electron_E_minus_p_over_p"].Fill(e_minus_p_over_p)
+                        #hists[slice_name]["electron_abs_E_minus_p_over_p"].Fill(abs_e_minus_p_over_p)
                         
-                        hists2d[slice_name]["E_vs_p"].Fill(track_momentum, cluster_energy)
-                        hists2d[slice_name]["E_over_p_vs_energy"].Fill(trueE, e_over_p)
-                        hists2d[slice_name]["E_over_p_vs_profile_discrepancy"].Fill(e_over_p, profile_discrepancy)
+                        # These 2D fills are commented out earlier; keeping as-is
+                        #hists2d[slice_name]["E_vs_p"].Fill(track_momentum, cluster_energy)
+                        #hists2d[slice_name]["E_over_p_vs_energy"].Fill(trueE, e_over_p)
+                        #hists2d[slice_name]["E_over_p_vs_profile_discrepancy"].Fill(e_over_p, profile_discrepancy)
                         
 
             # Fill cluster histograms
@@ -753,7 +752,11 @@ for slice_name in files:
             #hists[slice_name]["electron_shower_start_layer"].Fill(shower_start_layer if shower_start_layer > 0 else 0)
             #hists[slice_name]["electron_shower_max_layer"].Fill(shower_max_layer if shower_max_layer > 0 else 0)
             hists[slice_name]["pion_max_cell_energy"].Fill(max_energy)
-            hists[slice_name]["pion_profile_discrepancy"].Fill(profile_discrepancy)
+
+            # >>> Guard discrepancy fill so zeros from empty events don’t dominate
+            if total_energy > 0:
+                hists[slice_name]["pion_profile_discrepancy"].Fill(profile_discrepancy)
+
             hists[slice_name]["pion_cluster_cone_energy"].Fill(cluster_energy)
 
             # Fill LCElectronId specific histograms
@@ -779,14 +782,9 @@ for slice_name in files:
                     #hists2d[slice_name]["cluster_eta_v_mcp_eta"].Fill(tlv_cluster.Eta(), tlv_truth.Eta())
 
                 # Fill 2D parameter correlations
-                hists2d[slice_name]["shower_start_layer_v_max_cell_energy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, max_energy)
-                hists2d[slice_name]["cluster_rms_width_v_n_hits"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0, n_hits_in_cluster)
-                hists2d[slice_name]["shower_start_layer_v_profile_discrepancy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, profile_discrepancy)
-
-                # Check if this is a matched electron (using proper TLorentzVector matching)
-                #if tlv_cluster.E() > 0 and isMatched(tlv_truth, tlv_cluster):
-                    #hists[slice_name]["electron_match_E"].Fill(cluster_energy)
-                    #hists[slice_name]["electron_match_pt"].Fill(tlv_cluster.Perp())
+                #hists2d[slice_name]["shower_start_layer_v_max_cell_energy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, max_energy)
+                #hists2d[slice_name]["cluster_rms_width_v_n_hits"].Fill(cluster_rms_width if cluster_rms_width > 0 else 0, n_hits_in_cluster)
+                #hists2d[slice_name]["shower_start_layer_v_profile_discrepancy"].Fill(shower_start_layer if shower_start_layer > 0 else 0, profile_discrepancy)
 
             events_processed_in_slice += 1
             total_events_processed += 1
@@ -795,7 +793,7 @@ for slice_name in files:
             if events_processed_in_slice % 100 == 0:
                 print(f"  Processed {events_processed_in_slice} events in {slice_name}")
                 
-        reader.close()
+        reader.close()  # <<< CLOSE AFTER EACH FILE
         file_count += 1
 
 print(f"Total events processed: {total_events_processed}")
@@ -867,8 +865,8 @@ if e_minus_p_over_p_hists:
 profile_discrepancy_hists = {}
 
 for s in hists:
-    if "electron_profile_discrepancy" in hists[s] and hists[s]["electron_profile_discrepancy"].GetEntries() > 0:
-        profile_discrepancy_hists[s] = hists[s]["electron_profile_discrepancy"]
+    if "pion_profile_discrepancy" in hists[s] and hists[s]["pion_profile_discrepancy"].GetEntries() > 0:
+        profile_discrepancy_hists[s] = hists[s]["pion_profile_discrepancy"]
 
 
 for s in abs_e_minus_p_over_p_hists:
@@ -1011,8 +1009,8 @@ if shower_start_hists:
 profile_discrepancy_hists = {}
 
 for s in hists:
-    if "electron_profile_discrepancy" in hists[s] and hists[s]["electron_profile_discrepancy"].GetEntries() > 0:
-        profile_discrepancy_hists[s] = hists[s]["electron_profile_discrepancy"]
+    if "pion_profile_discrepancy" in hists[s] and hists[s]["pion_profile_discrepancy"].GetEntries() > 0:
+        profile_discrepancy_hists[s] = hists[s]["pion_profile_discrepancy"]
 if profile_discrepancy_hists:
     plotDiscrepancyHistograms(profile_discrepancy_hists, "plots/profile_discrepancy_all_pt_slices_MAIA_COMBINED.png",
                              "Max Profile Discrepancy", "Entries", threshold_line=0.6, with_bib=False)
@@ -1187,21 +1185,24 @@ if pfo_shower_hists:
         can.SaveAs(f"plots/pfo_shower_start_layer_{s}_ABSOLUTE_THRESHOLD.png")
         can.Close()
 
-# Plot 2D histograms
-for s in hists2d:
-    for h in hists2d[s]:
-        if hists2d[s][h].GetEntries() == 0:
-            continue
+# Plot 2D histograms (guarded: only if booked/fed above)
+if 'hists2d' in locals():
+    for s in hists2d:
+        for h in hists2d[s]:
+            if hists2d[s][h].GetEntries() == 0:
+                continue
 
-        c = ROOT.TCanvas("can", "can", 800, 600)
-        hists2d[s][h].Draw("colz")
-        hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0].replace("_", " ").title())
-        hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
-        c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
-        c.Close()
+            c = ROOT.TCanvas("can", "can", 800, 600)
+            hists2d[s][h].Draw("colz")
+            hists2d[s][h].GetXaxis().SetTitle(h.split("_v_")[0].replace("_", " ").title())
+            hists2d[s][h].GetYaxis().SetTitle(h.split("_v_")[1].replace("_", " ").title())
+            c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
+            c.Close()
+
 if shower_start_hists:
     for s in shower_start_hists:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
 if pfo_shower_hists:
     for s in pfo_shower_hists:
         pt_range = s.replace('electronGun_pT_', '').replace('_', '-')
+
