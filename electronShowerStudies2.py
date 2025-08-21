@@ -10,7 +10,7 @@ import plotHelper
 
 ROOT.gROOT.SetBatch()
 
-max_events = 10
+max_events = -1
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
@@ -72,7 +72,7 @@ for s in files:
     #hists[s]["lcpionid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
     hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
     #hists[s]["lcpionid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
-
+    hists[slice_name]["pion_profile_discrepancy"] = ROOT.TH1F(
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
     if tlv1.DeltaR(tlv2) < dR_cut:
@@ -463,18 +463,18 @@ if cluster_hists_nhits:
 if cluster_hists_r:
     plotHistogramsSimple(cluster_hists_r, "plots/cluster_r.png", "Cluster Radial Position [mm]", "Entries")
 
-lcelectronid_hists = {}
+lcpionid_hists = {}
 for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "cluster_cone_energy"]:
-    lcelectronid_hists[param] = {}
+    lcpionid_hists[param] = {}
     for s in hists:
-        if f"electron_{param}" in hists[s]:
-            lcelectronid_hists[param][s] = hists[s][f"electron_{param}"]
+        if f"pion_{param}" in hists[s]:
+            lcpionid_hists[param][s] = hists[s][f"pion_{param}"]
 
-    if lcelectronid_hists[param]:
+    if lcpionid_hists[param]:
         if param == "shower_start_layer":
             plotHelper.plotHistograms( 
-                lcelectronid_hists[param],
-                f"plots/lcelectronid_{param}.png",
+                lcpionid_hists[param],
+                f"plots/lcpionid_{param}.png",
                 "Shower Start Layer",
                 "Fraction of MC Electrons",
                 False,
@@ -484,7 +484,7 @@ for param in ["shower_start_layer", "max_cell_energy", "profile_discrepancy", "c
             )   
 
         else:
-            plotHistogramsSimple(lcelectronid_hists[param], f"plots/lcelectronid_{param}.png",
+            plotHistogramsSimple(lcpionid_hists[param], f"plots/lcpionid_{param}.png",
                           param.replace("_", " ").title(), "Entries")
 
 pfo_shower_hists = {}

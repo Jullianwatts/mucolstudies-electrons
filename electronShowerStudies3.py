@@ -9,11 +9,9 @@ import math
 
 ROOT.gROOT.SetBatch()
 ## not using shower start layer plots from here because theyre wrong
-# Set up some options
-max_events = -1
+max_events = 10
 import os
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
-#samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/recoBIB/electronGun*")
 #samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
@@ -60,8 +58,6 @@ for s in files:
     if not files[s]:  # Skip empty slices
         continue
     hists[s] = {}
-
-    # Truth and reconstructed electron histograms
     for obj in ["mcp", "mcp_pion", "pion", "pion_match"]:
         for var in variables["pion"]:
             hists[s][f"{obj}_{var}"] = ROOT.TH1F(f"{s}_{obj}_{var}", f"{s}_{obj}_{var}",
@@ -78,48 +74,38 @@ for s in files:
     #hists[s]["lcelectronid_max_inner_layer"] = ROOT.TH1F(f"{s}_lcelectronid_max_inner_layer", f"{s}_lcelectronid_max_inner_layer", 10, 0, 10)
     #hists[s]["lcelectronid_max_energy"] = ROOT.TH1F(f"{s}_lcelectronid_max_energy", f"{s}_lcelectronid_max_energy", 50, 0, 20)
     #hists[s]["lcelectronid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
-    #hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
+    hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
     #hists[s]["lcelectronid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
     
     # E/p analysis histograms
-    hists[s]["electron_E_over_p"] = ROOT.TH1F(f"{s}_electron_E_over_p", f"E/p Distribution {s};E/p;Entries", 100, 0, 3)
-    hists[s]["electron_E_minus_p_over_p"] = ROOT.TH1F(f"{s}_electron_E_minus_p_over_p", f"(E-p)/p Distribution {s};(E-p)/p;Entries", 100, -1, 1)
-    hists[s]["electron_abs_E_minus_p_over_p"] = ROOT.TH1F(f"{s}_electron_abs_E_minus_p_over_p", f"|E-p|/p Distribution {s};|E-p|/p;Entries", 100, 0, 1)
-    hists[s]["track_momentum"] = ROOT.TH1F(f"{s}_track_momentum", f"Track Momentum {s};p [GeV];Entries", 100, 0, 1000)
-    hists[s]["matched_cluster_energy"] = ROOT.TH1F(f"{s}_matched_cluster_energy", f"Matched Cluster Energy {s};E [GeV];Entries", 100, 0, 1000)
-    hists[s]["track_cluster_dR"] = ROOT.TH1F(f"{s}_track_cluster_dR", f"Track-Cluster dR {s};dR;Entries", 50, 0, 0.5)
+    #hists[s]["electron_E_over_p"] = ROOT.TH1F(f"{s}_electron_E_over_p", f"E/p Distribution {s};E/p;Entries", 100, 0, 3)
+    #hists[s]["electron_E_minus_p_over_p"] = ROOT.TH1F(f"{s}_electron_E_minus_p_over_p", f"(E-p)/p Distribution {s};(E-p)/p;Entries", 100, -1, 1)
+    #hists[s]["electron_abs_E_minus_p_over_p"] = ROOT.TH1F(f"{s}_electron_abs_E_minus_p_over_p", f"|E-p|/p Distribution {s};|E-p|/p;Entries", 100, 0, 1)
+    #hists[s]["track_momentum"] = ROOT.TH1F(f"{s}_track_momentum", f"Track Momentum {s};p [GeV];Entries", 100, 0, 1000)
+    #hists[s]["matched_cluster_energy"] = ROOT.TH1F(f"{s}_matched_cluster_energy", f"Matched Cluster Energy {s};E [GeV];Entries", 100, 0, 1000)
+    #hists[s]["track_cluster_dR"] = ROOT.TH1F(f"{s}_track_cluster_dR", f"Track-Cluster dR {s};dR;Entries", 50, 0, 0.5)
 
 # Set up 2D histograms
-hists2d = {}
-for s in files:
-    if not files[s]:  # Skip empty slices
-        continue
-    hists2d[s] = {}
+#hists2d = {}
+#for s in files:
+    #if not files[s]:  # Skip empty slices
+        #continue
+    #hists2d[s] = {}
 
     # Cluster vs truth comparisons
-    hists2d[s]["cluster_E_v_mcp_E"] = ROOT.TH2F(f"cluster_E_v_mcp_E_{s}", f"cluster_E_v_mcp_E_{s}", 30, 0, 1000, 30, 0, 1000)
-    hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
+    #hists2d[s]["cluster_E_v_mcp_E"] = ROOT.TH2F(f"cluster_E_v_mcp_E_{s}", f"cluster_E_v_mcp_E_{s}", 30, 0, 1000, 30, 0, 1000)
+    #hists2d[s]["cluster_eta_v_mcp_eta"] = ROOT.TH2F(f"cluster_eta_v_mcp_eta_{s}", f"cluster_eta_v_mcp_eta_{s}", 30, -3, 3, 30, -3, 3)
 
     # LCElectronId parameter correlations
-    hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy",
-    20, 0, 20, 100, 0, 2)
+    #hists2d[s]["shower_start_layer_v_profile_discrepancy"] = ROOT.TH2F(f"shower_start_layer_v_profile_discrepancy_{s}","Shower Start Layer vs Profile Discrepancy;Shower Start Layer;Profile Discrepancy",20, 0, 20, 100, 0, 2)
 
-    hists2d[s]["E_over_p_v_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_v_profile_discrepancy_{s}", f"E_over_p_v_profile_discrepancy_{s}", 50, 0, 2, 50, 0, 1)
+    #hists2d[s]["E_over_p_v_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_v_profile_discrepancy_{s}", f"E_over_p_v_profile_discrepancy_{s}", 50, 0, 2, 50, 0, 1)
     
-    max_y = 10  # default
-    if "1000_5000" in s:
-        max_y = 100
-    elif "250_1000" in s:
-        max_y = 50
-    elif "50_250" in s:
-        max_y = 20
-    hists2d[s]["shower_start_layer_v_max_cell_energy"] = ROOT.TH2F(f"shower_start_layer_v_max_cell_energy_{s}", f"shower_start_layer_v_max_cell_energy_{s}", 20, 0, 20, 50, 0, 10)
-    hists2d[s]["cluster_rms_width_v_n_hits"] = ROOT.TH2F(f"cluster_rms_width_v_n_hits_{s}", f"cluster_rms_width_v_n_hits_{s}", 50, 0, 200, 50, 0, 100)
-    
+   
     # E/p analysis 2D histograms
-    hists2d[s]["E_vs_p"] = ROOT.TH2F(f"E_vs_p_{s}", f"Cluster Energy vs Track Momentum {s};Track p [GeV];Cluster E [GeV]", 50, 0, 1000, 50, 0, 1000)
-    hists2d[s]["E_over_p_vs_energy"] = ROOT.TH2F(f"E_over_p_vs_energy_{s}", f"E/p vs Energy {s};True Energy [GeV];E/p", 50, 0, 1000, 50, 0, 3)
-    hists2d[s]["E_over_p_vs_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_vs_profile_discrepancy_{s}", f"E/p vs Profile Discrepancy {s};E/p;Profile Discrepancy", 50, 0, 3, 50, 0, 2)
+    #hists2d[s]["E_vs_p"] = ROOT.TH2F(f"E_vs_p_{s}", f"Cluster Energy vs Track Momentum {s};Track p [GeV];Cluster E [GeV]", 50, 0, 1000, 50, 0, 1000)
+    #hists2d[s]["E_over_p_vs_energy"] = ROOT.TH2F(f"E_over_p_vs_energy_{s}", f"E/p vs Energy {s};True Energy [GeV];E/p", 50, 0, 1000, 50, 0, 3)
+    #hists2d[s]["E_over_p_vs_profile_discrepancy"] = ROOT.TH2F(f"E_over_p_vs_profile_discrepancy_{s}", f"E/p vs Profile Discrepancy {s};E/p;Profile Discrepancy", 50, 0, 3, 50, 0, 2)
 
 # PANDORA-STYLE PROFILE DISCREPANCY FUNCTION (ONLY)
 def get_profile_discrepancy_pandora_style(energy_by_layer, total_energy, energy=None, num_layers=50, X0_per_layer=0.6286):
@@ -180,21 +166,6 @@ def isMatched(tlv1, tlv2, dR_cut=0.1):
     if tlv1.DeltaR(tlv2) < dR_cut:
         return True
     return False
-
-def calculate_rms_width(hit_positions, hit_energies, center):
-    if len(hit_positions) == 0:
-        return 0.0
-
-    total_energy = sum(hit_energies)
-    if total_energy == 0:
-        return 0.0
-
-    weighted_r_squared = 0.0
-    for i, pos in enumerate(hit_positions):
-        r_squared = (pos[0] - center[0])**2 + (pos[1] - center[1])**2
-        weighted_r_squared += hit_energies[i] * r_squared
-
-    return sqrt(weighted_r_squared / total_energy)
 
 def find_shower_start_layer_absolute(energy_by_layer, absolute_threshold_gev=1.0):
     if not energy_by_layer:
@@ -448,13 +419,6 @@ for slice_name in files:
         if max_events > 0 and file_count >= max_events:
             break
 
-        try:
-            reader.open(f)
-        except Exception as e:
-            print(f"  Error opening file {f}: {e}")
-            continue
-            
-        # Loop over events in this file
         for ievt, event in enumerate(reader):
 
             # Reset variables for this event
