@@ -166,10 +166,11 @@ for sample_name in files:
     if "pfo_e_match_obj_ep_ratio" in hists[sample_name] and hists[sample_name]["pfo_e_match_obj_ep_ratio"].GetEntries() > 0:
         ep_hists[sample_name] = hists[sample_name]["pfo_e_match_obj_ep_ratio"]
 
-if ep_hists:
-    plotHistograms(ep_hists, "plots/electron_ep_ratio_comparison.png", 
-                  xlabel="E/p", ylabel="Entries",
-                  atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
+
+plotHistograms(ep_hists, "plots/electron_ep_ratio_comparison.png", 
+               xlabel="E/p", ylabel="Entries",
+               atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
+
 
 # Plot variables
 for var in ["pt", "eta", "phi", "E"]:
