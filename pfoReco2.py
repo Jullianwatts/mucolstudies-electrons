@@ -7,7 +7,10 @@ from pyLCIO import IOIMPL
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-max_events = -1
+# Make sure plots folder exists
+os.makedirs("plots", exist_ok=True)
+
+max_events = 10
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 
@@ -25,8 +28,10 @@ for s in samples:
 match_counts = {s: 0 for s in files}
 
 hists = {}
+hists2d = {}  # <-- 2D hist container
 for s in files:
     hists[s] = {}
+    hists2d[s] = {}  # initialize dict for 2D hists if you add them later
     for obj in ["pfo","pfo_e","pfo_e_match", "mcp", "mcp_e", "trk", "trk_e", "trk_e_match", "clusters", "clusters_e_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
@@ -208,4 +213,12 @@ for sample_name in files:
         
         percent_near_one = (near_one / total_entries) * 100 if total_entries > 0 else 0
         print(f"  E/p entries with 0.8 < E/p < 1.2: {percent_near_one:.1f}%")
+
+# --- New block: save all 2D histograms if present ---
+for s in hists2d:
+    for h in hists2d[s]:
+        c = ROOT.TCanvas("c", "c", 800, 600)
+        hists2d[s][h].Draw("COLZ")
+        c.SaveAs(f"plots/{hists2d[s][h].GetName()}.png")
+        c.Close()
 
