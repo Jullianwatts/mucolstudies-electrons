@@ -7,15 +7,14 @@ from pyLCIO import IOIMPL
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-
 max_events = 10
 
-samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
+samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 
 files = {}
 slices = ["0_50", "50_250", "250_1000", "1000_5000"]
 for s in slices: 
-    files[f"pionGun_pT_{s}"] = []
+    files[f"electronGun_pT_{s}"] = []
 
 for s in samples:
     sname = s.split("/")[-1]
@@ -28,7 +27,7 @@ match_counts = {s: 0 for s in files}
 hists = {}
 for s in files:
     hists[s] = {}
-    for obj in ["pfo","pfo_pi","pfo_pi_match", "mcp", "mcp_pi", "trk", "trk_pi", "trk_pi_match", "clusters", "clusters_pi_match"]:
+    for obj in ["pfo","pfo_e","pfo_e_match", "mcp", "mcp_e", "trk", "trk_e", "trk_e_match", "clusters", "clusters_e_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:
                 hists[s][obj+"_"+var] = ROOT.TH1F(s+"_"+obj+"_"+var, s, 
@@ -36,9 +35,9 @@ for s in files:
                                                 variables[vtype][var]["xmin"], 
                                                 variables[vtype][var]["xmax"])
     
-    # E/p ratio hists for pions
-    hists[s]["pfo_pi_match_obj_ep_ratio"] = ROOT.TH1F(s+"_pfo_pi_match_obj_ep_ratio", s, 100, 0, 3)
-    hists[s]["clusters_pi_match_obj_ep_ratio"] = ROOT.TH1F(s+"_clusters_pi_match_obj_ep_ratio", s, 100, 0, 3)
+    # E/p ratio hists for electrons
+    hists[s]["pfo_e_match_obj_ep_ratio"] = ROOT.TH1F(s+"_pfo_e_match_obj_ep_ratio", s, 100, 0, 3)
+    hists[s]["clusters_e_match_obj_ep_ratio"] = ROOT.TH1F(s+"_clusters_e_match_obj_ep_ratio", s, 100, 0, 3)
 
 def find_closest_track(cluster_tlv, track_list, dR_cut=0.1):
     if cluster_tlv.E() <= 0:
@@ -101,8 +100,8 @@ for s in files:
                 cluster_tlvs.append(cluster_tlv)
             
             for track in tracks:
-                # pion mass for TLV
-                track_tlv = getTrackTLV(track, m=0.13957)
+                # electron mass for TLV
+                track_tlv = getTrackTLV(track, m=0.000511)
                 if track_tlv.E() < 10: 
                     continue
                 track_tlvs.append(track_tlv)
@@ -131,11 +130,11 @@ for s in files:
                     continue
                 ep_ratio = E / p
                 
-                # fill pion hists
-                fillObjHists(hists[s], "pfo_pi_match", closest_track)
-                fillObjHists(hists[s], "clusters_pi_match", cluster_tlv)
-                hists[s]["pfo_pi_match_obj_ep_ratio"].Fill(ep_ratio)
-                hists[s]["clusters_pi_match_obj_ep_ratio"].Fill(ep_ratio)
+                # fill electron hists
+                fillObjHists(hists[s], "pfo_e_match", closest_track)
+                fillObjHists(hists[s], "clusters_e_match", cluster_tlv)
+                hists[s]["pfo_e_match_obj_ep_ratio"].Fill(ep_ratio)
+                hists[s]["clusters_e_match_obj_ep_ratio"].Fill(ep_ratio)
                 
                 if i < 10:
                     print(f"{s}: E={E:.1f} GeV, p={p:.1f} GeV, E/p={ep_ratio:.3f}")
@@ -146,22 +145,22 @@ for s in files:
 
 print(f"Total matches: {sum(match_counts.values())}")
 
-# Labels keyed by pion samples
+# Labels keyed by electron samples
 label_map = {
-    "pionGun_pT_0_50": "0-50 GeV",
-    "pionGun_pT_50_250": "50-250 GeV", 
-    "pionGun_pT_250_1000": "250-1000 GeV",
-    "pionGun_pT_1000_5000": "1000-5000 GeV"
+    "electronGun_pT_0_50": "0-50 GeV",
+    "electronGun_pT_50_250": "50-250 GeV", 
+    "electronGun_pT_250_1000": "250-1000 GeV",
+    "electronGun_pT_1000_5000": "1000-5000 GeV"
 }
 
 # Plot E/p ratios comparison
 ep_hists = {}
 for sample_name in files:
-    if "pfo_pi_match_obj_ep_ratio" in hists[sample_name] and hists[sample_name]["pfo_pi_match_obj_ep_ratio"].GetEntries() > 0:
-        ep_hists[sample_name] = hists[sample_name]["pfo_pi_match_obj_ep_ratio"]
+    if "pfo_e_match_obj_ep_ratio" in hists[sample_name] and hists[sample_name]["pfo_e_match_obj_ep_ratio"].GetEntries() > 0:
+        ep_hists[sample_name] = hists[sample_name]["pfo_e_match_obj_ep_ratio"]
 
 if ep_hists:
-    plotHistograms(ep_hists, "plots/pi_ep_ratio_comparison.png", 
+    plotHistograms(ep_hists, "plots/electron_ep_ratio_comparison.png", 
                   xlabel="E/p", ylabel="Entries",
                   atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
 
@@ -169,24 +168,24 @@ if ep_hists:
 for var in ["pt", "eta", "phi", "E"]:
     var_hists = {}
     for sample_name in files:
-        hist_name = f"pfo_pi_match_obj_{var}"
+        hist_name = f"pfo_e_match_obj_{var}"
         if hist_name in hists[sample_name] and hists[sample_name][hist_name].GetEntries() > 0:
             var_hists[sample_name] = hists[sample_name][hist_name]
     
     if var_hists:
-        plotHistograms(var_hists, f"plots/pfo_pi_match_{var}.png",
+        plotHistograms(var_hists, f"plots/pfo_e_match_{var}.png",
                       xlabel=variables["obj"][var]["label"], ylabel="Entries",
                       atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
 
 # Plot cluster E/p ratios
 cluster_ep_hists = {}
 for sample_name in files:
-    hist_name = "clusters_pi_match_obj_ep_ratio"
+    hist_name = "clusters_e_match_obj_ep_ratio"
     if hist_name in hists[sample_name] and hists[sample_name][hist_name].GetEntries() > 0:
         cluster_ep_hists[sample_name] = hists[sample_name][hist_name]
 
 if cluster_ep_hists:
-    plotHistograms(cluster_ep_hists, "plots/pi_cluster_ep_ratio_comparison.png",
+    plotHistograms(cluster_ep_hists, "plots/electron_cluster_ep_ratio_comparison.png",
                   xlabel="E/p", ylabel="Entries", 
                   atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
 
@@ -198,7 +197,7 @@ for sample_name in files:
     print(f"\n{sample_name}:")
     print(f"  Total matches: {match_counts[sample_name]}")
     
-    ep_hist = hists[sample_name]["pfo_pi_match_obj_ep_ratio"]
+    ep_hist = hists[sample_name]["pfo_e_match_obj_ep_ratio"]
     if ep_hist.GetEntries() > 0:
         total_entries = ep_hist.GetEntries()
         near_one = 0
