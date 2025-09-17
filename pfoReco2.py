@@ -8,7 +8,7 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
 
-max_events = -1
+max_events = 10
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
 
@@ -28,7 +28,6 @@ match_counts = {s: 0 for s in files}
 hists = {}
 for s in files:
     hists[s] = {}
-    # renamed *_el → *_pi
     for obj in ["pfo","pfo_pi","pfo_pi_match", "mcp", "mcp_pi", "trk", "trk_pi", "trk_pi_match", "clusters", "clusters_pi_match"]:
         for vtype in ["obj", "evt"]:
             for var in variables[vtype]:

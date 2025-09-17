@@ -111,18 +111,18 @@ def plotHistograms(h_map, save_name, xlabel="", ylabel="", interactive=False, lo
         h_map[k].Draw("hist same")
 
     # Create better legend
-    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
-    leg.SetBorderSize(1)
-    leg.SetFillColor(0)
-    leg.SetFillStyle(1001)
-    leg.SetTextSize(0.035)
-    leg.SetHeader("pT slices", "C")
+    #leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
+    #leg.SetBorderSize(1)
+    #leg.SetFillColor(0)
+    #leg.SetFillStyle(1001)
+    #leg.SetTextSize(0.035)
+    #leg.SetHeader("pT slices", "C")
     
-    for k in h_keys:
+    #for k in h_keys:
         # Clean up legend labels
-        clean_label = k.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
-        leg.AddEntry(h_map[k], clean_label, "l")
-    leg.Draw()
+        #clean_label = k.replace("electronGun_pT_", "").replace("_", "-") + " GeV"
+        #leg.AddEntry(h_map[k], clean_label, "l")
+    #leg.Draw()
     if atltext != "":
         text = ROOT.TLatex()
         text.SetNDC()
@@ -194,17 +194,17 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
     xmax = eff_map[list(eff_map.keys())[0]].GetXaxis().GetXmax()
     line.DrawLine(xmin, 1.0, xmax, 1.0)
     # Create legend with header like in your desired style
-    leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
-    leg.SetBorderSize(1)
-    leg.SetFillColor(0)
-    leg.SetFillStyle(1001)
-    leg.SetTextSize(0.035)
+    #leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
+    #leg.SetBorderSize(1)
+    #leg.SetFillColor(0)
+    #leg.SetFillStyle(1001)
+    #leg.SetTextSize(0.035)
     
-    for k in eff_map:
+    #for k in eff_map:
         # Clean up the legend entries
-        clean_label = k.replace("pT slice ", "")
-        leg.AddEntry(eff_map[k], clean_label, "lp")
-    leg.Draw()
+        #clean_label = k.replace("pT slice ", "")
+        #leg.AddEntry(eff_map[k], clean_label, "lp")
+    #leg.Draw()
 
     text = ROOT.TLatex()
     text.SetNDC()

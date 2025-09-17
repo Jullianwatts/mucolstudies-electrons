@@ -10,7 +10,7 @@ import plotHelper
 
 ROOT.gROOT.SetBatch()
 
-max_events = -1
+max_events = 10
 import os
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/pionGun*")
@@ -72,7 +72,6 @@ for s in files:
     #hists[s]["lcpionid_max_profile_start"] = ROOT.TH1F(f"{s}_lcelectronid_max_profile_start", f"{s}_lcelectronid_max_profile_start", 20, 0, 20)
     hists[s]["lcpionid_max_profile_discrepancy"] = ROOT.TH1F(f"{s}_lcpionid_max_profile_discrepancy", f"{s}_lcpionid_max_profile_discrepancy", 100, 0, 2)
     #hists[s]["lcpionid_max_residual_e_over_p"] = ROOT.TH1F(f"{s}_lcelectronid_max_residual_e_over_p", f"{s}_lcelectronid_max_residual_e_over_p", 50, 0, 1)
-    hists[slice_name]["pion_profile_discrepancy"] = ROOT.TH1F(
 # Matching function
 def isMatched(tlv1, tlv2, dR_cut=0.1):
     if tlv1.DeltaR(tlv2) < dR_cut:
