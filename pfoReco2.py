@@ -4,11 +4,13 @@ import glob
 import pyLCIO
 from pyLCIO import IOIMPL
 
+# === ensure we save into this repo's ./plots exactly like your working script ===
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
+os.makedirs("plots", exist_ok=True)
+
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
-
-# Make sure plots folder exists
-os.makedirs("plots", exist_ok=True)
 
 max_events = 10
 
