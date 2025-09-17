@@ -7,7 +7,7 @@ from pyLCIO import IOIMPL
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-max_events = 10
+max_events = -1
 
 samples = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun*")
 
