@@ -1,27 +1,15 @@
 import glob
 from pyLCIO import IOIMPL, EVENT
-
-# ----------------------------------------------
-# Collect all .slcio files across pT directories
-# ----------------------------------------------
 dirs = glob.glob("/data/fmeloni/DataMuC_MAIA_v0/v5/reco/electronGun_pT_*")
 files = []
 for d in dirs:
     files.extend(glob.glob(f"{d}/*.slcio"))
 print(f"Found {len(files)} .slcio files across {len(dirs)} directories")
-
-# ----------------------------------------------
-# Set up LCIO reader
-# ----------------------------------------------
 reader = IOIMPL.LCFactory.getInstance().createLCReader()
 reader.setReadCollectionNames(["PandoraClusters"])  # only load what you need
 
 max_files = 5      # number of files to open
 max_events = 2     # number of events per file
-
-# ----------------------------------------------
-# Loop through files and inspect PID data
-# ----------------------------------------------
 for f_index, fname in enumerate(files):
     if f_index >= max_files:
         break
