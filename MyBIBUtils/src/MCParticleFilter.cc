@@ -14,7 +14,7 @@
 using namespace lcio;
 using namespace marlin;
 
-MCParticleFilter aMCParticleFilter;
+//MCParticleFilter aMCParticleFilter;
 
 MCParticleFilter::MCParticleFilter() : Processor("MCParticleFilter")
 {

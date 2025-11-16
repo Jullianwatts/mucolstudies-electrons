@@ -12,8 +12,8 @@ parser.add_argument("--enableBIB", action="store_true", default=False, help="Ena
 parser.add_argument("--enableIP", action="store_true", default=False, help="Enable IP overlay")
 parser.add_argument("--TypeEvent", type=str, default="electronGun_pT_0_50", help="Type of event to process")
 parser.add_argument("--InFileName", type=str, default="0", help="Input file name for the simulation")
-parser.add_argument("--code", type=str, default="/code", help="Top-level directory for code")
-parser.add_argument("--data", type=str, default="/dataMuC", help="Top-level directory for data")
+parser.add_argument("--code", type=str, default="/scratch/jwatts/mucol", help="Top-level directory for code")
+parser.add_argument("--data", type=str, default="/scratch/jwatts/mucol/data", help="Top-level directory for data")
 parser.add_argument("--skipReco", action="store_true", default=False, help="Skip reconstruction")
 parser.add_argument("--skipTrackerConing", action="store_true", default=False, help="Skip tracker coning")
 the_args = parser.parse_args()
@@ -30,7 +30,7 @@ parseConstants(CONSTANTS)
 
 read = LcioEvent()
 read.OutputLevel = INFO
-read.Files = [f"{the_args.data}/sim/{the_args.TypeEvent}/{the_args.TypeEvent}_sim_{the_args.InFileName}.slcio"]
+read.Files = ["/scratch/jwatts/mucol/MyBIBUtils/output_sim.slcio"]
 algList.append(read)
 
 EventNumber = MarlinProcessorWrapper("EventNumber")
@@ -57,7 +57,7 @@ if not the_args.enableBIB:
         "DropCollectionNames": [],
         "FullSubsetCollections": [],
         "KeepCollectionNames": ["MCParticle_SiTracks_Refitted"],
-        "LCIOOutputFile": [f"{the_args.data}/reco/{the_args.TypeEvent}/{the_args.TypeEvent}_reco_{the_args.InFileName}.slcio"],
+        "LCIOOutputFile": ["/scratch/jwatts/mucol/data/reco/"+the_args.TypeEvent+"/"+the_args.TypeEvent+"_reco_"+the_args.InFileName+".slcio"],
         "LCIOWriteMode": ["WRITE_NEW"]
     }
 else:
@@ -109,8 +109,8 @@ InitDD4hep = MarlinProcessorWrapper("InitDD4hep")
 InitDD4hep.OutputLevel = INFO
 InitDD4hep.ProcessorType = "InitializeDD4hep"
 InitDD4hep.Parameters = {
-    "DD4hepXMLFile": [f"{the_args.code}/detector-simulation/geometries/MAIA_v0/MAIA_v0.xml"],
-    "EncodingStringParameterName": ["GlobalTrackerReadoutID"]
+        "DD4hepXMLFile": ["/scratch/jwatts/mucol/detector-simulation/geometries/MAIA_v0/MAIA_v0.xml"],
+        "EncodingStringParameterName": ["GlobalTrackerReadoutID"]
 }
 
 VXDBarrelDigitiser = MarlinProcessorWrapper("VXDBarrelDigitiser")
@@ -616,7 +616,7 @@ MyEcalBarrelSelector.Parameters = {
     "CaloRelationCollectionName": ["EcalBarrelRelationsSimConed"],
     "GoodHitCollection": ["EcalBarrelCollectionSel"],
     "GoodRelationCollection": ["EcalBarrelRelationsSimSel"],
-    "ThresholdsFilePath": [f"{the_args.code}/MyBIBUtils/data/ECAL_Thresholds_10TeV.root"],
+    "ThresholdsFilePath": ["/scratch/jwatts/mucol/MyBIBUtils/data/ECAL_Thresholds_10TeV.root"],
     "Nsigma": ["0"],
     "TimeWindowMin": ["-0.3"],
     "TimeWindowMax": ["0.3"],
@@ -631,7 +631,7 @@ MyEcalEndcapSelector.Parameters = {
     "CaloRelationCollectionName": ["EcalEndcapRelationsSimConed"],
     "GoodHitCollection": ["EcalEndcapCollectionSel"],
     "GoodRelationCollection": ["EcalEndcapRelationsSimSel"],
-    "ThresholdsFilePath": [f"{the_args.code}/MyBIBUtils/data/ECAL_Thresholds_10TeV.root"],
+    "ThresholdsFilePath": ["/scratch/jwatts/mucol/MyBIBUtils/data/ECAL_Thresholds_10TeV.root"],
     "Nsigma": ["0"],
     "TimeWindowMin": ["-0.3"],
     "TimeWindowMax": ["0.3"],
@@ -647,7 +647,7 @@ MyHcalBarrelSelector.Parameters = {
     "CaloRelationCollectionName": ["HcalBarrelRelationsSimConed"],
     "GoodHitCollection": ["HcalBarrelCollectionSel"],
     "GoodRelationCollection": ["HcalBarrelRelationsSimSel"],
-    "ThresholdsFilePath": [f"{the_args.code}/MyBIBUtils/data/HCAL_Thresholds_10TeV.root"],
+    "ThresholdsFilePath": ["/scratch/jwatts/mucol/MyBIBUtils/data/HCAL_Thresholds_10TeV.root"],
     "FlatThreshold": ["5e-05"],
     "Nsigma": ["0"],
     "TimeWindowMin": ["-0.3"],
@@ -663,7 +663,7 @@ MyHcalEndcapSelector.Parameters = {
     "CaloRelationCollectionName": ["HcalEndcapRelationsSimConed"],
     "GoodHitCollection": ["HcalEndcapCollectionSel"],
     "GoodRelationCollection": ["HcalEndcapRelationsSimSel"],
-    "ThresholdsFilePath": [f"{the_args.code}/MyBIBUtils/data/HCAL_Thresholds_10TeV.root"],
+    "ThresholdsFilePath": ["/scratch/jwatts/mucol/MyBIBUtils/data/HCAL_Thresholds_10TeV.root"],
     "FlatThreshold": ["5e-05"],
     "Nsigma": ["0"],
     "TimeWindowMin": ["-0.3"],
@@ -742,7 +742,7 @@ DDMarlinPandora.Parameters = {
     "NEventsToSkip": ["0"],
     "NOuterSamplingLayers": ["3"],
     "PFOCollectionName": ["PandoraPFOs"],
-    "PandoraSettingsXmlFile": [f"{the_args.code}/SteeringMacros/PandoraSettings/PandoraSettingsDefault.xml"],
+    "PandoraSettingsXmlFile": ["/scratch/jwatts/mucol/SteeringMacros/PandoraSettings/PandoraSettingsDefault.xml"],
     "ProngVertexCollections": ["ProngVertices"],
     "ReachesECalBarrelTrackerOuterDistance": ["-100"],
     "ReachesECalBarrelTrackerZMaxDistance": ["-50"],
