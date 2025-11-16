@@ -1,1 +1,25 @@
-removed all MAIA sim and reco files to completly restart. now following MAIA WIKI page to pull all the correct repos.
+What to run to access singularity: 
+apptainer run -B /ospool/uc-shared/project/futurecolliders/data/:/data /cvmfs/unpacked.cern.ch/ghcr.io/muoncollidersoft/mucoll-sim-alma9\:v2.9.7
+setup_mucoll
+
+
+11/16 
+11:00 - removed all MAIA sim and reco files to completly restart. now following MAIA WIKI page to pull all the correct repos.
+12:00 - removed all .git's in files so I could add them to this gitlog with no error and updated pat in sim_steer_GEN_CONDOR.py
+13:00 - now running sim with these paths
+    ddsim --inputFile /data/fmeloni/ParticleGuns/muonGun_pT_0_50/muonGun_pT_0_50_gen.slcio \
+        --steeringFile /scratch/jwatts/mucol/SteeringMacros/Sim/sim_steer_GEN_CONDOR.py \
+        --outputFile output_sim.slcio \
+        --compactFile /scratch/jwatts/mucol/detector-simulation/geometries/MAIA_v0/MAIA_v0.xml
+14:00 - ran export MARLIN_DLL=`readlink -e lib/libMyBIBUtils.so`:${MARLIN_DLL} in MyBIBUtils
+14:30 - ran ddsim --inputFile /data/fmeloni/ParticleGuns/muonGun_pT_0_50/muonGun_pT_0_50_gen.slcio \
+        --steeringFile /scratch/jwatts/mucol/SteeringMacros/Sim/sim_steer_GEN_CONDOR.py \
+        --outputFile output_sim.slcio \
+        --compactFile /scratch/jwatts/mucol/detector-simulation/geometries/MAIA_v0/MAIA_v0.xml
+    output from running simulation, is stored in textfile on computer called OutputFromMucollSim
+    file is located at /scratch/jwatts/mucol/MyBIBUtils/output_sim.slcio
+15:00 - updated paths in Steer_reco and PandoraSettingsDefault 
+        going to run k4run /scratch/jwatts/mucol/SteeringMacros/k4Reco/steer_reco.py
+15:20 - tried to run and couldnt load lib. trying to run not with wiki line of code but with export MARLIN_DLL=/scratch/jwatts/mucol/MyBIBUtils/build/lib/libMyBIBUtils.so
+
+
