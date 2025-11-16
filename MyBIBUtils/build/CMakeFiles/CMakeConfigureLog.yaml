@@ -1,0 +1,938 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineSystem.cmake:205 (message)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      The system is: Linux - 5.14.0-570.42.2.el9_6.x86_64 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/gcc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/3.31.4/CompilerIdC/a.out
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCXXCompiler.cmake:126 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+      Compiler: /usr/bin/g++ 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+      
+      The CXX compiler identification is GNU, found in:
+        /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/3.31.4/CompilerIdCXX/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_b7c52/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_b7c52.dir/build.make CMakeFiles/cmTC_b7c52.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li'
+        Building C object CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o
+        /usr/bin/gcc   -v -o CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -c /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/gcc
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-redhat-linux
+        Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/cc1 -quiet -v /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_b7c52.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64-v2 -version -o /tmp/ccoSWLN6.s
+        GNU C17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
+        	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/../../../../x86_64-redhat-linux/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3
+         .
+         /usr/lib/gcc/x86_64-redhat-linux/11/include
+         /usr/local/include
+         /usr/include
+        End of search list.
+        GNU C17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
+        	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        Compiler executable checksum: 4414b45fdf7cee70037cf83f40d3c8f3
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/'
+         as -v --64 -o CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o /tmp/ccoSWLN6.s
+        GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-54.el9
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.'
+        Linking C executable cmTC_b7c52
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7c52.dir/link.txt --verbose=1
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/gcc
+        COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-redhat-linux
+        Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_b7c52' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_b7c52.'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cctcHr4b.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_b7c52 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        collect2 version 11.5.0 20240719 (Red Hat 11.5.0-5)
+        /usr/bin/ld -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cctcHr4b.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_b7c52 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        GNU ld version 2.35.2-54.el9
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_b7c52' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_b7c52.'
+        /usr/bin/gcc  -v -Wl,-v -rdynamic CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -o cmTC_b7c52
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:182 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+          add: [.]
+          add: [/usr/lib/gcc/x86_64-redhat-linux/11/include]
+          add: [/usr/local/include]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+        skipping relative include dir [.]
+        collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/11/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
+        ignore line: [Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_b7c52/fast]
+        ignore line: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_b7c52.dir/build.make CMakeFiles/cmTC_b7c52.dir/build]
+        ignore line: [gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-7EX7Li']
+        ignore line: [Building C object CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/gcc   -v -o CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -c /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/gcc]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-redhat-linux]
+        ignore line: [Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c c++ fortran lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/cc1 -quiet -v /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCCompilerABI.c -quiet -dumpdir CMakeFiles/cmTC_b7c52.dir/ -dumpbase CMakeCCompilerABI.c.c -dumpbase-ext .c -mtune=generic -march=x86-64-v2 -version -o /tmp/ccoSWLN6.s]
+        ignore line: [GNU C17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
+        ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/../../../../x86_64-redhat-linux/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+        ignore line: [ .]
+        ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [GNU C17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
+        ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [Compiler executable checksum: 4414b45fdf7cee70037cf83f40d3c8f3]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o /tmp/ccoSWLN6.s]
+        ignore line: [GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-54.el9]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.']
+        ignore line: [Linking C executable cmTC_b7c52]
+        ignore line: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7c52.dir/link.txt --verbose=1]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/gcc]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-redhat-linux]
+        ignore line: [Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c c++ fortran lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_b7c52' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_b7c52.']
+        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cctcHr4b.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_b7c52 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+          arg [/usr/libexec/gcc/x86_64-redhat-linux/11/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/cctcHr4b.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--no-add-needed] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-export-dynamic] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_b7c52] ==> ignore
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [-lc] ==> lib [c]
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        ignore line: [collect2 version 11.5.0 20240719 (Red Hat 11.5.0-5)]
+        ignore line: [/usr/bin/ld -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cctcHr4b.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_b7c52 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_b7c52.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        linker tool for 'C': /usr/bin/ld
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> [/usr/lib64/crt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11] ==> [/usr/lib/gcc/x86_64-redhat-linux/11]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> [/usr/lib]
+        implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+        implicit objs: [/usr/lib64/crt1.o;/usr/lib64/crti.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o;/usr/lib64/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/usr/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Running the C compiler's linker: "/usr/bin/ld" "-v"
+      GNU ld version 2.35.2-54.el9
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:74 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    checks:
+      - "Detecting CXX compiler ABI info"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_CXX_SCAN_FOR_MODULES: "OFF"
+    buildResult:
+      variable: "CMAKE_CXX_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_a1db6/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_a1db6.dir/build.make CMakeFiles/cmTC_a1db6.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop'
+        Building CXX object CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o
+        /usr/bin/g++   -v -o CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -c /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCXXCompilerABI.cpp
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/g++
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-redhat-linux
+        Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_a1db6.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cc6BWjqr.s
+        GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
+        	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/include-fixed"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/../../../../x86_64-redhat-linux/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki
+         /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3
+         .
+         /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11
+         /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux
+         /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward
+         /usr/lib/gcc/x86_64-redhat-linux/11/include
+         /usr/local/include
+         /usr/include
+        End of search list.
+        GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)
+        	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5), GMP version 6.2.0, MPFR version 4.1.0-p9, MPC version 1.2.1, isl version none
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        Compiler executable checksum: e93254d940b36bb677eb536fa6c50158
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/'
+         as -v --64 -o CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc6BWjqr.s
+        GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-54.el9
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.'
+        Linking CXX executable cmTC_a1db6
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1db6.dir/link.txt --verbose=1
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/g++
+        COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-redhat-linux
+        Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c,c++,fortran,lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1
+        Thread model: posix
+        Supported LTO compression algorithms: zlib zstd
+        gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) 
+        COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_a1db6' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a1db6.'
+         /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cciZduhl.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a1db6 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        collect2 version 11.5.0 20240719 (Red Hat 11.5.0-5)
+        /usr/bin/ld -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cciZduhl.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a1db6 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o
+        GNU ld version 2.35.2-54.el9
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_a1db6' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a1db6.'
+        /usr/bin/g++  -v -Wl,-v -rdynamic CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_a1db6
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:182 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Parsed CXX implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+          add: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+          add: [.]
+          add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11]
+          add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux]
+          add: [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward]
+          add: [/usr/lib/gcc/x86_64-redhat-linux/11/include]
+          add: [/usr/local/include]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+        collapse include dir [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3] ==> [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+        skipping relative include dir [.]
+        collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11] ==> [/usr/include/c++/11]
+        collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux] ==> [/usr/include/c++/11/x86_64-redhat-linux]
+        collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward] ==> [/usr/include/c++/11/backward]
+        collapse include dir [/usr/lib/gcc/x86_64-redhat-linux/11/include] ==> [/usr/lib/gcc/x86_64-redhat-linux/11/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3;/usr/include/c++/11;/usr/include/c++/11/x86_64-redhat-linux;/usr/include/c++/11/backward;/usr/lib/gcc/x86_64-redhat-linux/11/include;/usr/local/include;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:218 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Parsed CXX implicit link information:
+        link line regex: [^( *|.*[/\\])(ld[0-9]*(\\.[a-z]+)?|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        linker tool regex: [^[ 	]*(->|")?[ 	]*(([^"]*[/\\])?(ld[0-9]*(\\.[a-z]+)?))("|,| |$)]
+        ignore line: [Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop']
+        ignore line: []
+        ignore line: [Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_a1db6/fast]
+        ignore line: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_a1db6.dir/build.make CMakeFiles/cmTC_a1db6.dir/build]
+        ignore line: [gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Xtkpop']
+        ignore line: [Building CXX object CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o]
+        ignore line: [/usr/bin/g++   -v -o CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -c /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCXXCompilerABI.cpp]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/g++]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-redhat-linux]
+        ignore line: [Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c c++ fortran lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/']
+        ignore line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/cc1plus -quiet -v -D_GNU_SOURCE /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpdir CMakeFiles/cmTC_a1db6.dir/ -dumpbase CMakeCXXCompilerABI.cpp.cpp -dumpbase-ext .cpp -mtune=generic -march=x86-64-v2 -version -o /tmp/cc6BWjqr.s]
+        ignore line: [GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
+        ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/include-fixed"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/11/../../../../x86_64-redhat-linux/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/vdt-0.4.4-spajvmfpbzv3yllbrbg7vw26horykqxp/include]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaldet-1.14.1-rhnc5ufyjtits6bw6oueqicz2jlby5d4/include/kaldet]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/kaltest-2.5.2-uarufjmb6l2die6vvkwbnz4eit4ud5nv/include/kaltest]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/lcio-2.22.5-v3x5uiwfim3nefmeizxn5xooqa4ptgki]
+        ignore line: [ /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/eigen-3.4.0-jrxj5vglnzvvcx4l5mpyiddisyxmzlxa/include/eigen3]
+        ignore line: [ .]
+        ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11]
+        ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/x86_64-redhat-linux]
+        ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/../../../../include/c++/11/backward]
+        ignore line: [ /usr/lib/gcc/x86_64-redhat-linux/11/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [GNU C++17 (GCC) version 11.5.0 20240719 (Red Hat 11.5.0-5) (x86_64-redhat-linux)]
+        ignore line: [	compiled by GNU C version 11.5.0 20240719 (Red Hat 11.5.0-5)  GMP version 6.2.0  MPFR version 4.1.0-p9  MPC version 1.2.1  isl version none]
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [Compiler executable checksum: e93254d940b36bb677eb536fa6c50158]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o /tmp/cc6BWjqr.s]
+        ignore line: [GNU assembler version 2.35.2 (x86_64-redhat-linux) using BFD version version 2.35.2-54.el9]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.']
+        ignore line: [Linking CXX executable cmTC_a1db6]
+        ignore line: [/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a1db6.dir/link.txt --verbose=1]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/g++]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-redhat-linux]
+        ignore line: [Configured with: ../configure --enable-bootstrap --enable-host-pie --enable-host-bind-now --enable-languages=c c++ fortran lto --prefix=/usr --mandir=/usr/share/man --infodir=/usr/share/info --with-bugurl=http://bugs.almalinux.org/ --enable-shared --enable-threads=posix --enable-checking=release --with-system-zlib --enable-__cxa_atexit --disable-libunwind-exceptions --enable-gnu-unique-object --enable-linker-build-id --with-gcc-major-version-only --enable-plugin --enable-initfini-array --without-isl --enable-multilib --with-linker-hash-style=gnu --enable-offload-targets=nvptx-none --without-cuda-driver --enable-gnu-indirect-function --enable-cet --with-tune=generic --with-arch_64=x86-64-v2 --with-arch_32=x86-64 --build=x86_64-redhat-linux --with-build-config=bootstrap-lto --enable-link-serialization=1]
+        ignore line: [Thread model: posix]
+        ignore line: [Supported LTO compression algorithms: zlib zstd]
+        ignore line: [gcc version 11.5.0 20240719 (Red Hat 11.5.0-5) (GCC) ]
+        ignore line: [COMPILER_PATH=/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/11/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-redhat-linux/11/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/:/lib/../lib64/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/11/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_a1db6' '-shared-libgcc' '-mtune=generic' '-march=x86-64-v2' '-dumpdir' 'cmTC_a1db6.']
+        link line: [ /usr/libexec/gcc/x86_64-redhat-linux/11/collect2 -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cciZduhl.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a1db6 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+          arg [/usr/libexec/gcc/x86_64-redhat-linux/11/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/cciZduhl.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--no-add-needed] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [-export-dynamic] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_a1db6] ==> ignore
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64]
+          arg [-L/lib/../lib64] ==> dir [/lib/../lib64]
+          arg [-L/usr/lib/../lib64] ==> dir [/usr/lib/../lib64]
+          arg [-L/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..]
+          arg [-v] ==> ignore
+          arg [CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o] ==> ignore
+          arg [-lstdc++] ==> lib [stdc++]
+          arg [-lm] ==> lib [m]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [-lc] ==> lib [c]
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [-lgcc] ==> lib [gcc]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o]
+          arg [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        ignore line: [collect2 version 11.5.0 20240719 (Red Hat 11.5.0-5)]
+        ignore line: [/usr/bin/ld -plugin /usr/libexec/gcc/x86_64-redhat-linux/11/liblto_plugin.so -plugin-opt=/usr/libexec/gcc/x86_64-redhat-linux/11/lto-wrapper -plugin-opt=-fresolution=/tmp/cciZduhl.res -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lgcc --build-id --no-add-needed --eh-frame-hdr --hash-style=gnu -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_a1db6 /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o -L/usr/lib/gcc/x86_64-redhat-linux/11 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/11/../../.. -v CMakeFiles/cmTC_a1db6.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lgcc_s -lgcc -lc -lgcc_s -lgcc /usr/lib/gcc/x86_64-redhat-linux/11/crtend.o /usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o]
+        linker tool for 'CXX': /usr/bin/ld
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crt1.o] ==> [/usr/lib64/crt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crti.o] ==> [/usr/lib64/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64/crtn.o] ==> [/usr/lib64/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11] ==> [/usr/lib/gcc/x86_64-redhat-linux/11]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../../../lib64] ==> [/usr/lib64]
+        collapse library dir [/lib/../lib64] ==> [/lib64]
+        collapse library dir [/usr/lib/../lib64] ==> [/usr/lib64]
+        collapse library dir [/usr/lib/gcc/x86_64-redhat-linux/11/../../..] ==> [/usr/lib]
+        implicit libs: [stdc++;m;gcc_s;gcc;c;gcc_s;gcc]
+        implicit objs: [/usr/lib64/crt1.o;/usr/lib64/crti.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtbegin.o;/usr/lib/gcc/x86_64-redhat-linux/11/crtend.o;/usr/lib64/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-redhat-linux/11;/usr/lib64;/lib64;/usr/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CMakeDetermineLinkerId.cmake:40 (message)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeDetermineCompilerABI.cmake:255 (cmake_determine_linker_id)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeTestCXXCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:9 (PROJECT)"
+    message: |
+      Running the CXX compiler's linker: "/usr/bin/ld" "-v"
+      GNU ld version 2.35.2-54.el9
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wall"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: ""
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wall"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_d9ec6/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_d9ec6.dir/build.make CMakeFiles/cmTC_d9ec6.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU'
+        Building CXX object CMakeFiles/cmTC_d9ec6.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__Wall  -Wall -o CMakeFiles/cmTC_d9ec6.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU/src.cxx
+        Linking CXX executable cmTC_d9ec6
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d9ec6.dir/link.txt --verbose=1
+        /usr/bin/g++ -rdynamic CMakeFiles/cmTC_d9ec6.dir/src.cxx.o -o cmTC_d9ec6
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-erJuDU'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wextra"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wextra"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_2b1c5/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_2b1c5.dir/build.make CMakeFiles/cmTC_2b1c5.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI'
+        Building CXX object CMakeFiles/cmTC_2b1c5.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__Wextra  -Wall     -Wextra -o CMakeFiles/cmTC_2b1c5.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI/src.cxx
+        Linking CXX executable cmTC_2b1c5
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2b1c5.dir/link.txt --verbose=1
+        /usr/bin/g++ -Wall   -rdynamic CMakeFiles/cmTC_2b1c5.dir/src.cxx.o -o cmTC_2b1c5
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-f98yYI'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wshadow"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wshadow"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_82b8a/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_82b8a.dir/build.make CMakeFiles/cmTC_82b8a.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd'
+        Building CXX object CMakeFiles/cmTC_82b8a.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__Wshadow  -Wextra -Wall     -Wshadow -o CMakeFiles/cmTC_82b8a.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd/src.cxx
+        Linking CXX executable cmTC_82b8a
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_82b8a.dir/link.txt --verbose=1
+        /usr/bin/g++ -Wextra -Wall   -rdynamic CMakeFiles/cmTC_82b8a.dir/src.cxx.o -o cmTC_82b8a
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-LUHnkd'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__WeffcPP"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__WeffcPP"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_284d4/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_284d4.dir/build.make CMakeFiles/cmTC_284d4.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5'
+        Building CXX object CMakeFiles/cmTC_284d4.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__WeffcPP  -Wshadow -Wextra -Wall     -Weffc++ -o CMakeFiles/cmTC_284d4.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5/src.cxx
+        Linking CXX executable cmTC_284d4
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_284d4.dir/link.txt --verbose=1
+        /usr/bin/g++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_284d4.dir/src.cxx.o -o cmTC_284d4
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-QsiHA5'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__pedantic"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Weffc++ -Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__pedantic"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_5afdc/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_5afdc.dir/build.make CMakeFiles/cmTC_5afdc.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj'
+        Building CXX object CMakeFiles/cmTC_5afdc.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__pedantic  -Weffc++ -Wshadow -Wextra -Wall     -pedantic -o CMakeFiles/cmTC_5afdc.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj/src.cxx
+        Linking CXX executable cmTC_5afdc
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5afdc.dir/link.txt --verbose=1
+        /usr/bin/g++ -Weffc++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_5afdc.dir/src.cxx.o -o cmTC_5afdc
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-qyzPjj'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wno_long_long"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-pedantic -Weffc++ -Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wno_long_long"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_b0650/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_b0650.dir/build.make CMakeFiles/cmTC_b0650.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR'
+        Building CXX object CMakeFiles/cmTC_b0650.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__Wno_long_long  -pedantic -Weffc++ -Wshadow -Wextra -Wall     -Wno-long-long -o CMakeFiles/cmTC_b0650.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR/src.cxx
+        Linking CXX executable cmTC_b0650
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b0650.dir/link.txt --verbose=1
+        /usr/bin/g++ -pedantic -Weffc++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_b0650.dir/src.cxx.o -o cmTC_b0650
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-GbvDDR'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wuninitialized"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wuninitialized"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_a251b/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_a251b.dir/build.make CMakeFiles/cmTC_a251b.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0'
+        Building CXX object CMakeFiles/cmTC_a251b.dir/src.cxx.o
+        /usr/bin/g++ -DCXX_FLAG_WORKS__Wuninitialized  -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall     -Wuninitialized -o CMakeFiles/cmTC_a251b.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0/src.cxx
+        Linking CXX executable cmTC_a251b
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a251b.dir/link.txt --verbose=1
+        /usr/bin/g++ -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_a251b.dir/src.cxx.o -o cmTC_a251b
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-yqYAJ0'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckCompilerFlag.cmake:18 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXCompilerFlag.cmake:55 (cmake_check_compiler_flag)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_cxx_flags.cmake:23 (CHECK_CXX_COMPILER_FLAG)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules/ilcsoft_default_settings.cmake:23 (INCLUDE)"
+      - "CMakeLists.txt:20 (INCLUDE)"
+    checks:
+      - "Performing Test CXX_FLAG_WORKS__Wl,_no_undefined"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules"
+    buildResult:
+      variable: "CXX_FLAG_WORKS__Wl,_no_undefined"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_4cd9c/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_4cd9c.dir/build.make CMakeFiles/cmTC_4cd9c.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq'
+        Building CXX object CMakeFiles/cmTC_4cd9c.dir/src.cxx.o
+        /usr/bin/g++   -Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall     -DCXX_FLAG_WORKS__Wl,_no_undefined -Wl,-no-undefined -o CMakeFiles/cmTC_4cd9c.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq/src.cxx
+        <command-line>: warning: ISO C++11 requires whitespace after the macro name
+        Linking CXX executable cmTC_4cd9c
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_4cd9c.dir/link.txt --verbose=1
+        /usr/bin/g++ -Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_4cd9c.dir/src.cxx.o -o cmTC_4cd9c
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-Lr0rcq'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/geant4-11.3.0-qtruukj56mfoylo4ljdg3bocfidnttfn/lib/cmake/Geant4/PTL/PTLConfig.cmake:56 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/geant4-11.3.0-qtruukj56mfoylo4ljdg3bocfidnttfn/lib/cmake/Geant4/Geant4Config.cmake:301 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/dd4hep-master-fzr6nyeeos2hpkhcx4w3gsptbvlsbhkt/cmake/DD4hepConfig.cmake:57 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/marlinutil-1.18.2-vegnxpkvhgsqx6ti6jcdcvy3t5hldwmy/MarlinUtilConfig.cmake:48 (FIND_PACKAGE)"
+      - "CMakeLists.txt:27 (FIND_PACKAGE)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/geant4-11.3.0-qtruukj56mfoylo4ljdg3bocfidnttfn/lib/cmake/Geant4/Modules;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/dd4hep-master-fzr6nyeeos2hpkhcx4w3gsptbvlsbhkt/cmake;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/dd4hep-master-fzr6nyeeos2hpkhcx4w3gsptbvlsbhkt/cmake"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_9ab6b/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_9ab6b.dir/build.make CMakeFiles/cmTC_9ab6b.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK'
+        Building C object CMakeFiles/cmTC_9ab6b.dir/src.c.o
+        /usr/bin/gcc -DCMAKE_HAVE_LIBC_PTHREAD   -o CMakeFiles/cmTC_9ab6b.dir/src.c.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK/src.c
+        Linking C executable cmTC_9ab6b
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_9ab6b.dir/link.txt --verbose=1
+        /usr/bin/gcc -rdynamic CMakeFiles/cmTC_9ab6b.dir/src.c.o -o cmTC_9ab6b
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-jSDtwK'
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/Internal/CheckSourceCompiles.cmake:108 (try_compile)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CheckCXXSourceCompiles.cmake:58 (cmake_check_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6/FindWrapAtomic.cmake:36 (check_cxx_source_compiles)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6/QtPublicDependencyHelpers.cmake:36 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6Core/Qt6CoreDependencies.cmake:35 (_qt_internal_find_third_party_dependencies)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6Core/Qt6CoreConfig.cmake:45 (include)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/geant4-11.3.0-qtruukj56mfoylo4ljdg3bocfidnttfn/lib/cmake/Geant4/Geant4Config.cmake:371 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/share/cmake-3.31/Modules/CMakeFindDependencyMacro.cmake:76 (find_package)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/dd4hep-master-fzr6nyeeos2hpkhcx4w3gsptbvlsbhkt/cmake/DD4hepConfig.cmake:57 (find_dependency)"
+      - "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/marlinutil-1.18.2-vegnxpkvhgsqx6ti6jcdcvy3t5hldwmy/MarlinUtilConfig.cmake:48 (FIND_PACKAGE)"
+      - "CMakeLists.txt:27 (FIND_PACKAGE)"
+    checks:
+      - "Performing Test HAVE_STDATOMIC"
+    directories:
+      source: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl"
+      binary: "/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl"
+    cmakeVariables:
+      CMAKE_CXX_FLAGS: "-fdiagnostics-color=auto -Wl,-no-undefined -Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall "
+      CMAKE_MODULE_PATH: "/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/geant4-11.3.0-qtruukj56mfoylo4ljdg3bocfidnttfn/lib/cmake/Geant4/Modules;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/ilcutil-1.7.3-rbqyt64imuq24jaou6uehkomwkrxombo/cmakemodules;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/dd4hep-master-fzr6nyeeos2hpkhcx4w3gsptbvlsbhkt/cmake;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6/3rdparty/extra-cmake-modules/find-modules;/opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/qt-base-6.8.1-wgi77vuqvm66nbaej3sq6d6fjlewpn7n/lib/cmake/Qt6/3rdparty/kwin"
+    buildResult:
+      variable: "HAVE_STDATOMIC"
+      cached: true
+      stdout: |
+        Change Dir: '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl'
+        
+        Run Build Command(s): /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E env VERBOSE=1 /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake -f Makefile cmTC_87665/fast
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/gmake-4.4.1-pwdz5kihtt236d6ln5xsihgda3ehm75m/bin/gmake  -f CMakeFiles/cmTC_87665.dir/build.make CMakeFiles/cmTC_87665.dir/build
+        gmake[1]: Entering directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl'
+        Building CXX object CMakeFiles/cmTC_87665.dir/src.cxx.o
+        /usr/bin/g++ -DHAVE_STDATOMIC  -fdiagnostics-color=auto -Wl,-no-undefined -Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall   -o CMakeFiles/cmTC_87665.dir/src.cxx.o -c /scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl/src.cxx
+        Linking CXX executable cmTC_87665
+        /opt/spack/opt/spack/linux-almalinux9-x86_64/gcc-11.5.0/cmake-3.31.4-u7bitlxdtcr7tlb64k22k5x5dbbyt5od/bin/cmake -E cmake_link_script CMakeFiles/cmTC_87665.dir/link.txt --verbose=1
+        /usr/bin/g++ -fdiagnostics-color=auto -Wl,-no-undefined -Wuninitialized -Wno-long-long -pedantic -Weffc++ -Wshadow -Wextra -Wall   -rdynamic CMakeFiles/cmTC_87665.dir/src.cxx.o -o cmTC_87665
+        gmake[1]: Leaving directory '/scratch/jwatts/mucol/MyBIBUtils/build/CMakeFiles/CMakeScratch/TryCompile-CHcNzl'
+        
+      exitCode: 0
+...
