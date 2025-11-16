@@ -21,5 +21,7 @@ setup_mucoll
 15:00 - updated paths in Steer_reco and PandoraSettingsDefault 
         going to run k4run /scratch/jwatts/mucol/SteeringMacros/k4Reco/steer_reco.py
 15:20 - tried to run and couldnt load lib. trying to run not with wiki line of code but with export MARLIN_DLL=/scratch/jwatts/mucol/MyBIBUtils/build/lib/libMyBIBUtils.so
+        - the above did not work -- this did export MARLIN_DLL=`readlink -e /scratch/jwatts/mucol/MyBIBUtils/build/lib/libMyBIBUtils.so`:$MARLIN_DLL
+
 
 
