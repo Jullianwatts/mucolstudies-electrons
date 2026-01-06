@@ -1,0 +1,20 @@
+# Containers
+*.sif
+
+# ROOT / LCIO
+*.root
+*.slcio
+
+# Data
+data/
+
+# Plots
+plots/
+clusterPlots/
+
+# Python junk
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

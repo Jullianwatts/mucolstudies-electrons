@@ -21,7 +21,7 @@ SIM.hepmc3.useHepMC3 = True
 # Macro file to execute for runType 'run' or 'vis'
 SIM.macroFile = []
 # number of events to simulate, used in batch mode
-SIM.numberOfEvents = 10
+SIM.numberOfEvents = 100
 # Outputfile from the simulation,only lcio output is supported
 # SIM.outputFile = "out/digi/sim_mod1_mumu2H2bb750.slcio"
 SIM.outputFile = "output_sim.slcio"

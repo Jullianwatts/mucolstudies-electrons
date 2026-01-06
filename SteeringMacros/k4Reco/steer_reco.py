@@ -30,9 +30,9 @@ parseConstants(CONSTANTS)
 
 read = LcioEvent()
 read.OutputLevel = INFO
-read.Files = ["/scratch/jwatts/mucol/MyBIBUtils/output_sim.slcio"]
-algList.append(read)
+read.Files = ["/scratch/jwatts/mucol/data/electronGun_pT_0_50_sim_0.slcio"]
 
+algList.append(read)
 EventNumber = MarlinProcessorWrapper("EventNumber")
 EventNumber.OutputLevel = INFO
 EventNumber.ProcessorType = "Statusmonitor"
@@ -44,7 +44,7 @@ MyAIDAProcessor = MarlinProcessorWrapper("MyAIDAProcessor")
 MyAIDAProcessor.OutputLevel = INFO
 MyAIDAProcessor.ProcessorType = "AIDAProcessor"
 MyAIDAProcessor.Parameters = {
-    "FileName": ["lctuple_"+the_args.TypeEvent+"_actsseededckf_"+the_args.InFileName],
+    "LCIOOutputFile": ["/scratch/jwatts/mucol/data/reco/"+the_args.TypeEvent+"/"+the_args.TypeEvent+"_reco_100.slcio"],
     "FileType": ["root"]
 }
 
