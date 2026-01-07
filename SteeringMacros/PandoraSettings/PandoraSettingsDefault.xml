@@ -18,6 +18,11 @@
         <MinMuonTrackSegmentHitsCut>5</MinMuonTrackSegmentHitsCut>
         <MuonRmsCut>15.625</MuonRmsCut>
     </LCMuonId>
+    
+    <LCElectronId>
+	<MaxProfileDiscrepancy>0.8</MaxProfileDiscrepancy>
+    	<MaxResidualEOverP>0.4</MaxResidualEOverP>
+    </LCElectronId>
 
     <!-- ALGORITHM SETTINGS -->
 
