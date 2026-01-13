@@ -7,32 +7,25 @@ import os
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-# =========================
 # CONFIGURATION
-# =========================
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_2.slcio")
+samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_4.slcio")
 files = {"electronGun_pT_0_50": samples}
 
 label_map = {"electronGun_pT_0_50": "0-50 GeV"}
 
-# =========================
 # MINIMAL HISTOGRAM SETUP (Only Eta)
-# =========================
 hists = {}
 for s in files:
     hists[s] = {}
-    # ONLY keeping Eta histograms as requested
     for obj in ["mcp_el", "trk_el_match", "pfo_el_match", "clusters_el_match"]:
         hists[s][obj + "_eta"] = ROOT.TH1F(f"{s}_{obj}_eta", ";#eta;Counts", 50, -2.5, 2.5)
 
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
 
-# =========================
 # EVENT LOOP (Your trusted logic)
-# =========================
 for s in files:
     for f in files[s]:
         reader.open(f)
@@ -47,7 +40,7 @@ for s in files:
             for mcp in mcps:
                 if mcp.getGeneratorStatus() != 1 or abs(mcp.getPDG()) != 11: continue
                 tlv = getTLV(mcp)
-                if tlv.E() < 20 or abs(tlv.Eta()) > 2.4: continue
+                if tlv.E() < 10 or abs(tlv.Eta()) > 2.4: continue
                 hists[s]["mcp_el_eta"].Fill(tlv.Eta())
                 mcp_electrons.append(tlv)
 
@@ -66,9 +59,7 @@ for s in files:
                     hists[s]["clusters_el_match_eta"].Fill(mcp_el.Eta())
         reader.close()
 
-# =========================
 # SAVE PUBLICATION PNGs
-# =========================
 print(f"\nSaving publication plots to {PLOT_DIR}...")
 for s in hists:
     denom = hists[s]["mcp_el_eta"]
