@@ -7,7 +7,6 @@ import os
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-# CONFIGURATION
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
@@ -16,7 +15,7 @@ files = {"electronGun_pT_0_50": samples}
 
 label_map = {"electronGun_pT_0_50": "0-50 GeV"}
 
-# MINIMAL HISTOGRAM SETUP (Only Eta)
+# HISTOGRAM SETUP (Only Eta)
 hists = {}
 for s in files:
     hists[s] = {}
@@ -25,7 +24,6 @@ for s in files:
 
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
 
-# EVENT LOOP (Your trusted logic)
 for s in files:
     for f in files[s]:
         reader.open(f)
@@ -59,13 +57,11 @@ for s in files:
                     hists[s]["clusters_el_match_eta"].Fill(mcp_el.Eta())
         reader.close()
 
-# SAVE PUBLICATION PNGs
 print(f"\nSaving publication plots to {PLOT_DIR}...")
 for s in hists:
     denom = hists[s]["mcp_el_eta"]
     eff_map = {}
     
-    # Map for clean legend labels
     display_names = {
         "trk_el_match": "SiTracks",
         "pfo_el_match": "PandoraPFOs",
@@ -75,7 +71,6 @@ for s in hists:
     for obj in display_names:
         num = hists[s][obj + "_eta"]
         
-        # Correct statistical handling
         teff = ROOT.TEfficiency(num, denom)
         graph = teff.CreateGraph() # Necessary for plotHelper GetXaxis()
         eff_map[display_names[obj]] = graph
@@ -84,10 +79,8 @@ for s in hists:
         single_map = {display_names[obj]: graph}
         plotEfficiencies(single_map, os.path.join(PLOT_DIR, f"EFFICIENCY_{obj}.png"), xlabel="#eta", ylabel="Efficiency")
 
-    # SAVE COMBINED PLOT WITH LEGEND
     plotEfficiencies(eff_map, os.path.join(PLOT_DIR, f"EFFICIENCY_COMBINED.png"), xlabel="#eta", ylabel="Efficiency")
 
-# Final Summaries
 for obj, label in [("trk_el_match", "TRACK"), ("pfo_el_match", "PFO"), ("clusters_el_match", "CLUSTER")]:
     m = hists[s][obj + "_eta"].GetEntries()
     t = hists[s]["mcp_el_eta"].GetEntries()
