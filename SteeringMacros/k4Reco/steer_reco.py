@@ -30,7 +30,7 @@ parseConstants(CONSTANTS)
 
 read = LcioEvent()
 read.OutputLevel = INFO
-read.Files = ["/scratch/jwatts/mucol/data/electronGun_pT_0_50_sim_3.slcio"]
+read.Files = ["/scratch/jwatts/mucol/data/electronGun_pT_0_50_sim_4.slcio"]
 
 algList.append(read)
 EventNumber = MarlinProcessorWrapper("EventNumber")
@@ -46,7 +46,7 @@ MyAIDAProcessor.ProcessorType = "AIDAProcessor"
 MyAIDAProcessor.Parameters = {
     "LCIOOutputFile": [
         "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/"
-        "electronGun_pT_0_50_reco_3.root"
+        "electronGun_pT_0_50_reco_5.root"
     ],
     "FileType": ["root"]
 }
@@ -62,7 +62,7 @@ if not the_args.enableBIB:
         "KeepCollectionNames": ["MCParticle_SiTracks_Refitted"],
         "LCIOOutputFile": [
             "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/"
-            "electronGun_pT_0_50_reco_3.slcio"],
+            "electronGun_pT_0_50_reco_5.slcio"],
         "LCIOWriteMode": ["WRITE_NEW"]
     }
 else:

@@ -180,7 +180,7 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
             eff_map[k].GetXaxis().SetLabelSize(0.04)
             eff_map[k].GetYaxis().SetLabelSize(0.04)
             eff_map[k].SetMinimum(0)
-            eff_map[k].SetMaximum(1.25)
+            eff_map[k].SetMaximum(1.4)
             eff_map[k].GetXaxis().SetTickLength(0)
             eff_map[k].GetYaxis().SetTickLength(0)
 
@@ -194,17 +194,16 @@ def plotEfficiencies(eff_map, save_name, xlabel="", ylabel="", xrange="", with_b
     xmax = eff_map[list(eff_map.keys())[0]].GetXaxis().GetXmax()
     line.DrawLine(xmin, 1.0, xmax, 1.0)
     # Create legend with header like in your desired style
-    #leg = ROOT.TLegend(0.65, 0.15, 0.93, 0.45)
-    #leg.SetBorderSize(1)
-    #leg.SetFillColor(0)
-    #leg.SetFillStyle(1001)
-    #leg.SetTextSize(0.035)
+    leg = ROOT.TLegend(0.65, 0.72, 0.93, 0.90)
+    leg.SetBorderSize(0)
+    leg.SetFillColor(0)
+    leg.SetFillStyle(0)
+    leg.SetTextSize(0.035)
     
-    #for k in eff_map:
-        # Clean up the legend entries
-        #clean_label = k.replace("pT slice ", "")
-        #leg.AddEntry(eff_map[k], clean_label, "lp")
-    #leg.Draw()
+    for k in eff_map:
+        clean_label = k.replace("pT slice ", "")
+        leg.AddEntry(eff_map[k], clean_label, "lp")
+    leg.Draw()
 
     text = ROOT.TLatex()
     text.SetNDC()

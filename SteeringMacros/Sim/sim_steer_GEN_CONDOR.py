@@ -239,9 +239,9 @@ SIM.physics.rejectPDGs = {1, 2, 3, 4, 5, 6, 21, 23, 24, 25}
 
 # If True, calculate random seed for each event based on eventID and runID
 # allows reproducibility even when SkippingEvents
-SIM.random.enableEventSeed = True
+SIM.random.enableEventSeed = False
 SIM.random.file = None
 SIM.random.luxury = 1
 SIM.random.replace_gRandom = True
-SIM.random.seed = None
+SIM.random.seed = 42
 SIM.random.type = None
