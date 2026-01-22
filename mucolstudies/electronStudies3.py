@@ -42,19 +42,24 @@ for s in files:
                 hists[s]["mcp_el_eta"].Fill(tlv.Eta())
                 mcp_electrons.append(tlv)
 
-            # Reconstructed Candidates
-            pfo_electrons = [getTLV(p) for p in pfos if getTLV(p).E() > 10 and abs(p.getType()) == 11]
-            trk_electrons = [getTrackTLV(t) for t in trks if getTrackTLV(t).E() > 10]
-            clu_electrons = [getClusterTLV(c) for c in clusters if c.getEnergy() > 10]
+            # Reconstructed Candidates with added Eta cuts
+            pfo_electrons = [getTLV(p) for p in pfos if getTLV(p).E() > 10 and abs(getTLV(p).Eta()) < 2.4 and abs(p.getType()) == 11]
+            trk_electrons = [getTrackTLV(t) for t in trks if getTrackTLV(t).E() > 10 and abs(getTrackTLV(t).Eta()) < 2.4]
+            clu_electrons = [getClusterTLV(c) for c in clusters if c.getEnergy() > 10 and abs(getClusterTLV(c).Eta()) < 2.4]
 
-            # Matching (dR < 0.1)
+            # Matching 
             for mcp_el in mcp_electrons:
-                if any(mcp_el.DeltaR(t) < 0.1 for t in trk_electrons):
+                # Tracks and Clusters still use Delta R matching
+                if any(mcp_el.DeltaR(t) < 0.2 for t in trk_electrons):
                     hists[s]["trk_el_match_eta"].Fill(mcp_el.Eta())
-                if any(mcp_el.DeltaR(p) < 0.1 for p in pfo_electrons):
-                    hists[s]["pfo_el_match_eta"].Fill(mcp_el.Eta())
-                if any(mcp_el.DeltaR(c) < 0.1 for c in clu_electrons):
+                
+                if any(mcp_el.DeltaR(c) < 0.2 for c in clu_electrons):
                     hists[s]["clusters_el_match_eta"].Fill(mcp_el.Eta())
+
+                # PFO efficiency determined only by presence of PDGID 11 PFO in the event
+                if len(pfo_electrons) > 0:
+                    hists[s]["pfo_el_match_eta"].Fill(mcp_el.Eta())
+
         reader.close()
 
 print(f"\nSaving publication plots to {PLOT_DIR}...")
