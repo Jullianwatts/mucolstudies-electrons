@@ -10,7 +10,7 @@ ROOT.gROOT.SetBatch()
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_4.slcio")
+samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio")
 files = {"electronGun_pT_0_50": samples}
 
 label_map = {"electronGun_pT_0_50": "0-50 GeV"}
@@ -69,7 +69,7 @@ for s in hists:
     
     display_names = {
         "trk_el_match": "SiTracks",
-        "pfo_el_match": "PandoraPFOs",
+        "pfo_el_match": "PFOs with PDGID = 11",
         "clusters_el_match": "PandoraClusters"
     }
 
