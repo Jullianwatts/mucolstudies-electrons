@@ -4,7 +4,7 @@ import ROOT
 from pyLCIO import EVENT, IOIMPL
 
 # --- Configuration ---
-file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_4.slcio"
+file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio"
 pdg_map = {11: "Electron", 13: "Muon", 22: "Photon", 211: "Pion", 2112: "Neutron"}
 
 # Stats storage: stats[pdg] = [count, total_energy]

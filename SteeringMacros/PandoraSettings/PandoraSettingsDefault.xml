@@ -18,8 +18,9 @@
         <MinMuonTrackSegmentHitsCut>5</MinMuonTrackSegmentHitsCut>
         <MuonRmsCut>15.625</MuonRmsCut>
     </LCMuonId>
-	
-	<!-- ALGORITHM SETTINGS -->
+
+
+	    <!-- ALGORITHM SETTINGS -->
 
     <!-- Set calo hit properties, then select tracks and hits to use for clustering -->
     <algorithm type = "CaloHitPreparation"/>

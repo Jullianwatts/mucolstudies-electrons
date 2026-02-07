@@ -10,12 +10,11 @@ ROOT.gROOT.SetBatch()
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio")
+samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_9.slcio")
 files = {"electronGun_pT_0_50": samples}
 
 label_map = {"electronGun_pT_0_50": "0-50 GeV"}
 
-# HISTOGRAM SETUP (Only Eta)
 hists = {}
 for s in files:
     hists[s] = {}
@@ -42,14 +41,12 @@ for s in files:
                 hists[s]["mcp_el_eta"].Fill(tlv.Eta())
                 mcp_electrons.append(tlv)
 
-            # Reconstructed Candidates with added Eta cuts
             pfo_electrons = [getTLV(p) for p in pfos if getTLV(p).E() > 10 and abs(getTLV(p).Eta()) < 2.4 and abs(p.getType()) == 11]
             trk_electrons = [getTrackTLV(t) for t in trks if getTrackTLV(t).E() > 10 and abs(getTrackTLV(t).Eta()) < 2.4]
             clu_electrons = [getClusterTLV(c) for c in clusters if c.getEnergy() > 10 and abs(getClusterTLV(c).Eta()) < 2.4]
 
             # Matching 
             for mcp_el in mcp_electrons:
-                # Tracks and Clusters still use Delta R matching
                 if any(mcp_el.DeltaR(t) < 0.2 for t in trk_electrons):
                     hists[s]["trk_el_match_eta"].Fill(mcp_el.Eta())
                 
@@ -80,7 +77,6 @@ for s in hists:
         graph = teff.CreateGraph() # Necessary for plotHelper GetXaxis()
         eff_map[display_names[obj]] = graph
         
-        # Save individual plot
         single_map = {display_names[obj]: graph}
         plotEfficiencies(single_map, os.path.join(PLOT_DIR, f"EFFICIENCY_{obj}.png"), xlabel="#eta", ylabel="Efficiency")
 
