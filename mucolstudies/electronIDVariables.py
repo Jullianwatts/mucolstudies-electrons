@@ -41,10 +41,11 @@ for event in reader:
     for pfo in pfos:
         if abs(pfo.getType()) == 11:
             e_calo = sum([c.getEnergy() for c in pfo.getClusters()])
-            pfo_mom = pfo.getMomentum()
-            p_track = math.sqrt(pfo_mom[0]**2 + pfo_mom[1]**2 + pfo_mom[2]**2)
+            # Updated to use plotHelper getTLV and .P() for momentum
+            pfo_tlv = getTLV(pfo)
+            p_track = pfo_tlv.P()
+            
             if p_track > 0:
-                pfo_tlv = getTLV(pfo)
                 h_ep_pfo.Fill(pfo_tlv.Eta(), e_calo / p_track)
 
     # Truth-Matching Loop
