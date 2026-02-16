@@ -1,95 +1,84 @@
 import os, math, ROOT, glob, pyLCIO
-from pyLCIO import IOIMPL, EVENT, UTIL
+from pyLCIO import IOIMPL, EVENT, UTIL; from math import gamma, exp
 
-exec(open("./plotHelper.py").read())
-ROOT.gROOT.SetBatch()
-os.makedirs("plots", exist_ok=True)
+exec(open("./plotHelper.py").read()); ROOT.gROOT.SetBatch(); os.makedirs("plots", exist_ok=True)
 
-# Config: Only 0-50 GeV slices, B=5T
-B_FIELD, MAX_EVENTS, DR_CUT = 5, -1, 0.2
-base_path = "/data/fmeloni/DataMuC_MAIA_v0/v5/reco/"
-samples = ["electronGun_pT_0_50", "pionGun_pT_0_50"]
+# CONFIG & HISTOS
+TARGET_PDG, B_FIELD, MAX_EVENTS, DR_CUT = 11, 5, -1, 0.2
+file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_4.slcio"
+h_ep_match = ROOT.TProfile("h_ep_match", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
+h_ep_pfo = ROOT.TProfile("h_ep_pfo", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
+h_disc = ROOT.TH1F("h_disc", "Profile Discrepancy; Profile Discrepancy; Entries", 100, 0, 1.0)
 
-# --- Profile Discrepancy Functions ---
-def generate_expected_em_profile(energy, num_layers=50, X0_per_layer=0.6286):
-    a = 1.0 + 0.5 * math.log(max(energy, 0.01) / 0.01)
-    b = 0.5 
-    expected = {}
-    total = 0.0
-    for l in range(num_layers):
-        t = l * X0_per_layer
-        try: val = (b**a * t**(a-1) * math.exp(-b*t)) / math.gamma(a) if t > 0 else 0
-        except: val = 0
-        expected[l] = val
-        total += val
-    return {l: v/total for l, v in expected.items()} if total > 0 else {l: 0 for l in range(num_layers)}
+def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=0.628):
+    # Calculate a (shower max) and b (tail)
+    a, b, expected_profile, norm = 1.0 + 0.5 * math.log(energy / 0.01), 0.5, {}, 0.0
+    for i in range(num_layers): 
+        t = i * X0_scale 
+        f = (b * (b * t)**(a-1) * exp(-b * t)) / gamma(a)
+        expected_profile[i] = f
+        norm += f
+    
+    if norm > 0:
+        res = {i: f/norm for i, f in expected_profile.items()}
+        # PRINT TO TERMINAL: Find which layer has the highest energy fraction
+        peak_layer = max(res, key=res.get)
+        print(f"[DEBUG] E={energy:.1f} GeV | X0={X0_scale} | Peak Layer={peak_layer} | Peak Val={res[peak_layer]:.4f}")
+        return res
+    return {}
 
-def get_max_profile_discrepancy(hit_energies_by_layer, total_energy):
-    if total_energy <= 0: return 0.0
-    expected = generate_expected_em_profile(total_energy)
-    max_disc = 0.0
-    for l in range(50):
-        obs_frac = hit_energies_by_layer.get(l, 0.0) / total_energy
-        max_disc = max(max_disc, abs(obs_frac - expected.get(l, 0.0)))
-    return max_disc
+reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader(); reader.open(file_path); count = 0
+for event in reader:
+    if MAX_EVENTS > 0 and count >= MAX_EVENTS: break
+    try:
+        mcps, tracks = event.getCollection("MCParticle"), event.getCollection("SiTracks_Refitted")
+        clusters, ecal_coll = event.getCollection("PandoraClusters"), event.getCollection("EcalBarrelCollectionRec")
+        pfos = event.getCollection("PandoraPFOs")
+        decoder = UTIL.BitField64(ecal_coll.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding))
+    except: continue
 
-# --- Initialization ---
-hists = {s: {
-    "ep": ROOT.TH1F(f"ep_{s}", f"{s};E/p;Entries", 100, 0, 2.0),
-    "disc": ROOT.TH1F(f"disc_{s}", f"{s};Max Profile Discrepancy;Entries", 100, 0, 0.5)
-} for s in samples}
+    # PFO Loop
+    for pfo in pfos:
+        if abs(pfo.getType()) == 11:
+            e_calo = sum([c.getEnergy() for c in pfo.getClusters()])
+            pfo_mom = pfo.getMomentum()
+            p_track = math.sqrt(pfo_mom[0]**2 + pfo_mom[1]**2 + pfo_mom[2]**2)
+            if p_track > 0:
+                pfo_tlv = getTLV(pfo)
+                h_ep_pfo.Fill(pfo_tlv.Eta(), e_calo / p_track)
 
-reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
+    # Truth-Matching Loop
+    for mcp in [m for m in mcps if abs(m.getPDG()) == TARGET_PDG and m.getGeneratorStatus() == 1]:
+        mcp_tlv = getTLV(mcp)
+        if abs(mcp_tlv.Eta()) > 2.4: continue
+        
+        m_trk, min_dr_t = None, DR_CUT
+        for trk in tracks:
+            dr = getTrackTLV(trk, 0.000511, B_FIELD).DeltaR(mcp_tlv)
+            if dr < min_dr_t: min_dr_t, m_trk = dr, trk
 
-for s in samples:
-    files = glob.glob(f"{base_path}{s}/*.slcio")
-    count = 0
-    for f in files:
-        if MAX_EVENTS > 0 and count >= MAX_EVENTS: break
-        reader.open(f)
-        for event in reader:
-            if MAX_EVENTS > 0 and count >= MAX_EVENTS: break
-            try:
-                mcps = event.getCollection("MCParticle")
-                # Updated to SiTracks_Refitted
-                tracks = event.getCollection("SiTracks_Refitted")
-                clusters = event.getCollection("PandoraClusters")
-                ecal_coll = event.getCollection("EcalBarrelCollectionRec")
-                decoder = UTIL.BitField64(ecal_coll.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding))
-            except: continue
+        m_clu, min_dr_c = None, DR_CUT
+        for clu in clusters:
+            dr = getClusterTLV(clu).DeltaR(mcp_tlv)
+            if dr < min_dr_c: min_dr_c, m_clu = dr, clu
 
-            for mcp in mcps:
-                pdg = abs(mcp.getPDG())
-                if pdg not in [11, 211] or mcp.getGeneratorStatus() != 1: continue
-                mcp_tlv = getTLV(mcp)
-                if mcp_tlv.P() < 1.0 or abs(mcp_tlv.Eta()) > 2.4: continue
-                
-                best_p, min_dr_t = 0, DR_CUT
-                for trk in tracks:
-                    trk_tlv = getTrackTLV(trk, m=0.000511 if pdg==11 else 0.139, b_field=B_FIELD)
-                    dr = trk_tlv.DeltaR(mcp_tlv)
-                    if dr < min_dr_t: min_dr_t, best_p = dr, getP(trk, b_field=B_FIELD)
-                
-                best_clu, min_dr_c = None, DR_CUT
-                for clu in clusters:
-                    clu_tlv = getClusterTLV(clu)
-                    dr = clu_tlv.DeltaR(mcp_tlv)
-                    if dr < min_dr_c: min_dr_c, best_clu = dr, clu
+        if m_trk and m_clu:
+            p, e, lyrs, total_e = getP(m_trk, B_FIELD), m_clu.getEnergy(), {}, 0.0
+            if p > 0: h_ep_match.Fill(mcp_tlv.Eta(), e/p)
+            for h in m_clu.getCalorimeterHits():
+                decoder.setValue(int(h.getCellID0())); l = decoder["layer"].value()
+                lyrs[l] = lyrs.get(l, 0.0) + h.getEnergy(); total_e += h.getEnergy()
+            
+            if total_e > 0 and len(lyrs) >= 3:
+                # Using the scale we calculated
+                expected = generate_expected_em_profile(energy=total_e, X0_scale=0.628)
+                max_layer_disc = 0.0
+                for lyr, obs_e in lyrs.items():
+                    layer_disc = abs((obs_e / total_e) - expected.get(lyr, 0.0))
+                    if layer_disc > max_layer_disc: max_layer_disc = layer_disc
+                h_disc.Fill(max_layer_disc)
+    count += 1
 
-                if best_p > 0 and best_clu:
-                    e_total = best_clu.getEnergy()
-                    hists[s]["ep"].Fill(e_total / best_p)
-                    layers = {}
-                    hits = best_clu.getCalorimeterHits()
-                    for h in hits:
-                        decoder.setValue(int(h.getCellID0()))
-                        l = decoder["layer"].value()
-                        layers[l] = layers.get(l, 0.0) + h.getEnergy()
-                    hists[s]["disc"].Fill(get_max_profile_discrepancy(layers, e_total))
-            count += 1
-        reader.close()
-
-for s in samples: print(f"{s} | E/p Mean: {hists[s]['ep'].GetMean():.4f} | Disc Mean: {hists[s]['disc'].GetMean():.4f}")
-
-plotHistograms({s: hists[s]["ep"] for s in samples}, "plots/matched_ep.png", xlabel="E/p", ylabel="Entries", atltext=["Muon Collider", "SiTracks_Refitted", "0-50 GeV"])
-plotHistograms({s: hists[s]["disc"] for s in samples}, "plots/profile_discrepancy.png", xlabel="Max Profile Discrepancy", ylabel="Entries", atltext=["Muon Collider", "EM Profile Match", "Electron vs Pion"])
+reader.close()
+plotHistograms({"Truth-Matched": h_ep_match, "Pandora PFOs": h_ep_pfo}, "plots/analysis_ep.png", xlabel="#eta", ylabel="<E/p>", atltext=["Muon Collider", "Electron Gun", "E/p Comparison"])
+plotHistograms({"0-50 GeV": h_disc}, "plots/analysis_disc.png", xlabel="Profile Discrepancy", ylabel="Entries", logy=True, atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
