@@ -4,10 +4,10 @@ import math
 print("Loading in plotHelper.py")
 
 variables = {"obj": {}, "evt": {}}
-variables["obj"]["pt"] =  {"nbins": 30, "xmin": 0,     "xmax": 3000,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
+variables["obj"]["pt"] =  {"nbins": 30, "xmin": 0,     "xmax": 200,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
 variables["obj"]["eta"] = {"nbins": 20, "xmin": -3,    "xmax": 3,       "accessor": ".Eta()",   "label": "#eta"}
 variables["obj"]["phi"] = {"nbins": 20, "xmin": -3.5,  "xmax": 3.5,     "accessor": ".Phi()",   "label": "#phi"}
-variables["obj"]["E"] =   {"nbins": 30, "xmin": 0,     "xmax": 5000,    "accessor": ".E()",     "label": "Energy [GeV]"}
+variables["obj"]["E"] =   {"nbins": 30, "xmin": 0,     "xmax": 200,    "accessor": ".E()",     "label": "Energy [GeV]"}
 variables["evt"]["n"] =   {"nbins": 20, "xmin": 0,     "xmax": 20,      "accessor": "",         "label": "number per event"}
 
 colors =        [ROOT.TColor.GetColor("#FFA900"),   # Sunny Orange
@@ -33,7 +33,7 @@ def getPt(trk, b_field = 5):
 def getP(trk, b_field = 5):
     return getPt(trk)*math.sqrt(1+trk.getTanLambda()**2)
 
-def getTrackTLV(trk, m = .106, b_field = 5):
+def getTrackTLV(trk, m = .000511, b_field = 5):
     pt = getPt(trk, b_field)
     p = getP(trk, b_field)
     px = pt*math.cos(trk.getPhi())
@@ -45,16 +45,18 @@ def getTrackTLV(trk, m = .106, b_field = 5):
     return trk_tlv
 
 def getClusterTLV(cluster):
-    pos = cluster.getPosition()
-    E = cluster.getEnergy()
-    direction = ROOT.TVector3(pos[0], pos[1], pos[2]).Unit()
-    px = direction.X() * E
-    py = direction.Y() * E
-    pz = direction.Z() * E
-    cluster_tlv = ROOT.TLorentzVector()
-    cluster_tlv.SetPxPyPzE(px, py, pz, E)
-    
-    return cluster_tlv
+    pos = cluster.getPosition()   # mm from IP
+    E   = cluster.getEnergy()     # GeV
+    r = math.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
+    if r == 0: return ROOT.TLorentzVector()
+    px = E * pos[0] / r
+    py = E * pos[1] / r
+    pz = E * pos[2] / r
+    tlv = ROOT.TLorentzVector()
+    tlv.SetPxPyPzE(px, py, pz, E)
+    return tlv
+
+
 
 def fillObjHists(hists, objtype, obj):
     for var in variables["obj"]:
