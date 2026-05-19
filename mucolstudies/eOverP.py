@@ -3,11 +3,9 @@ import pyLCIO
 import ROOT
 from pyLCIO import EVENT, IOIMPL
 
-# --- Configuration ---
 file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio"
 pdg_map = {11: "Electron", 13: "Muon", 22: "Photon", 211: "Pion", 2112: "Neutron"}
 
-# Stats storage: stats[pdg] = [count, total_energy]
 stats = {}
 total_pfo_count = 0
 event_count = 0
@@ -15,7 +13,6 @@ event_count = 0
 reader = IOIMPL.LCFactory.getInstance().createLCReader()
 reader.open(file_path)
 
-# Loop directly through the reader to count events accurately
 for event in reader:
     event_count += 1
     
@@ -49,7 +46,6 @@ reader.close()
 
 # --- FINAL SUMMARY ---
 print(f"({event_count} EVENTS)")
-# Updated Header
 print(f"{'Particle Type':<15} | {'Total Count':<12} | {'Avg/Event':<10} | {'Avg Energy/Part (GeV)':<18}")
 
 for p_type in sorted(stats.keys()):
@@ -63,5 +59,4 @@ for p_type in sorted(stats.keys()):
     name = pdg_map.get(p_type, f"ID({p_type})")
     print(f"{name:<15} | {count:<12} | {avg_per_event:<10.2f} | {avg_e_per_particle:<20.2f}")
 
-print("-" * 65)
 print(f"{'TOTAL PFOS':<15} | {total_pfo_count:<12} | {total_pfo_count/event_count:<10.2f} |")

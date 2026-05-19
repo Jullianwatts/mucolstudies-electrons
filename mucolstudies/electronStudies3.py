@@ -10,7 +10,7 @@ ROOT.gROOT.SetBatch()
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_9.slcio")
+samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_7.slcio")
 files = {"electronGun_pT_0_50": samples}
 
 label_map = {"electronGun_pT_0_50": "0-50 GeV"}
@@ -29,7 +29,7 @@ for s in files:
         for event in reader:
             mcps = event.getCollection("MCParticle")
             pfos = event.getCollection("PandoraPFOs")
-            trks = event.getCollection("SiTracks")
+            trks = event.getCollection("SiTracks_Refitted")
             clusters = event.getCollection("PandoraClusters")
 
             # Denominator

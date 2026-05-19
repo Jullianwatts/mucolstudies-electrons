@@ -1,10 +1,8 @@
 import pyLCIO, ROOT, os, plotHelper, math
 ROOT.gROOT.SetBatch()
 
-calib_factor = 1.08 
-
 config = {
-    "v2.9.7": {"path": "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio", "trk_coll": "SiTracks_Refitted"},
+#    "v2.9.7": {"path": "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio", "trk_coll": "SiTracks_Refitted"},
     "v11": {"path": "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_9.slcio", "trk_coll": "SelectedTracks"}
 }
 
@@ -55,8 +53,13 @@ for ver, cfg in config.items():
                 if dr < min_dr_c:
                     min_dr_c, b_clu = dr, tlv
 
-        e_reco = (b_clu.E() * calib_factor) if b_clu else 0
-        hists[ver]["e_res"].Fill((e_reco - truth_tlv.E()) / truth_tlv.E())
+        e_reco = b_clu.E() if b_clu else 0
+        rel_res = (e_reco - truth_tlv.E()) / truth_tlv.E()
+        hists[ver]["e_res"].Fill(rel_res)
+
+        if rel_res < -0.2:
+            status = "MISSED" if not b_clu else "POOR_RECO"
+            print(f"{status} [{ver}]: Event {i_evt}, Res: {rel_res:.3f}, Truth E: {truth_tlv.E():.2f}, Eta: {truth_tlv.Eta():.2f}")
 
         if not b_clu:
             hists[ver]["fail_eta"].Fill(truth_tlv.Eta())
@@ -67,25 +70,25 @@ for ver, cfg in config.items():
             stats[ver]["sum_precon"] += b_trk.Pt()
         if b_clu:
             plotHelper.fillObjHists(hists[ver], "cluster", b_clu); stats[ver]["m_clu"] += 1
-            stats[ver]["sum_erecon"] += (b_clu.E() * calib_factor)
+            stats[ver]["sum_erecon"] += b_clu.E()
 
         hists[ver]["track_n"].Fill(n_t); hists[ver]["cluster_n"].Fill(n_c)
         stats[ver]["t_trk"] += n_t; stats[ver]["t_clu"] += n_c
 
     reader.close()
 
-print(f"\n{'-'*10}\nFINAL AVERAGES (Calib: {calib_factor}, E_true > 10, E_reco > 2)\n{'-'*10}")
+print(f"\n{'-'*10}\nFINAL AVERAGES (RAW - No Calib, E_true > 10, E_reco > 2)\n{'-'*10}")
 for v in config:
     n = stats[v]["evts"]
     if n > 0:
         print(f"{v}: Eff_T {stats[v]['m_trk']/n*100:.1f}%, Eff_C {stats[v]['m_clu']/n*100:.1f}%")
         print(f"   Residuals: pT_sum_miss: {stats[v]['sum_ptrue']-stats[v]['sum_precon']:.2f} GeV | E_sum_miss: {stats[v]['sum_etrue']-stats[v]['sum_erecon']:.2f} GeV")
 
-res_map = {v: hists[v]["e_res"] for v in config}
-plotHelper.plotHistograms(res_map, f"{out_dir}/energy_response_calibrated.png", xlabel="(E_reco_calib - E_true) / E_true", ylabel="Events", atltext=["Muon Collider", "Comparison", "Calibrated"])
-
 for feat in ["fail_eta", "fail_e"]:
     f_map = {v: hists[v][feat] for v in config}
-    plotHelper.plotHistograms(f_map, f"{out_dir}/{feat}.png", xlabel=feat, ylabel="Failure Counts", atltext=["Muon Collider", "Failures Only"])
+    plotHelper.plotHistograms(f_map, f"{out_dir}/{feat}.png", xlabel=feat, ylabel="Failure Counts", atltext=["Muon Collider", "Failures Only (E_true > 10)"])
+
+res_map = {v: hists[v]["e_res"] for v in config}
+plotHelper.plotHistograms(res_map, f"{out_dir}/energy_response_relative.png", xlabel="(E_reco_raw - E_true) / E_true", ylabel="Events", atltext=["Muon Collider", "Comparison", "|#eta| < 2.4"])
 
 print(f"\nDone. Results in {out_dir}/")

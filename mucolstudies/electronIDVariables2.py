@@ -5,27 +5,17 @@ exec(open("./plotHelper.py").read()); ROOT.gROOT.SetBatch(); os.makedirs("plots"
 
 # CONFIG & HISTOS
 TARGET_PDG, B_FIELD, MAX_EVENTS, DR_CUT = 11, 5, -1, 0.2
-file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_7.slcio"
+file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_4.slcio"
 h_ep_match = ROOT.TProfile("h_ep_match", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
 h_ep_pfo = ROOT.TProfile("h_ep_pfo", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
+
+# X-AXIS SHRINK: Reduced range from [0, 2.0] to [0, 1.0] to focus on the signal peak
 h_disc = ROOT.TH1F("h_disc", "Profile Discrepancy; Profile Discrepancy; Entries", 100, 0, 1.0)
 
-def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=0.628):
-    # Calculate a (shower max) and b (tail)
+def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=1.0):
     a, b, expected_profile, norm = 1.0 + 0.5 * math.log(energy / 0.01), 0.5, {}, 0.0
-    for i in range(num_layers): 
-        t = i * X0_scale 
-        f = (b * (b * t)**(a-1) * exp(-b * t)) / gamma(a)
-        expected_profile[i] = f
-        norm += f
-    
-    if norm > 0:
-        res = {i: f/norm for i, f in expected_profile.items()}
-        # PRINT TO TERMINAL: Find which layer has the highest energy fraction
-        peak_layer = max(res, key=res.get)
-        print(f"[DEBUG] E={energy:.1f} GeV | X0={X0_scale} | Peak Layer={peak_layer} | Peak Val={res[peak_layer]:.4f}")
-        return res
-    return {}
+    for i in range(num_layers): t = i * X0_scale; f = (b * (b * t)**(a-1) * exp(-b * t)) / gamma(a); expected_profile[i] = f; norm += f
+    return {i: f/norm for i, f in expected_profile.items()} if norm > 0 else {}
 
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader(); reader.open(file_path); count = 0
 for event in reader:
@@ -37,18 +27,14 @@ for event in reader:
         decoder = UTIL.BitField64(ecal_coll.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding))
     except: continue
 
-    # PFO Loop
     for pfo in pfos:
         if abs(pfo.getType()) == 11:
-            e_calo = sum([c.getEnergy() for c in pfo.getClusters()])
-            # Updated to use plotHelper getTLV and .P() for momentum
-            pfo_tlv = getTLV(pfo)
-            p_track = pfo_tlv.P()
-            
-            if p_track > 0:
-                h_ep_pfo.Fill(pfo_tlv.Eta(), e_calo / p_track)
+            pfo_clusters, pfo_tracks = pfo.getClusters(), pfo.getTracks()
+            if len(pfo_clusters) > 0 and len(pfo_tracks) > 0:
+                e, p = pfo_clusters[0].getEnergy(), getP(pfo_tracks[0], B_FIELD)
+                eta = getTLV(pfo).Eta()
+                if p > 0: h_ep_pfo.Fill(eta, e / p)
 
-    # Truth-Matching Loop
     for mcp in [m for m in mcps if abs(m.getPDG()) == TARGET_PDG and m.getGeneratorStatus() == 1]:
         mcp_tlv = getTLV(mcp)
         if abs(mcp_tlv.Eta()) > 2.4: continue
@@ -71,9 +57,7 @@ for event in reader:
                 lyrs[l] = lyrs.get(l, 0.0) + h.getEnergy(); total_e += h.getEnergy()
             
             if total_e > 0 and len(lyrs) >= 3:
-                # Using the scale we calculated
-                expected = generate_expected_em_profile(energy=total_e, X0_scale=0.628)
-                max_layer_disc = 0.0
+                expected, max_layer_disc = generate_expected_em_profile(energy=total_e), 0.0
                 for lyr, obs_e in lyrs.items():
                     layer_disc = abs((obs_e / total_e) - expected.get(lyr, 0.0))
                     if layer_disc > max_layer_disc: max_layer_disc = layer_disc
@@ -81,5 +65,14 @@ for event in reader:
     count += 1
 
 reader.close()
+
+# Y-AXIS SHRINK: Setting the plot limits to fit 1000 events
+# E/p vs Eta Plot
 plotHistograms({"Truth-Matched": h_ep_match, "Pandora PFOs": h_ep_pfo}, "plots/analysis_ep.png", xlabel="#eta", ylabel="<E/p>", atltext=["Muon Collider", "Electron Gun", "E/p Comparison"])
+
+# Profile Discrepancy Plot
+# Using a log scale with a maximum of 10^3 to match the expected event count
+h_disc.SetMaximum(1000) 
 plotHistograms({"0-50 GeV": h_disc}, "plots/analysis_disc.png", xlabel="Profile Discrepancy", ylabel="Entries", logy=True, atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
+
+print(f"Processed {count} events. Plots saved in plots/")

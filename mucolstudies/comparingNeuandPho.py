@@ -2,52 +2,36 @@ import math, ROOT, pyLCIO, os
 exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 
-PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
-os.makedirs(PLOT_DIR, exist_ok=True)
 INPUT_FILE = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_7.slcio"
-
-hists = {}
-for p in ["photon", "neutron"]:
-    hists[f"{p}_nhits"] = ROOT.TH1F(f"{p}_nhits", ";Number of Hits;Counts", 60, 0, 300)
-    hists[f"{p}_dr"]    = ROOT.TH1F(f"{p}_dr", ";#DeltaR(PFO, MC);Counts", 50, 0, 0.2)
-    hists[f"{p}_E"]     = ROOT.TH1F(f"{p}_E", ";Energy [GeV];Counts", 50, 0, 60)
-
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
 reader.open(INPUT_FILE)
-first_event = True
 
-for event in reader:
-    if first_event:
-        try:
-            names = event.getCollection("PandoraClusters").getParameters().getStringVals("ClusterSubdetectorNames")
-            for i, name in enumerate(names): print(f"Index {i}: {name}")
-        except: print("Mapping not found")
-        first_event = False
+print(f"{'EVT':<5} | {'E-RECO?':<8} | {'MIS-RECO':<10} | {'TRUE E':<8} | {'MIS-E':<8} | {'ECAL(0)':<8} | {'HCAL(1)':<8}")
+print("-" * 80)
 
-    mcps = [(abs(m.getPDG()), getTLV(m)) for m in event.getCollection("MCParticle") if m.getGeneratorStatus() == 1 and abs(m.getPDG()) in [22, 2112]]
+for ievt, event in enumerate(reader):
+    mcps = [m for m in event.getCollection("MCParticle") if m.getGeneratorStatus() == 1 and abs(m.getPDG()) == 11 and m.getEnergy() > 10]
+    if not mcps: continue
+    true_e = mcps[0].getEnergy()
+
     pfos = event.getCollection("PandoraPFOs")
+    has_electron = any(abs(p.getType()) == 11 for p in pfos)
+    e_status = "YES" if has_electron else "NO"
 
     for pfo in pfos:
         pdg = abs(pfo.getType())
-        if pdg not in [22, 2112] or pfo.getEnergy() < 2: continue
+        # Skip the electron; show photons, neutrons, and pions > 2 GeV
+        if pdg == 11 or pfo.getEnergy() < 2: continue
         
-        p_label = "photon" if pdg == 22 else "neutron"
-        pfo_tlv = getTLV(pfo)
-        cl = pfo.getClusters()
-        if cl.size() == 0: continue
+        clusters = pfo.getClusters()
+        if clusters.size() == 0: continue
         
-        hists[f"{p_label}_nhits"].Fill(len(cl[0].getCalorimeterHits()))
-        hists[f"{p_label}_E"].Fill(pfo_tlv.E())
+        p_label = "PHOTON" if pdg == 22 else ("NEUTRON" if pdg == 2112 else ("PION" if pdg == 211 else str(pdg)))
+        cl = clusters[0]
+        sub_e = cl.getSubdetectorEnergies()
+        e0 = sub_e[0] if sub_e.size() > 0 else 0.0
+        e1 = sub_e[1] if sub_e.size() > 1 else 0.0
 
-        drs = [pfo_tlv.DeltaR(m[1]) for m in mcps if m[0] == pdg]
-        if drs: hists[f"{p_label}_dr"].Fill(min(drs))
+        print(f"{ievt:<5} | {e_status:<8} | {p_label:<10} | {true_e:<8.1f} | {pfo.getEnergy():<8.1f} | {e0:<8.2f} | {e1:<8.2f}")
 
 reader.close()
-
-for m, xl in [("nhits", "Hits"), ("dr", "#DeltaR"), ("E", "Energy [GeV]")]:
-    plotHistograms({"Photons": hists[f"photon_{m}"], "Neutrons": hists[f"neutron_{m}"]}, 
-                   f"{PLOT_DIR}/CMP_{m}.png", xlabel=xl, ylabel="Entries", atltext="MAIA PFO Study")
-
-for p in ["photon", "neutron"]:
-    h = hists[f"{p}_nhits"]
-    print(f"{p.upper()}: {int(h.GetEntries())} entries, {h.GetMean():.1f} avg hits")

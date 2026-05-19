@@ -12,7 +12,7 @@ pdg_map = {
     2212: "Protons"
 }
 
-file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_5.slcio"
+file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_7.slcio"
 
 # Dictionary to store counts
 counts = {}

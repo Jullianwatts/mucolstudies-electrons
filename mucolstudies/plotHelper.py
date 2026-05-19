@@ -4,11 +4,11 @@ import math
 print("Loading in plotHelper.py")
 
 variables = {"obj": {}, "evt": {}}
-variables["obj"]["pt"] =  {"nbins": 30, "xmin": 0,     "xmax": 200,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
+variables["obj"]["pt"] =  {"nbins": 20, "xmin": 0,     "xmax": 80,    "accessor": ".Perp()",  "label": "p_{T} [GeV]"}
 variables["obj"]["eta"] = {"nbins": 20, "xmin": -3,    "xmax": 3,       "accessor": ".Eta()",   "label": "#eta"}
 variables["obj"]["phi"] = {"nbins": 20, "xmin": -3.5,  "xmax": 3.5,     "accessor": ".Phi()",   "label": "#phi"}
 variables["obj"]["E"] =   {"nbins": 30, "xmin": 0,     "xmax": 200,    "accessor": ".E()",      "label": "Energy [GeV]"}
-variables["evt"]["n"] =   {"nbins": 20, "xmin": 0,     "xmax": 20,      "accessor": "",          "label": "number per event"}
+variables["evt"]["n"] =   {"nbins": 20, "xmin": 0,     "xmax": 10,      "accessor": "",          "label": "number per event"}
 
 colors =         [ROOT.TColor.GetColor("#FFA900"),   # Sunny Orange
                 ROOT.TColor.GetColor("#3629AC"),    # Dark Blue

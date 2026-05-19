@@ -24,9 +24,10 @@ hists = {}
 for s in files:
     hists[s] = {}
     prefix = "el" if "electron" in s else "mu"
+    bins, xlow, xhigh = 20, 0, 100
     for obj in [f"mcp_{prefix}", f"trk_{prefix}_match"]: 
-        hists[s][obj + "_barrel"] = ROOT.TH1F(f"{s}_{obj}_barrel", ";p_{T} [GeV];Counts", 50, 0, 100)
-        hists[s][obj + "_endcap"] = ROOT.TH1F(f"{s}_{obj}_endcap", ";p_{T} [GeV];Counts", 50, 0, 100)
+        hists[s][obj + "_barrel"] = ROOT.TH1F(f"{s}_{obj}_barrel", ";p_{T} [GeV];Counts", bins, xlow, xhigh)
+        hists[s][obj + "_endcap"] = ROOT.TH1F(f"{s}_{obj}_endcap", ";p_{T} [GeV];Counts", bins, xlow, xhigh)
 
 reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader()
 
@@ -99,4 +100,3 @@ for region in ["barrel", "endcap"]:
 
     plotEfficiencies(eff_map, os.path.join(PLOT_DIR, f"EFFICIENCY_COMPARISON_pT_{region_label}.png"), 
                      xlabel="p_{T} [GeV]", ylabel="Efficiency")
-
