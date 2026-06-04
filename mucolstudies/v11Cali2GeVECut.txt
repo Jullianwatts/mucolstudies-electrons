@@ -1,0 +1,419 @@
+
+--- Event 1 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [206.0250244140625]
+
+--- Event 2 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [24.277799606323242]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [3.749941110610962]
+
+--- Event 3 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [18.196735382080078]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.405578851699829]
+
+--- Event 4 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [9.647115707397461]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [25.679977416992188]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [18.977535247802734]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 5 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [96.47542572021484]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [5.160294055938721]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.4893276691436768]
+
+--- Event 6 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [185.73745727539062]
+
+--- Event 7 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [92.15341186523438]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [4.2828779220581055]
+
+--- Event 8 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [18.956377029418945]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [16.21235466003418]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [71.52108764648438]
+
+--- Event 9 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [11.31340503692627]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.717538833618164]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 10 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [87.86984252929688]
+
+--- Event 11 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [39.26052474975586]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [2.418226957321167]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [3.1534433364868164]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.4315075874328613]
+
+--- Event 12 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [16.670955657958984]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 13 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [5.274374008178711]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [21.305667877197266]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.5852675437927246]
+
+--- Event 14 ---
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [18.70390510559082]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [17.225120544433594]
+
+--- Event 15 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [29.441329956054688]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [6.511474132537842]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 16 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [5.129288196563721]
+
+--- Event 17 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [7.279109477996826]
+
+--- Event 18 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [40.85519027709961]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [4.304200649261475]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 19 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [12.132977485656738]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [4.587941646575928]
+
+--- Event 20 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [46.2063102722168]
+
+--- Event 21 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [24.930946350097656]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.0939366817474365]
+
+--- Event 22 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [44.665687561035156]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [66.9859848022461]
+
+--- Event 23 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [18.431222915649414]
+
+--- Event 24 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [35.74074935913086]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.219580888748169]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [4.738973617553711]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 25 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [50.0171012878418]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [4.514003753662109]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.6800496578216553]
+
+--- Event 26 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [25.51722526550293]
+
+--- Event 27 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [5.705478191375732]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [2.711122751235962]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [47.056640625]
+
+--- Event 28 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [33.63143539428711]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [4.747744560241699]
+
+--- Event 29 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [129.91018676757812]
+
+--- Event 30 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [41.41224670410156]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [3.34775447845459]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [4.237115859985352]
+
+--- Event 31 ---
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 32 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [39.072509765625]
+
+--- Event 33 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [16.843612670898438]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 34 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [24.717668533325195]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 35 ---
+
+--- Event 36 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [20.78103256225586]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 37 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [30.44232749938965]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [4.0616559982299805]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.270132303237915]
+
+--- Event 38 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [56.902156829833984]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 39 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [52.16013717651367]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [2.7864205837249756]
+
+--- Event 40 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [52.741790771484375]
+
+--- Event 41 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [10.294574737548828]
+
+--- Event 42 ---
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [7.015966415405273]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [6.983274459838867]
+
+--- Event 43 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [101.45504760742188]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.279240369796753]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [5.544128894805908]
+
+--- Event 44 ---
+
+--- Event 45 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [26.745994567871094]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [2.407715082168579]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [3.6306800842285156]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [7.663862228393555]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [10.45467758178711]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [14.365501403808594]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): [2.291231870651245]
+
+--- Event 46 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [13.07373332977295]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [3.432126522064209]
+
+--- Event 47 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [37.34959030151367]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 48 ---
+  PFO: Pion | Total Clusters: 1
+    Passed (>= 2 GeV): [34.115421295166016]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [5.12646484375]
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+--- Event 49 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Photon | Total Clusters: 1
+    Passed (>= 2 GeV): [8.14807415008545]
+
+--- Event 50 ---
+  PFO: Electron | Total Clusters: 1
+    Passed (>= 2 GeV): [14.618387222290039]
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+  PFO: Neutron | Total Clusters: 1
+    Passed (>= 2 GeV): []
+    Failed (<  2 GeV): 1 clusters filtered out
+
+(1000 EVENTS)
+Particle Type   | Total Count  | Avg/Event  | Avg Energy/Part (GeV)
+Electron        | 414          | 0.41       | 49.73               
+Photon          | 994          | 0.99       | 12.90               
+Pion            | 322          | 0.32       | 38.56               
+Neutron         | 1123         | 1.12       | 2.19                
+TOTAL PFOS      | 2853         | 2.85       |
