@@ -2,7 +2,9 @@ import math
 import pyLCIO
 from pyLCIO import EVENT, IOIMPL
 
-file_path = "/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio"
+
+file_path = "/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_noClusMerge.slcio"
+#file_path = "/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio"
 pdg_map = {
     11: "Electron",
     13: "Muon",
@@ -23,7 +25,7 @@ for event in reader:
     event_count += 1
 
     # Print cluster energies for first 50 events
-    if event_count <= 50:
+    if event_count <= 1000:
         try:
             clusters = event.getCollection("PandoraClusters")
             energies = [c.getEnergy() for c in clusters]
