@@ -1,5 +1,6 @@
 import os
 import math
+# Samples: swap in fixed theta=pi/2, pt=25 files when ready
 import pyLCIO
 from pyLCIO import EVENT, IOIMPL
 import ROOT
@@ -8,9 +9,10 @@ import plotHelper
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026/pionshowers"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
+# Samples: PDG ID is used to filter PFOs — compares what Pandora actually called each particle
 samples = {
-    "Electrons": "/scratch/jwatts/mucol/v11Container/reco/electron25Fixed_reco.slcio",
-    "Pions":     "/scratch/jwatts/mucol/v11Container/reco/pion25Fixed_reco.slcio"
+    "Electrons": {"path": "/scratch/jwatts/mucol/v11Container/reco/electron25Fixed_reco.slcio", "pdg": 11},
+    "Pions":     {"path": "/scratch/jwatts/mucol/v11Container/reco/pion25Fixed_reco.slcio",     "pdg": 211}
 }
 
 max_events = 1000
@@ -18,9 +20,9 @@ max_events = 1000
 shower_vars = {
     "clus_E":    {"nbins": 40, "xmin": 0,    "xmax": 40,   "label": "Leading Cluster Energy [GeV]"},
     "n_clus":    {"nbins": 10, "xmin": 0,    "xmax": 10,   "label": "Number of Clusters per Event"},
-    "ecal_frac": {"nbins": 45, "xmin": 0,    "xmax": 1.05, "label": "ECAL Energy Fraction"},
-    "hcal_E":    {"nbins": 45, "xmin": 0,    "xmax": 30,   "label": "HCAL Energy [GeV]"},
-    "n_hits":    {"nbins": 30, "xmin": 0,    "xmax": 600,  "label": "Number of Hits in Leading Cluster"},
+    "ecal_frac": {"nbins": 25, "xmin": 0,    "xmax": 1.05, "label": "ECAL Energy Fraction"},
+    "hcal_E":    {"nbins": 30, "xmin": 0,    "xmax": 30,   "label": "HCAL Energy [GeV]"},
+    "n_hits":    {"nbins": 30, "xmin": 0,    "xmax": 300,  "label": "Number of Hits in Leading Cluster"},
     "start_r":   {"nbins": 30, "xmin": 1400, "xmax": 4000, "label": "Shower Start Radius [mm]"},
     "depth_r":   {"nbins": 30, "xmin": 1400, "xmax": 4000, "label": "Energy-Weighted Shower Depth [mm]"},
     "width":     {"nbins": 30, "xmin": 0,    "xmax": 150,  "label": "Transverse Shower Width [mm]"},
@@ -37,37 +39,64 @@ for s in samples:
 
 for s in samples:
     print(f"\nProcessing sample: {s}")
+    target_pdg = samples[s]["pdg"]
     event_count = 0
+    n_found = 0
 
     reader = IOIMPL.LCFactory.getInstance().createLCReader()
-    reader.open(samples[s])
+    reader.open(samples[s]["path"])
 
     for event in reader:
 
         event_count += 1
 
         try:
-            clusters = event.getCollection("PandoraClusters")
+            pfo_coll = event.getCollection("PandoraPFOs")
         except:
             continue
+        for pfo in pfo_coll:
+            print(f"  PFO type: {pfo.getType()}, energy: {pfo.getEnergy():.2f}")
+        # Only PFOs Pandora labeled with the target PDG
+        matched_pfos = [pfo for pfo in pfo_coll if abs(pfo.getType()) == target_pdg]
+        hists[s]["n_clus"].Fill(len(matched_pfos))
 
-        hists[s]["n_clus"].Fill(len(clusters))
-
-        if len(clusters) < 1:
+        if len(matched_pfos) < 1:
             continue
 
-        # Leading cluster by energy
-        lead_clus = max(clusters, key=lambda c: c.getEnergy())
+        n_found += 1
+
+        # Pick the highest-momentum matched PFO
+        best_pfo = None
+        best_p   = 0.0
+
+        for pfo in matched_pfos:
+            trks = pfo.getTracks()
+            if len(trks) < 1:
+                continue
+            p = plotHelper.getP(trks[0])
+            if p > best_p:
+                best_p   = p
+                best_pfo = pfo
+
+        if best_pfo is None:
+            continue
+
+        clus_list = best_pfo.getClusters()
+        if len(clus_list) < 1:
+            continue
+
+        # Leading cluster by energy from the matched PFO
+        lead_clus = max(clus_list, key=lambda c: c.getEnergy())
         clus_E = lead_clus.getEnergy()
         hists[s]["clus_E"].Fill(clus_E)
 
-        # ECAL/HCAL split: index 0 = ECAL, index 1 = HCAL
+        # ECAL/HCAL split
         sub_E = lead_clus.getSubdetectorEnergies()
         if len(sub_E) > 1 and (sub_E[0] + sub_E[1]) > 0:
             hists[s]["ecal_frac"].Fill(sub_E[0] / (sub_E[0] + sub_E[1]))
             hists[s]["hcal_E"].Fill(sub_E[1])
 
-        # Hit-level shower shape from the leading cluster
+        # Hit-level shower shape
         hits = lead_clus.getCalorimeterHits()
 
         if len(hits) > 0:
@@ -103,27 +132,9 @@ for s in samples:
                 hists[s]["depth_r"].Fill(sum_Er / sum_E)
                 hists[s]["width"].Fill(math.sqrt(sum_Ed2 / sum_E))
 
-        # E/p: use only the highest-momentum PFO per event
-        try:
-            pfo_coll = event.getCollection("PandoraPFOs")
-        except:
-            pfo_coll = []
-
-        best_pfo = None
-        best_p   = 0.0
-
-        for pfo in pfo_coll:
-            trks = pfo.getTracks()
-            clus = pfo.getClusters()
-            if len(trks) < 1 or len(clus) < 1:
-                continue
-            p = plotHelper.getP(trks[0])
-            if p > best_p:
-                best_p   = p
-                best_pfo = pfo
-
-        if best_pfo is not None and best_p > 0:
-            e_calo = sum(c.getEnergy() for c in best_pfo.getClusters())
+        # E/p for the best matched PFO
+        if best_p > 0:
+            e_calo = sum(c.getEnergy() for c in clus_list)
             hists[s]["E_over_p"].Fill(e_calo / best_p)
 
         if event_count == max_events:
@@ -131,6 +142,14 @@ for s in samples:
 
     reader.close()
     print(f"  Processed {event_count} events")
+    print(f"  Events with a PDG {target_pdg} PFO: {n_found} ({100*n_found/event_count:.1f}%)")
+
+# Normalize to unit area for shape comparison
+for s in samples:
+    for var in shower_vars:
+        integral = hists[s][var].Integral()
+        if integral > 0:
+            hists[s][var].Scale(1.0 / integral)
 
 # Make overlay plots
 for var in shower_vars:
@@ -139,9 +158,9 @@ for var in shower_vars:
         h_map[s] = hists[s][var]
     plotHelper.plotHistograms(
         h_map,
-        os.path.join(PLOT_DIR, f"shower_compare_{var}.png"),
+        os.path.join(PLOT_DIR, f"shower_compare_pdgfilter_{var}.png"),
         xlabel=shower_vars[var]["label"],
-        ylabel="Events",
+        ylabel="Normalized Entries",
         atltext=["Muon Collider", "Simulation, no BIB", "#theta = #pi/2, p_{T} = 25 GeV"]
     )
 
