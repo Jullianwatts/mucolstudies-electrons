@@ -49,15 +49,24 @@ for s in samples:
         try:
             clusters = event.getCollection("PandoraClusters")
         except:
+            print(f"  Event {event_count}: PandoraClusters not found")
             continue
 
         hists[s]["n_clus"].Fill(len(clusters))
 
         if len(clusters) < 1:
+            print(f"  Event {event_count}: no clusters")
             continue
 
         # Leading cluster by energy
         lead_clus = max(clusters, key=lambda c: c.getEnergy())
+
+        # Print ECAL/HCAL subdetector energies from leading cluster
+        sub_E_all = lead_clus.getSubdetectorEnergies()
+        ecal_E = sub_E_all[0] if len(sub_E_all) > 0 else 0.0
+        hcal_E = sub_E_all[1] if len(sub_E_all) > 1 else 0.0
+        print(f"  Event {event_count}: ECAL E = {ecal_E:.3f} GeV, HCAL E = {hcal_E:.3f} GeV")
+
         clus_E = lead_clus.getEnergy()
         hists[s]["clus_E"].Fill(clus_E)
 
@@ -103,7 +112,9 @@ for s in samples:
                 hists[s]["depth_r"].Fill(sum_Er / sum_E)
                 hists[s]["width"].Fill(math.sqrt(sum_Ed2 / sum_E))
 
+
         # E/p: use only the highest-momentum PFO per event
+        # not working bc no tracks in sample
         try:
             pfo_coll = event.getCollection("PandoraPFOs")
         except:
@@ -132,7 +143,6 @@ for s in samples:
     reader.close()
     print(f"  Processed {event_count} events")
 
-# Make overlay plots
 for var in shower_vars:
     h_map = {}
     for s in samples:
