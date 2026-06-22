@@ -1,85 +1,209 @@
-import os, math, ROOT, glob, pyLCIO
-from pyLCIO import IOIMPL, EVENT, UTIL; from math import gamma, exp
+import math
+import pyLCIO
+from pyLCIO import EVENT, IOIMPL, UTIL
+import ROOT
+exec(open("./plotHelper.py").read())
+ROOT.gROOT.SetBatch(True)
+#change script
+file_path = "/scratch/jwatts/mucol/v11Container/reco/electron25Fixed_reco.slcio"
 
-exec(open("./plotHelper.py").read()); ROOT.gROOT.SetBatch(); os.makedirs("plots", exist_ok=True)
+X0_PER_LAYER  = 2.2 / 3.504
 
-# CONFIG & HISTOS
-TARGET_PDG, B_FIELD, MAX_EVENTS, DR_CUT = 11, 5, -1, 0.2
-file_path = "/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_7.slcio"
-h_ep_match = ROOT.TProfile("h_ep_match", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
-h_ep_pfo = ROOT.TProfile("h_ep_pfo", "E/p vs Eta; #eta; E/p", 50, -2.5, 2.5)
-h_disc = ROOT.TH1F("h_disc", "Profile Discrepancy; Profile Discrepancy; Entries", 100, 0, 1.0)
+CUT_MAX_ENERGY        = 5.0
+CUT_MAX_INNER_LAYER   = 4
+CUT_MAX_PROFILE_START = 4.5
+CUT_MAX_EOP_RESIDUAL  = 0.2
 
-def generate_expected_em_profile(num_layers=60, energy=10.0, X0_scale=0.628):
-    # Calculate a (shower max) and b (tail)
-    a, b, expected_profile, norm = 1.0 + 0.5 * math.log(energy / 0.01), 0.5, {}, 0.0
-    for i in range(num_layers): 
-        t = i * X0_scale 
-        f = (b * (b * t)**(a-1) * exp(-b * t)) / gamma(a)
-        expected_profile[i] = f
-        norm += f
-    
-    if norm > 0:
-        res = {i: f/norm for i, f in expected_profile.items()}
-        # PRINT TO TERMINAL: Find which layer has the highest energy fraction
-        peak_layer = max(res, key=res.get)
-        print(f"[DEBUG] E={energy:.1f} GeV | X0={X0_scale} | Peak Layer={peak_layer} | Peak Val={res[peak_layer]:.4f}")
-        return res
-    return {}
+reader = IOIMPL.LCFactory.getInstance().createLCReader()
+reader.open(file_path)
 
-reader = pyLCIO.IOIMPL.LCFactory.getInstance().createLCReader(); reader.open(file_path); count = 0
+encoding = None
 for event in reader:
-    if MAX_EVENTS > 0 and count >= MAX_EVENTS: break
+    for coll_name in ["EcalBarrelCollectionRec", "ECALBarrel", "ECalBarrel",
+                      "EcalBarrelCollection", "HCALBarrel", "HCalBarrelCollection"]:
+        try:
+            coll     = event.getCollection(coll_name)
+            encoding = coll.getParameters().getStringVal("CellIDEncoding")
+            print(f"Got CellIDEncoding from '{coll_name}': {encoding}")
+            break
+        except:
+            continue
+    if encoding: break
+reader.close()
+
+if encoding is None:
+    raise RuntimeError("Could not find CellIDEncoding.")
+
+decoder = UTIL.BitField64(encoding)
+
+def get_layer(hit):
+    decoder.setValue(hit.getCellID0())
+    return int(decoder["layer"])
+
+def get_system(hit):
+    decoder.setValue(hit.getCellID0())
+    return int(decoder["system"])
+
+# scan all system IDs across 1000 events so we can set ECAL_SYSTEM_IDS correctly
+print("Scanning system IDs across 1000 events...")
+all_system_ids = set()
+scan_reader = IOIMPL.LCFactory.getInstance().createLCReader()
+scan_reader.open(file_path)
+for i, event in enumerate(scan_reader):
+    if i >= 1000: break
     try:
-        mcps, tracks = event.getCollection("MCParticle"), event.getCollection("SiTracks_Refitted")
-        clusters, ecal_coll = event.getCollection("PandoraClusters"), event.getCollection("EcalBarrelCollectionRec")
         pfos = event.getCollection("PandoraPFOs")
-        decoder = UTIL.BitField64(ecal_coll.getParameters().getStringVal(EVENT.LCIO.CellIDEncoding))
-    except: continue
-
-    # PFO Loop
+    except:
+        continue
     for pfo in pfos:
-        if abs(pfo.getType()) == 11:
-            e_calo = sum([c.getEnergy() for c in pfo.getClusters()])
-            # Updated to use plotHelper getTLV and .P() for momentum
-            pfo_tlv = getTLV(pfo)
-            p_track = pfo_tlv.P()
-            
-            if p_track > 0:
-                h_ep_pfo.Fill(pfo_tlv.Eta(), e_calo / p_track)
+        for cluster in pfo.getClusters():
+            for hit in cluster.getCalorimeterHits():
+                all_system_ids.add(get_system(hit))
+scan_reader.close()
+print(f"All system IDs in PFO cluster hits: {sorted(all_system_ids)}")
+print(f"-> update ECAL_SYSTEM_IDS below if needed\n")
 
-    # Truth-Matching Loop
-    for mcp in [m for m in mcps if abs(m.getPDG()) == TARGET_PDG and m.getGeneratorStatus() == 1]:
-        mcp_tlv = getTLV(mcp)
-        if abs(mcp_tlv.Eta()) > 2.4: continue
-        
-        m_trk, min_dr_t = None, DR_CUT
-        for trk in tracks:
-            dr = getTrackTLV(trk, 0.000511, B_FIELD).DeltaR(mcp_tlv)
-            if dr < min_dr_t: min_dr_t, m_trk = dr, trk
+# ---- update this once you see the system IDs above ----
+ECAL_SYSTEM_IDS = {29}
+# -------------------------------------------------------
 
-        m_clu, min_dr_c = None, DR_CUT
-        for clu in clusters:
-            dr = getClusterTLV(clu).DeltaR(mcp_tlv)
-            if dr < min_dr_c: min_dr_c, m_clu = dr, clu
+reader = IOIMPL.LCFactory.getInstance().createLCReader()
+reader.open(file_path)
 
-        if m_trk and m_clu:
-            p, e, lyrs, total_e = getP(m_trk, B_FIELD), m_clu.getEnergy(), {}, 0.0
-            if p > 0: h_ep_match.Fill(mcp_tlv.Eta(), e/p)
-            for h in m_clu.getCalorimeterHits():
-                decoder.setValue(int(h.getCellID0())); l = decoder["layer"].value()
-                lyrs[l] = lyrs.get(l, 0.0) + h.getEnergy(); total_e += h.getEnergy()
-            
-            if total_e > 0 and len(lyrs) >= 3:
-                # Using the scale we calculated
-                expected = generate_expected_em_profile(energy=total_e, X0_scale=0.628)
-                max_layer_disc = 0.0
-                for lyr, obs_e in lyrs.items():
-                    layer_disc = abs((obs_e / total_e) - expected.get(lyr, 0.0))
-                    if layer_disc > max_layer_disc: max_layer_disc = layer_disc
-                h_disc.Fill(max_layer_disc)
-    count += 1
+event_count = 0
+n_matched   = 0
+records     = []
+
+for event in reader:
+    if event_count >= 1000: break
+    event_count += 1
+
+    try:
+        pfos = event.getCollection("PandoraPFOs")
+        mcps = event.getCollection("MCParticle")
+    except:
+        continue
+
+    truth_e = [getTLV(m) for m in mcps if abs(m.getPDG()) == 11 and m.getGeneratorStatus() == 1]
+    if not truth_e: continue
+
+    for pfo in pfos:
+
+        tracks   = pfo.getTracks()
+        clusters = pfo.getClusters()
+        if len(tracks) == 0 or len(clusters) == 0: continue
+
+        cluster = clusters[0]
+        track   = tracks[0]
+        if track.getOmega() == 0: continue
+
+        trk_tlv = getTrackTLV(track)
+        p = trk_tlv.P()
+        if p < 0.5: continue
+
+        pfo_p   = pfo.getMomentum()
+        pfo_tlv = ROOT.TLorentzVector(pfo_p[0], pfo_p[1], pfo_p[2], pfo.getEnergy())
+        if not any(pfo_tlv.DeltaR(e) < 0.1 for e in truth_e): continue
+
+        n_matched += 1
+
+        em_energy = cluster.getEnergy()
+        ep        = em_energy / p
+
+        sub_e       = cluster.getSubdetectorEnergies()
+        ecal_energy = sub_e[0] if len(sub_e) > 0 else 0.0
+        hcal_energy = sub_e[1] if len(sub_e) > 1 else 0.0
+        total_sub_e = ecal_energy + hcal_energy
+        ecal_frac   = ecal_energy / total_sub_e if total_sub_e > 0 else 0.0
+
+        layer_energy = {}
+        for hit in cluster.getCalorimeterHits():
+            if get_system(hit) in ECAL_SYSTEM_IDS:
+                layer = get_layer(hit)
+                layer_energy[layer] = layer_energy.get(layer, 0.0) + hit.getEnergy()
+
+        if layer_energy:
+            min_ecal_layer     = min(layer_energy.keys())
+            inner_pseudo_layer = min_ecal_layer + 1
+            profile_start_est  = min_ecal_layer * X0_PER_LAYER
+        else:
+            inner_pseudo_layer = 9999
+            profile_start_est  = 9999.0
+
+        records.append({
+            "em_energy":          em_energy,
+            "ep":                 ep,
+            "abs_ep_minus_1":     abs(ep - 1),
+            "inner_pseudo_layer": inner_pseudo_layer,
+            "profile_start_est":  profile_start_est,
+            "ecal_energy":        ecal_energy,
+            "hcal_energy":        hcal_energy,
+            "ecal_frac":          ecal_frac,
+            "pfo_type":           abs(pfo.getType()),
+        })
 
 reader.close()
-plotHistograms({"Truth-Matched": h_ep_match, "Pandora PFOs": h_ep_pfo}, "plots/analysis_ep.png", xlabel="#eta", ylabel="<E/p>", atltext=["Muon Collider", "Electron Gun", "E/p Comparison"])
-plotHistograms({"0-50 GeV": h_disc}, "plots/analysis_disc.png", xlabel="Profile Discrepancy", ylabel="Entries", logy=True, atltext=["Muon Collider", "Simulation, no BIB", "|#eta| < 2.4", "MAIA Detector Concept"])
+
+def stats(vals):
+    if not vals: return "  no data"
+    mean = sum(vals) / len(vals)
+    return f"  mean={mean:8.3f}  min={min(vals):8.3f}  max={max(vals):8.3f}"
+
+def extract(recs, key):
+    return [r[key] for r in recs]
+
+def n_fail(vals, cut):
+    return sum(1 for v in vals if v > cut)
+
+def n_fail_abs(vals, cut):
+    return sum(1 for v in vals if abs(v - 1) > cut)
+
+called_e = [r for r in records if r["pfo_type"] == 11]
+missed_e = [r for r in records if r["pfo_type"] != 11]
+
+print(f"\n{event_count} events | {n_matched} truth-matched electron PFOs")
+print(f"  Pandora called electron (type=11): {len(called_e)} / {n_matched}")
+print(f"  Pandora did NOT call electron:     {len(missed_e)} / {n_matched}")
+
+for label, recs in [("CALLED ELECTRON (type=11)", called_e),
+                    ("NOT CALLED ELECTRON",        missed_e)]:
+
+    n = len(recs)
+    if n == 0:
+        print(f"\n--- {label} : none ---")
+        continue
+
+    em  = extract(recs, "em_energy")
+    ep  = extract(recs, "ep")
+    aep = extract(recs, "abs_ep_minus_1")
+    il  = extract(recs, "inner_pseudo_layer")
+    ps  = extract(recs, "profile_start_est")
+    ef  = extract(recs, "ecal_frac")
+    ee  = extract(recs, "ecal_energy")
+    he  = extract(recs, "hcal_energy")
+
+    print(f"\n{'='*70}")
+    print(f"  {label}  ({n} PFOs)")
+    print(f"{'='*70}")
+    print(f"  {'Variable':<44} Stats")
+    print(f"  {'-'*67}")
+
+    print(f"  {'em_energy [GeV]  (cut: >5 if !IsEmShower)':<44}{stats(em)}")
+    print(f"      -> {n_fail(em, CUT_MAX_ENERGY)}/{n} exceed 5 GeV")
+
+    print(f"  {'inner_pseudo_layer  (cut: >4 if !IsEmShower)':<44}{stats(il)}")
+    print(f"      pseudo-layer 4 = ECal layer 3 = {3*X0_PER_LAYER:.2f} X0 from ECal face")
+    print(f"      -> {n_fail(il, CUT_MAX_INNER_LAYER)}/{n} exceed pseudo-layer 4")
+    print(f"      NOTE: 9999 means no ECal hits found with ECAL_SYSTEM_IDS={ECAL_SYSTEM_IDS}")
+
+    print(f"  {'profile_start_est [X0]  (cut: >4.5)':<44}{stats(ps)}")
+    print(f"      = min_ecal_layer * 0.628  (rough proxy; Pandora uses template fit)")
+    print(f"      -> {n_fail(ps, CUT_MAX_PROFILE_START)}/{n} estimated exceed 4.5 X0")
+
+    print(f"  {'E/p':<44}{stats(ep)}")
+    print(f"  {'|E/p - 1|  (cut: >0.2 kills)':<44}{stats(aep)}")
+    print(f"      -> {n_fail_abs(ep, CUT_MAX_EOP_RESIDUAL)}/{n} fail E/p cut")
+
+    print(f"  {'ECal energy [GeV]  (subdetectorEnergies[0])':<44}{stats(ee)}")
+    print(f"  {'HCal energy [GeV]  (subdetectorEnergies[1])':<44}{stats(he)}")
+    print(f"  {'ECal energy fraction':<44}{stats(ef)}")
