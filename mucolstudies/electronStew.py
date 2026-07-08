@@ -12,12 +12,13 @@ ROOT.gROOT.SetBatch(True)
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples       = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio")
-dr_match      = 0.1     # PFO to truth match
+samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio")
+#samples       = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio")
+dr_match      = 0.2     # PFO to truth match
 eta_max       = 2.4     # truth acceptance
 hcal_frac_max = 0.1     # raw HCAL / (raw ECAL + raw HCAL)
-rms_max       = 20.0    # mm, energy-weighted transverse cluster RMS
-eop_window    = 0.4     # |E/p - 1| < this
+rms_max       = 30.0    # mm, energy-weighted transverse cluster RMS
+eop_window    = 0.6     # |E/p - 1| < this
 
 def getClusterRMS(cluster):
     # energy-weighted RMS of hit distance transverse to the cluster axis (origin -> centroid)
