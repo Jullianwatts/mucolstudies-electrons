@@ -7,11 +7,12 @@ exec(open("./plotHelper.py").read())
 ROOT.gROOT.SetBatch()
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
-samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/10kelectron0to50_recoCalib2.slcio")
+samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio")
+#samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco_v2/electrons_0_50/electron_0_50_reco.slcio")
+#samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_newcalib_0.slcio")
 #samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/1kelectron25_reco.slcio")
 #samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio")
 #samples = glob.glob("/scratch/jwatts/mucol/data/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_9.slcio")
-#files = {"electronGun_pT_0_50": samples}
 files = {"10kelectron0to50": samples}
 hists = {}
 for s in files:
