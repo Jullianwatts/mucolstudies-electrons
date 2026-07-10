@@ -42,15 +42,12 @@ for s in files:
             for mcp_el in mcp_electrons:
                 m_eta = mcp_el.Eta()
 
-                # tracks in cone -> highest pT
                 trks_in_cone = [t for t in trk_electrons if mcp_el.DeltaR(t) < 0.2]
                 best_trk = max(trks_in_cone, key=lambda t: t.Perp(), default=None)
 
-                # clusters in cone -> highest E
                 clus_in_cone = [c for c in clu_electrons if mcp_el.DeltaR(c) < 0.2]
                 best_clu = max(clus_in_cone, key=lambda c: c.E(), default=None)
 
-                # pfos in cone -> closest dR
                 pfo_drs_in_cone = [(mcp_el.DeltaR(p), p) for p in pfo_electrons if mcp_el.DeltaR(p) < 0.2]
                 best_pfo = min(pfo_drs_in_cone, key=lambda x: x[0], default=(999, None))
 
