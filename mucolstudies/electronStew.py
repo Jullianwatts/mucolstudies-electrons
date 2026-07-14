@@ -14,14 +14,13 @@ os.makedirs(PLOT_DIR, exist_ok=True)
 
 samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio")
 #samples       = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio")
-dr_match      = 0.2     # PFO to truth match
-eta_max       = 2.4     # truth acceptance
+dr_match      = 0.2
+eta_max       = 2.4
 hcal_frac_max = 0.1     # raw HCAL / (raw ECAL + raw HCAL)
 rms_max       = 30.0    # mm, energy-weighted transverse cluster RMS
 eop_window    = 0.6     # |E/p - 1| < this
 
 def getClusterRMS(cluster):
-    # energy-weighted RMS of hit distance transverse to the cluster axis (origin -> centroid)
     pos = cluster.getPosition()
     r = math.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
     if r == 0:
@@ -41,7 +40,6 @@ def getClusterRMS(cluster):
     return math.sqrt(sum_ed2/sum_e)
 
 def passSoup(pfo):
-    # the electron soup: hcal_frac, then rms, then E/p
     ecal_raw = 0.0
     hcal_raw = 0.0
     for cl in pfo.getClusters():
@@ -95,7 +93,6 @@ for f in files:
             h_denom.Fill(tlv.Eta())
             mcp_electrons.append(tlv)
 
-        # PFOs with at least one track and one cluster (soup needs both)
         good_pfos = []
         for pfo in pfos:
             if len(pfo.getTracks()) < 1 or len(pfo.getClusters()) < 1: continue
@@ -103,7 +100,6 @@ for f in files:
 
         for mcp_el in mcp_electrons:
 
-            # matched PFO: within dr_match, highest energy
             in_cone = [(tlv, pfo) for tlv, pfo in good_pfos if mcp_el.DeltaR(tlv) < dr_match]
             if len(in_cone) == 0:
                 continue
