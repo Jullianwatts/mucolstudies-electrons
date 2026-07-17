@@ -12,7 +12,9 @@ ROOT.gROOT.SetBatch(True)
 PLOT_DIR = "/scratch/jwatts/mucol/mucolstudies/plots2026"
 os.makedirs(PLOT_DIR, exist_ok=True)
 
-samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio")
+
+samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_Final.slcio")
+#samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio")
 #samples       = glob.glob("/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio")
 dr_match      = 0.2
 eta_max       = 2.4
