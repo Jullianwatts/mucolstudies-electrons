@@ -3,9 +3,11 @@ import csv
 import pyLCIO
 from pyLCIO import EVENT, IOIMPL, UTIL
 
-file_path = "/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio"
+file_path = " /scratch/jwatts/mucol/v11Container/reco/pion25Fixed_reco.slcio"
+#file_path = "/scratch/jwatts/mucol/v11Container/reco/1kelectron25_reco.slcio"
+#file_path = "/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_reco.slcio"
 #file_path = "/scratch/jwatts/mucol/v2.11/reco/electronGun_pT_0_50/electronGun_pT_0_50_reco_0.slcio"
-out_csv = "shower_profile_pfos.csv"
+out_csv = "shower_profile_pfos_fixed_pion.csv"
 max_events = -1   # -1 = all
 
 # ---- From LCShowerProfilePlugin.cc (your paste, confirmed defaults) ----
