@@ -1,3 +1,6 @@
+#makes cut plots and plots efficiencies that build on eachother
+#good script
+
 import math
 import glob
 import ROOT
@@ -14,23 +17,27 @@ samples = glob.glob("/scratch/jwatts/mucol/v11Container/reco/10kelectron0to50_re
 pion_samples = glob.glob("/scratch/jwatts/mucol/v2.11/reco_v2/pions_0_50/*.slcio")
 max_events    = 10000
 eta_max       = 2.4
-# ---- Electron ID cuts (applied cumulatively, in this order) ----
+
+#cuts are applied in this order
 hcal_frac_max = 0.001   # raw HCAL / (raw ECAL + raw HCAL)
-rms_max       = 26.0    # mm, energy-weighted transverse cluster RMS
-sstart_max    = 6.0     # X0, shower profile start
-# ---- Threshold scan values (printed, to verify cut choices) ----
+rms_max       = 28.0    # mm, energy-weighted transverse cluster RMS
+sstart_max    = 7     # X0, shower profile start
+
 scan_values = {
     "hcal_frac": [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1],
     "rms":       [24.0, 26.0, 28.0, 30.0],
-    "sstart":    [4.5, 6.0, 8.0],
+    "sstart":    [4.5, 6.0, 6.5, 7.0, 8.0],
 }
-# ---- Truth energy ranges for distribution plots: label -> (min, max) ----
+#testing diff shower start layer values
+sstart_variants = [4.5, 5.0, 5.5, 6.0, 6.5, 7.0]
+#Truth energy ranges for distribution plots
 e_ranges = {
     "E_0_15":  (0,  15),
     "E_15_35": (15, 35),
     "E_35_50": (35, 50),
 }
-# ---- Shower profile constants (from LCShowerProfilePlugin.cc) ----
+ptype_labels = {"Electrons": "Electron gun", "Pions": "Pion gun"}
+#  Shower profile constants (from LCShowerProfilePlugin.cc)
 LONG_PROFILE_BIN_WIDTH = 0.5        # X0
 LONG_PROFILE_N_BINS = 100
 LONG_PROFILE_MIN_COS_ANGLE = 0.3
@@ -38,7 +45,9 @@ LONG_PROFILE_CRITICAL_ENERGY = 0.08 # GeV
 LONG_PROFILE_PARAMETER_0 = 1.25
 LONG_PROFILE_PARAMETER_1 = 0.5
 LONG_PROFILE_MAX_DIFFERENCE = 0.1
-# ---- From steer_reco.py (DDMarlinPandora block) ----
+
+
+# from steer_reco
 ECAL_TO_EM_GEV = 1.02373335516      # ECalToEMGeVCalibration
 ECAL_TO_MIP = 181.818               # ECalToMipCalibration
 ECAL_MIP_THRESHOLD = 0.5            # ECalMipThreshold
@@ -227,6 +236,15 @@ def passSingle(cut, hcal_frac, rms, sstart):
     if cut == "rms":       return (0 <= rms <= rms_max)
     if cut == "sstart":    return (0 <= sstart <= sstart_max)
     return False
+def passFullChain(hcal_frac, rms, sstart, s_cut):
+    """All three cuts, with an alternative sstart cut value."""
+    if not (0 <= hcal_frac <= hcal_frac_max):
+        return False
+    if not (0 <= rms <= rms_max):
+        return False
+    if not (0 <= sstart <= s_cut):
+        return False
+    return True
 # ---- Histograms: denominator + cumulative stages + individual cuts ----
 stage_names  = {1: "HCAL frac", 2: "+ shower RMS", 3: "+ shower start"}
 single_names = {"hcal_frac": "HCAL frac only", "rms": "shower RMS only", "sstart": "shower start only"}
@@ -238,16 +256,20 @@ h_single = {}
 for cut in single_names:
     h_single[cut] = ROOT.TH1F(f"single_{cut}_el_eta", ";#eta;Counts", 50, -2.5, 2.5)
 # ---- Normalized 1D distributions: variable, binning, cut value, x label, log axes ----
-# hcal_frac uses log-spaced x bins from 1e-4 to 1; values below 1e-4 (incl. exactly 0) clamped into first bin
+# hcal_frac: log-spaced x bins from 1e-4 to 1, plus a dedicated "= 0" bin below 1e-4.
+# Exact zeros go in the zero bin; nonzero values below 1e-4 clamp into the first log bin.
+# rms and sstart: overflow clamped into the last bin so normalization counts everything.
 dist_vars = {
-    "hcal_frac": {"nbins": 40, "xmin": 1e-4, "xmax": 1,   "cut": hcal_frac_max, "label": "HCAL fraction",             "logy": True,  "logx": True},
-    "rms":       {"nbins": 50, "xmin": 0,    "xmax": 100, "cut": rms_max,       "label": "shower RMS [mm]",           "logy": False, "logx": False},
-    "sstart":    {"nbins": 40, "xmin": 0,    "xmax": 20,  "cut": sstart_max,    "label": "shower profile start [X0]", "logy": True,  "logx": False},
+    "hcal_frac": {"nbins": 20, "xmin": 1e-4, "xmax": 1,   "cut": hcal_frac_max, "label": "HCAL fraction",             "logy": True,  "logx": True,  "zero_bin": True,  "note": "first bin: HCAL fraction = 0"},
+    "rms":       {"nbins": 50, "xmin": 0,    "xmax": 100, "cut": rms_max,       "label": "shower RMS [mm]",           "logy": False, "logx": False, "zero_bin": False, "note": ""},
+    "sstart":    {"nbins": 40, "xmin": 0,    "xmax": 20,  "cut": sstart_max,    "label": "shower profile start [X0]", "logy": True,  "logx": False, "zero_bin": False, "note": ""},
 }
 def makeDistHist(name, v):
     if v["logx"]:
-        edges = array('d', [10**(math.log10(v["xmin"]) + i*(math.log10(v["xmax"])-math.log10(v["xmin"]))/v["nbins"]) for i in range(v["nbins"]+1)])
-        return ROOT.TH1F(name, "", v["nbins"], edges)
+        edges = [10**(math.log10(v["xmin"]) + i*(math.log10(v["xmax"])-math.log10(v["xmin"]))/v["nbins"]) for i in range(v["nbins"]+1)]
+        if v["zero_bin"]:
+            edges = [v["xmin"]*0.3] + edges   # dedicated bin for exact zeros
+        return ROOT.TH1F(name, "", len(edges)-1, array('d', edges))
     return ROOT.TH1F(name, "", v["nbins"], v["xmin"], v["xmax"])
 h_dist = {}
 for erange in e_ranges:
@@ -264,10 +286,12 @@ def getERangeLabel(energy):
 def fillDistHists(erange, ptype, hcal_frac, rms, sstart):
     if erange is None: return
     if hcal_frac >= 0:
-        h_dist[erange][ptype]["hcal_frac"].Fill(max(hcal_frac, 1.2e-4))   # clamp 0 into first log bin
-    if rms >= 0:       h_dist[erange][ptype]["rms"].Fill(rms)
-    if sstart >= 0:    h_dist[erange][ptype]["sstart"].Fill(sstart)
-# ---- Raw variable values, kept for threshold scans and fake rates ----
+        if hcal_frac == 0:
+            h_dist[erange][ptype]["hcal_frac"].Fill(5e-5)                          # zero bin
+        else:
+            h_dist[erange][ptype]["hcal_frac"].Fill(min(max(hcal_frac, 1.2e-4), 0.999))  # clamp under/overflow
+    if rms >= 0:       h_dist[erange][ptype]["rms"].Fill(min(rms, 99.9))           # clamp overflow
+    if sstart >= 0:    h_dist[erange][ptype]["sstart"].Fill(min(sstart, 19.9))     # clamp overflow
 el_vals = []    # (hcal_frac, rms, sstart) per truth electron with a charged PFO
 pi_vals = []    # (hcal_frac, rms, sstart) per truth pion with a charged PFO
 reader = IOIMPL.LCFactory.getInstance().createLCReader()
@@ -350,7 +374,6 @@ for f in pion_files:
 print(f"\nProcessed {n_events} electron events, {n_pion_events} pion events")
 print(f"Truth electrons: {n_el_truth} | no charged PFO in event: {n_el_nopfo}")
 print(f"Pions with charged PFO: {len(pi_vals)}")
-# ---- Threshold scans: fraction of electrons / pions passing each candidate cut ----
 def scanFrac(vals, idx, cut):
     if len(vals) == 0:
         return 0
@@ -363,7 +386,7 @@ for var in scan_values:
         f_el = scanFrac(el_vals, var_idx[var], cut)
         f_pi = scanFrac(pi_vals, var_idx[var], cut)
         print(f"  cut <= {cut:<8} | el: {f_el:.4f} | pi: {f_pi:.4f}")
-# ---- Cumulative stage results: electron efficiency and pion fake rate ----
+# electron efficiency and pion fake rate
 print("\n--- Cumulative Cut Results ---")
 n_den = h_denom.GetEntries()
 print(f"{'Stage':<18} | {'El eff':<10} | {'Pi fake rate':<12}")
@@ -373,6 +396,15 @@ for stage in stage_names:
     n_pi_pass = sum(1 for v in pi_vals if passStage(stage, v[0], v[1], v[2]))
     fake = n_pi_pass/len(pi_vals) if len(pi_vals) > 0 else 0
     print(f"{stage_names[stage]:<18} | {eff:<10.4f} | {fake:<12.4f}")
+#  Full chain with alternative sstart cuts
+print("\n--- Full Chain vs sstart_max Variant (HCAL + RMS + sstart) ---")
+print(f"{'sstart_max':<12} | {'El eff':<10} | {'Pi fake rate':<12}")
+for s_cut in sstart_variants:
+    n_el_pass = sum(1 for v in el_vals if passFullChain(v[0], v[1], v[2], s_cut))
+    n_pi_pass = sum(1 for v in pi_vals if passFullChain(v[0], v[1], v[2], s_cut))
+    eff = n_el_pass/n_den if n_den > 0 else 0
+    fake = n_pi_pass/len(pi_vals) if len(pi_vals) > 0 else 0
+    print(f"{s_cut:<12} | {eff:<10.4f} | {fake:<12.4f}")
 print("\n--- Individual Cut Results (each cut alone) ---")
 print(f"{'Cut':<18} | {'El eff':<10} | {'Pi fake rate':<12}")
 for cut in single_names:
@@ -381,7 +413,9 @@ for cut in single_names:
     n_pi_pass = sum(1 for v in pi_vals if passSingle(cut, v[0], v[1], v[2]))
     fake = n_pi_pass/len(pi_vals) if len(pi_vals) > 0 else 0
     print(f"{single_names[cut]:<18} | {eff:<10.4f} | {fake:<12.4f}")
-# ---- Efficiency plots: cumulative overlay + one plot per individual cut ----
+
+#eff plots
+
 eff_map = {}
 for stage in stage_names:
     eff_map[stage_names[stage]] = ROOT.TEfficiency(h_stage[stage], h_denom).CreateGraph()
@@ -392,7 +426,8 @@ for cut in single_names:
     single_map[single_names[cut]] = ROOT.TEfficiency(h_single[cut], h_denom).CreateGraph()
     plotEfficiencies(single_map, os.path.join(PLOT_DIR, f"EFFICIENCY_{cut.upper()}_ONLY_ETA.png"),
                      xlabel="#eta", ylabel="Efficiency")
-# ---- Normalized 1D distribution plots with cut lines, one per energy range ----
+
+#1D distribtion plots
 ROOT.gStyle.SetOptStat(0)
 for var in dist_vars:
     v = dist_vars[var]
@@ -424,7 +459,7 @@ for var in dist_vars:
             if j == 0:
                 h.SetTitle("")
                 h.GetXaxis().SetTitle(v["label"])
-                h.GetYaxis().SetTitle("Normalized Entries")
+                h.GetYaxis().SetTitle("Fraction of PFOs")
                 h.GetXaxis().SetTitleSize(0.045)
                 h.GetYaxis().SetTitleSize(0.045)
                 h.GetXaxis().SetLabelSize(0.04)
@@ -444,7 +479,7 @@ for var in dist_vars:
         leg.SetFillStyle(0)
         leg.SetTextSize(0.035)
         for ptype in ["Electrons", "Pions"]:
-            leg.AddEntry(h_dist[erange][ptype][var], ptype, "l")
+            leg.AddEntry(h_dist[erange][ptype][var], ptype_labels[ptype], "l")
         leg.AddEntry(cut_line, "cut value", "l")
         leg.Draw()
         text = ROOT.TLatex()
@@ -455,6 +490,11 @@ for var in dist_vars:
         text.SetTextFont(42)
         text.DrawLatex(0.15, 0.83, "Simulation, no BIB")
         text.DrawLatex(0.15, 0.78, f"Truth E: {emin}-{emax} GeV")
+        if v["note"] != "":
+            text.SetTextSize(0.03)
+            text.SetTextColor(ROOT.kGray+2)
+            text.DrawLatex(0.15, 0.73, v["note"])
+            text.SetTextColor(ROOT.kBlack)
         c.SaveAs(os.path.join(PLOT_DIR, f"DIST_{var}_{erange}.png"))
         c.Close()
 print(f"\nPlots saved to {PLOT_DIR}")
